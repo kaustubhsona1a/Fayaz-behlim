@@ -344,45 +344,45 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
       <div className="bg-zinc-950/65 backdrop-blur-md rounded-2xl border border-white/5 shadow-2xl p-4 sm:p-6 md:p-8 space-y-10">
         
         {/* 360° Showroom Turntable Studio & Frame Sequence Manager */}
-        <div className="border-l-2 border-white pl-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-            <div className="flex items-center space-x-2">
-              <h2 className="text-sm font-serif font-bold text-white uppercase tracking-widest">360° Showcase Turntable Studio</h2>
+        <div className="border-l-2 border-white pl-3 sm:pl-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 sm:mb-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xs sm:text-sm font-serif font-bold text-white uppercase tracking-widest">360° Showcase Turntable Studio</h2>
               <span className={`text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border ${
                 customFrames ? 'bg-white text-black border-white' : 'bg-white/10 text-white border-white/20'
               }`}>
                 {customFrames ? `Custom (${customFrames.length} Frames)` : 'Factory Preset (60 Frames)'}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 id="btn-dealer-open-studio"
                 onClick={() => setIsFrameStudioOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white text-black hover:bg-zinc-200 text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-md active:scale-95"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg bg-white text-black hover:bg-zinc-200 text-[11px] sm:text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-md active:scale-95 text-center"
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>360° Studio & Video Extractor</span>
+                <span>Upload 360 Video / Frames</span>
               </button>
               {customFrames && (
                 <button
                   type="button"
                   id="btn-dealer-reset-frames"
                   onClick={handleResetToPreset}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 text-xs font-bold font-mono uppercase tracking-wider transition-all"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg bg-zinc-900 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 text-[11px] sm:text-xs font-bold font-mono uppercase tracking-wider transition-all text-center"
                   title="Revert to factory default sequence"
                 >
                   <RotateCw className="w-3.5 h-3.5" />
-                  <span>Reset to Preset</span>
+                  <span>Reset</span>
                 </button>
               )}
             </div>
           </div>
-          <p className="text-zinc-400 text-[10px] uppercase font-mono tracking-wider mb-6">
-            Upload any car video (MP4/MOV) to automatically extract compressed 360° scroll frames, or upload individual high-resolution images. The last frame is permanently bound as the website background backdrop.
+          <p className="text-zinc-400 text-[10px] uppercase font-mono tracking-wider mb-4 sm:mb-6">
+            Upload any car video (MP4/MOV) to automatically extract compressed 360° scroll frames, or upload individual high-resolution images.
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-black/40 p-5 rounded-2xl border border-white/5">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 bg-black/40 p-3.5 sm:p-5 rounded-2xl border border-white/5">
             {/* Turntable Interactive Preview Window */}
             <div className="lg:col-span-7 flex flex-col space-y-3">
               <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 flex items-center justify-center shadow-inner">

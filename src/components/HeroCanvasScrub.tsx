@@ -64,11 +64,11 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   const lastPointerXRef = useRef<number>(0);
   const lastPointerTimeRef = useRef<number>(0);
 
-  // 2. High-Performance Sub-Frame Linear Interpolation Drawing
+  // 2. High-Performance Single-Frame Drawing (Zero Ghosting / Zero Multi-Frame Overlays)
   const drawInterpolatedFrame = useCallback((frameFloat: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: true });
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     const images = imagesRef.current;
@@ -78,11 +78,12 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     const ch = canvas.height;
     if (cw === 0 || ch === 0) return;
 
-    // Clear canvas cleanly so underlying first frame poster is never occluded by a black box
-    ctx.clearRect(0, 0, cw, ch);
+    // Solid dark showroom background fill to guarantee zero underlying image bleeding
+    ctx.fillStyle = '#050507';
+    ctx.fillRect(0, 0, cw, ch);
 
-    const drawAspectCover = (img: HTMLImageElement, alpha: number) => {
-      if (!img || !img.complete || img.naturalWidth === 0) return;
+    const drawAspectCover = (img: HTMLImageElement): boolean => {
+      if (!img || !img.complete || img.naturalWidth === 0) return false;
       const imgAspect = img.naturalWidth / img.naturalHeight;
       const canvasAspect = cw / ch;
 
@@ -109,39 +110,35 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         dy = 0;
       }
 
-      ctx.globalAlpha = alpha;
+      ctx.globalAlpha = 1.0;
       ctx.drawImage(img, dx, dy, dw, dh);
+      return true;
     };
 
     if (numFrames > 0) {
       let wrapped = frameFloat % numFrames;
       if (wrapped < 0) wrapped += numFrames;
 
-      const baseIndex = Math.floor(wrapped);
-      const nextIndex = (baseIndex + 1) % numFrames;
-      const blendAlpha = wrapped - baseIndex; // Sub-frame fractional progress (0.0 -> 1.0)
+      // Lock to exactly ONE single discrete frame index (closest frame) to ensure crisp, single-image rendering
+      const exactIndex = Math.min(numFrames - 1, Math.max(0, Math.round(wrapped)));
+      const activeImg = images[exactIndex];
 
-      const imgA = images[baseIndex];
-      const imgB = images[nextIndex];
-
-      // Draw primary base frame at full opacity
-      if (imgA && imgA.complete && imgA.naturalWidth > 0) {
-        drawAspectCover(imgA, 1.0);
-      } else if (firstFrameImgRef.current && firstFrameImgRef.current.complete && firstFrameImgRef.current.naturalWidth > 0) {
-        drawAspectCover(firstFrameImgRef.current, 1.0);
-      } else if (images[0] && images[0].complete && images[0].naturalWidth > 0) {
-        drawAspectCover(images[0], 1.0);
+      let rendered = false;
+      if (activeImg && activeImg.complete && activeImg.naturalWidth > 0) {
+        rendered = drawAspectCover(activeImg);
       }
 
-      // If sub-frame fraction is non-zero, cross-fade blend with next frame
-      if (blendAlpha > 0.005 && imgB && imgB.complete && imgB.naturalWidth > 0) {
-        drawAspectCover(imgB, blendAlpha);
+      // Safe fallback if target frame is still decoding
+      if (!rendered) {
+        if (firstFrameImgRef.current && firstFrameImgRef.current.complete && firstFrameImgRef.current.naturalWidth > 0) {
+          drawAspectCover(firstFrameImgRef.current);
+        } else if (images[0] && images[0].complete && images[0].naturalWidth > 0) {
+          drawAspectCover(images[0]);
+        }
       }
     } else if (firstFrameImgRef.current && firstFrameImgRef.current.complete && firstFrameImgRef.current.naturalWidth > 0) {
-      drawAspectCover(firstFrameImgRef.current, 1.0);
+      drawAspectCover(firstFrameImgRef.current);
     }
-
-    ctx.globalAlpha = 1.0;
   }, []);
 
   // Synchronous preloader for frame 1
@@ -621,96 +618,96 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           </div>
         </div>
 
-        {/* Phase 2: Performance Specs Callout (25% - 55% Scroll) - Enhanced Readability */}
+        {/* Phase 2: Performance Specs Callout (25% - 55% Scroll) */}
         <div 
           ref={phase2Ref}
           id="hero-phase-2"
-          className="absolute inset-0 z-10 flex flex-col justify-center items-end pt-20 sm:pt-24 md:pt-12 p-4 sm:p-8 md:p-12 lg:p-20 pointer-events-none opacity-0"
+          className="absolute inset-0 z-10 flex flex-col justify-center items-end pt-20 sm:pt-24 md:pt-12 p-6 sm:p-12 md:p-16 lg:p-24 pointer-events-none opacity-0"
         >
-          <div className="max-w-lg text-right select-none bg-black/80 border border-white/15 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
-            <div className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-white mb-2">
-              <Gauge className="w-3.5 h-3.5 text-white" />
+          <div className="max-w-lg text-right select-none drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]">
+            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-sans font-bold tracking-[0.2em] uppercase text-white mb-2">
+              <Gauge className="w-4 h-4 text-white" />
               <span>DYNAMIC PRECISION</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-4 uppercase leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-cinzel font-bold text-white tracking-tight mb-5 sm:mb-6 uppercase leading-tight">
               CURATED<br />MASTERPIECES
             </h2>
-            <div className="space-y-2.5 font-mono text-[11px] sm:text-xs text-zinc-100 mb-4 max-w-md ml-auto">
-              <div className="flex justify-between items-center pb-2 border-b border-white/20">
+            <div className="space-y-3 font-mono text-xs sm:text-sm text-zinc-100 mb-5 max-w-md ml-auto">
+              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
                 <span className="text-zinc-400 tracking-wider">HERITAGE:</span>
                 <span className="text-white font-semibold tracking-wide">Bandra Hill View Road, Mumbai</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-white/20">
+              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
                 <span className="text-zinc-400 tracking-wider">CERTIFICATION:</span>
                 <span className="text-white font-semibold tracking-wide">150-Point Master Verified</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-white/20">
+              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
                 <span className="text-zinc-400 tracking-wider">PRICING:</span>
                 <span className="text-emerald-400 font-semibold tracking-wide">100% Transparent Non-Accidental</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-white/20">
+              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
                 <span className="text-zinc-400 tracking-wider">EXPERIENCE:</span>
                 <span className="text-white font-semibold tracking-wide">White-Glove Doorstep Delivery</span>
               </div>
             </div>
-            <p className="text-xs text-zinc-300 font-sans leading-relaxed max-w-md ml-auto">
+            <p className="text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed max-w-md ml-auto">
               Every motorcar in our collection undergoes rigorous mechanical, structural, and cosmetic inspection before reaching the showroom floor.
             </p>
           </div>
         </div>
 
-        {/* Phase 3: Certified Quality Standards (55% - 80% Scroll) - Enhanced Readability */}
+        {/* Phase 3: Certified Quality Standards (55% - 80% Scroll) */}
         <div 
           ref={phase3Ref}
           id="hero-phase-3"
-          className="absolute inset-0 z-10 flex flex-col justify-center items-start pt-20 sm:pt-24 md:pt-12 p-4 sm:p-8 md:p-12 lg:p-20 pointer-events-none opacity-0"
+          className="absolute inset-0 z-10 flex flex-col justify-center items-start pt-20 sm:pt-24 md:pt-12 p-6 sm:p-12 md:p-16 lg:p-24 pointer-events-none opacity-0"
         >
-          <div className="max-w-lg text-left select-none bg-black/80 border border-white/15 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
-            <div className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-emerald-400 mb-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="max-w-lg text-left select-none drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]">
+            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-sans font-bold tracking-[0.2em] uppercase text-emerald-400 mb-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>CYR CARS CERTIFIED</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-4 uppercase leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-cinzel font-bold text-white tracking-tight mb-5 sm:mb-6 uppercase leading-tight">
               150-POINT<br />INSPECTION
             </h2>
-            <div className="space-y-2.5 text-[11px] sm:text-xs text-zinc-100 mb-4 font-sans max-w-md">
-              <div className="flex items-start gap-2.5 pb-2 border-b border-white/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+            <div className="space-y-3 text-xs sm:text-sm text-zinc-100 mb-5 font-sans max-w-md">
+              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                 <span>Complete Ownership History & Paperwork Verification</span>
               </div>
-              <div className="flex items-start gap-2.5 pb-2 border-b border-white/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                 <span>Comprehensive Engine, Transmission & Diagnostics Audit</span>
               </div>
-              <div className="flex items-start gap-2.5 pb-2 border-b border-white/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                 <span>Non-Accidental Structure & Authentic Mileage Guarantee</span>
               </div>
-              <div className="flex items-start gap-2.5 pb-2 border-b border-white/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                 <span>Full Interior & Exterior Detail Before Showroom Display</span>
               </div>
             </div>
-            <p className="text-xs text-zinc-300 font-sans leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed">
               Uncompromising quality delivering lifelong peace of mind.
             </p>
           </div>
         </div>
 
-        {/* Phase 4: Final Reveal & Inventory CTA (80% - 100% Scroll) - Enhanced Readability */}
+        {/* Phase 4: Final Reveal & Inventory CTA (80% - 100% Scroll) */}
         <div 
           ref={phase4Ref}
           id="hero-phase-4"
-          className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center p-4 sm:p-6 md:p-12 pointer-events-none opacity-0"
+          className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center p-6 md:p-12 pointer-events-none opacity-0"
         >
-          <div className="max-w-lg text-center select-none pointer-events-auto bg-black/85 border border-white/20 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
-            <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-emerald-400 font-bold mb-2.5 block">
+          <div className="max-w-xl text-center select-none pointer-events-auto drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)]">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-zinc-300 font-bold mb-3 block">
               SHOWCASE COMPLETE
             </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-snug">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-cinzel font-bold text-white tracking-tight mb-4 uppercase">
               Explore Available Collection
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-300 mb-6 leading-relaxed font-sans max-w-md mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-zinc-200 mb-8 leading-relaxed font-sans max-w-lg mx-auto">
               Discover our hand-picked collection of luxury SUVs, executive sedans, and family cars on Hill View Road, Bandra, Mumbai.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
