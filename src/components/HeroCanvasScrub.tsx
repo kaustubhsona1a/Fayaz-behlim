@@ -46,6 +46,12 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
 
   const activeMobileVideo = siteConfig.homeHeroMobileVideo || '/videos/hero-mobile.mp4';
 
+  // Video seeking queue refs to prevent browser decoding lock/freeze
+  const isVideoSeekingRef = useRef<boolean>(false);
+  const pendingVideoTimeRef = useRef<number | null>(null);
+  const seekTimeoutRef = useRef<number | null>(null);
+  const scrollRafIdRef = useRef<number | null>(null);
+
   // Loading & Mode State
   const [firstFrameSrc, setFirstFrameSrc] = useState<string>('/frames/frame_0001.webp');
   const [totalFrames, setTotalFrames] = useState(DEFAULT_TOTAL_FRAMES);
@@ -392,6 +398,81 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     };
   }, [drawInterpolatedFrame]);
 
+  // Video seeking dispatcher with lock protection to prevent decoder stalls
+  const applyVideoSeek = useCallback((progress: number) => {
+    const vid = mobileVideoRef.current;
+    if (!vid || !vid.duration || isNaN(vid.duration) || vid.duration <= 0) return;
+
+    const safeTime = Math.min(Math.max(0, progress * vid.duration), Math.max(0, vid.duration - 0.04));
+
+    if (isVideoSeekingRef.current) {
+      pendingVideoTimeRef.current = safeTime;
+      return;
+    }
+
+    isVideoSeekingRef.current = true;
+
+    // Timeout safety watchdog: If browser doesn't emit 'seeked' within 80ms, release lock
+    if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
+    seekTimeoutRef.current = window.setTimeout(() => {
+      isVideoSeekingRef.current = false;
+      if (pendingVideoTimeRef.current !== null) {
+        const nextTime = pendingVideoTimeRef.current;
+        pendingVideoTimeRef.current = null;
+        if (vid && vid.duration) {
+          applyVideoSeek(nextTime / vid.duration);
+        }
+      }
+    }, 80);
+
+    if ('fastSeek' in vid) {
+      try {
+        (vid as any).fastSeek(safeTime);
+      } catch {
+        vid.currentTime = safeTime;
+      }
+    } else {
+      vid.currentTime = safeTime;
+    }
+  }, []);
+
+  const handleVideoSeeked = useCallback(() => {
+    if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
+    isVideoSeekingRef.current = false;
+    if (pendingVideoTimeRef.current !== null) {
+      const nextTime = pendingVideoTimeRef.current;
+      pendingVideoTimeRef.current = null;
+      const vid = mobileVideoRef.current;
+      if (vid && vid.duration) {
+        applyVideoSeek(nextTime / vid.duration);
+      }
+    }
+  }, [applyVideoSeek]);
+
+  // Global Pointer Release Listener to prevent interactions from getting stuck
+  useEffect(() => {
+    const handleGlobalPointerRelease = () => {
+      if (isInteractingRef.current) {
+        isInteractingRef.current = false;
+        setIsDragging(false);
+      }
+    };
+
+    window.addEventListener('pointerup', handleGlobalPointerRelease);
+    window.addEventListener('pointercancel', handleGlobalPointerRelease);
+    window.addEventListener('mouseup', handleGlobalPointerRelease);
+    window.addEventListener('touchend', handleGlobalPointerRelease);
+    window.addEventListener('touchcancel', handleGlobalPointerRelease);
+
+    return () => {
+      window.removeEventListener('pointerup', handleGlobalPointerRelease);
+      window.removeEventListener('pointercancel', handleGlobalPointerRelease);
+      window.removeEventListener('mouseup', handleGlobalPointerRelease);
+      window.removeEventListener('touchend', handleGlobalPointerRelease);
+      window.removeEventListener('touchcancel', handleGlobalPointerRelease);
+    };
+  }, []);
+
   // 6. Direct Synchronous Scroll Sync with ZERO play or dead-zone
   useEffect(() => {
     const handleScroll = () => {
@@ -414,14 +495,8 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
       drawInterpolatedFrame(newFrame);
       updateOverlays(progress);
 
-      // Synchronize mobile video scroll position
-      if (mobileVideoRef.current && mobileVideoRef.current.duration) {
-        const vid = mobileVideoRef.current;
-        const targetTime = progress * vid.duration;
-        if (!isNaN(targetTime) && Math.abs(vid.currentTime - targetTime) > 0.02) {
-          vid.currentTime = Math.min(vid.duration - 0.05, Math.max(0, targetTime));
-        }
-      }
+      // Synchronize video scroll position smoothly without lockups
+      applyVideoSeek(progress);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -429,8 +504,9 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
     };
-  }, [totalFrames, updateOverlays, drawInterpolatedFrame]);
+  }, [totalFrames, updateOverlays, drawInterpolatedFrame, applyVideoSeek]);
 
   // 7. Interactive Direct Drag-to-Rotate on Canvas (Touch + Mouse)
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -544,7 +620,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           className="relative z-[2] w-full h-full block touch-none pointer-events-none"
         />
 
-        {/* Mobile Section Scroll Video (Direct in-build asset, synchronized with scroll) */}
+        {/* Hero Scroll Video (Direct in-build asset, synchronized with scroll on all devices) */}
         {activeMobileVideo && (
           <video
             ref={mobileVideoRef}
@@ -552,7 +628,11 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
             playsInline
             muted
             preload="auto"
-            className="md:hidden absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
+            onSeeked={handleVideoSeeked}
+            onLoadedMetadata={(e) => {
+              e.currentTarget.pause();
+            }}
+            className="absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
             onError={(e) => {
               const target = e.currentTarget;
               const currentSrc = target.getAttribute('src') || '';
@@ -560,6 +640,8 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
               if (currentSrc === '/videos/hero-mobile.mp4') {
                 target.src = '/hero-mobile.mp4';
               } else if (currentSrc === '/hero-mobile.mp4') {
+                target.src = '/videos/hero-laptop.mp4';
+              } else if (currentSrc === '/videos/hero-laptop.mp4') {
                 target.src = '/videos/hero-mobile.mov';
               } else if (currentSrc === '/videos/hero-mobile.mov') {
                 target.src = '/hero-mobile.mov';
