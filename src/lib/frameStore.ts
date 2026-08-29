@@ -176,7 +176,7 @@ export async function getFirstFrameUrl(target: DeviceTarget = 'desktop'): Promis
   } catch {
     // fallback
   }
-  return '/frames/frame_0001.webp';
+  return `/frames/${target}/frame_0001.webp`;
 }
 
 // Get the last frame URL from either custom sequence or default preset sequence
@@ -189,7 +189,7 @@ export async function getLastFrameUrl(target: DeviceTarget = 'desktop'): Promise
   } catch {
     // fallback
   }
-  return '/frames/frame_0060.webp';
+  return `/frames/${target}/frame_0096.webp`;
 }
 
 

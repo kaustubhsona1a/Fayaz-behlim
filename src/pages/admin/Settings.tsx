@@ -47,7 +47,7 @@ export default function AdminSettings() {
   const [dealerPreviewIdx, setDealerPreviewIdx] = useState(0);
   const [isDealerAutoSpinning, setIsDealerAutoSpinning] = useState(false);
 
-  const totalTurntableFrames = 60;
+  const totalTurntableFrames = 96;
 
   // Dealer Turntable Auto Spin Player
   useEffect(() => {
@@ -353,7 +353,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
               <h2 className="text-xs sm:text-sm font-serif font-bold text-white uppercase tracking-widest">360° Showcase Turntable</h2>
               <div className="flex items-center gap-1">
                 <span className="text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                  Direct In-Build Asset (60 Frames)
+                  Direct In-Build Asset (96 Frames)
                 </span>
                 <span className="text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border bg-white/10 text-white border-white/20">
                   $0 Supabase Egress
@@ -362,7 +362,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
             </div>
           </div>
           <p className="text-zinc-400 text-[10px] uppercase font-mono tracking-wider mb-4 sm:mb-6">
-            Pre-bundled WebP 360° turntable sequence located at <code className="text-emerald-400">/public/frames/frame_0001.webp</code> to <code className="text-emerald-400">frame_0060.webp</code>. Served directly from the high-speed edge CDN with zero database costs.
+            Pre-bundled WebP 360° turntable sequence located at <code className="text-emerald-400">/public/frames/desktop/</code> and <code className="text-emerald-400">/public/frames/mobile/</code> (96 Frames). Served directly from the high-speed edge CDN with zero database costs.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 bg-black/40 p-3.5 sm:p-5 rounded-2xl border border-white/5">
@@ -405,17 +405,17 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
                 </div>
                 <span className="text-[9px] font-mono text-emerald-400 pr-1 flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
-                  <span>Build-Linked (60 Frames)</span>
+                  <span>Build-Linked (96 Frames)</span>
                 </span>
               </div>
 
               <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 flex items-center justify-center shadow-inner">
                 <img 
-                  src={`/frames/frame_${String(dealerPreviewIdx + 1).padStart(4, '0')}.webp`}
+                  src={`/frames/${activePreviewTarget}/frame_${String(dealerPreviewIdx + 1).padStart(4, '0')}.webp`}
                   alt={`Preset Frame ${dealerPreviewIdx + 1}`}
                   onError={(e) => {
                     const target = e.currentTarget;
-                    target.src = `/frames/frame_${String(dealerPreviewIdx + 1).padStart(2, '0')}.webp`;
+                    target.src = `/frames/desktop/frame_${String(dealerPreviewIdx + 1).padStart(4, '0')}.webp`;
                   }}
                   className="w-full h-full object-cover select-none"
                 />
@@ -475,16 +475,16 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
                       <FileCode className="w-3 h-3" />
                       <span className="font-bold">Build File Directory:</span>
                     </div>
-                    <p className="text-zinc-400 break-all">/public/frames/frame_0001.webp - frame_0060.webp</p>
+                    <p className="text-zinc-400 break-all">/public/frames/desktop/ (96 frames) &amp; /public/frames/mobile/ (96 frames)</p>
                   </div>
                   <div className="aspect-[16/9] w-full rounded-lg overflow-hidden border border-white/10 bg-black/50">
                     <img 
-                      src="/frames/frame_0060.webp" 
+                      src="/frames/desktop/frame_0001.webp" 
                       alt="Permanent Background Preview" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.currentTarget;
-                        target.src = '/frames/frame_60.webp';
+                        target.src = '/frames/desktop/frame_0001.webp';
                       }}
                     />
                   </div>

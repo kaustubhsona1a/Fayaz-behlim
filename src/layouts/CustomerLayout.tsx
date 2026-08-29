@@ -17,17 +17,21 @@ export default function CustomerLayout() {
   const isHomePage = location.pathname === '/';
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [firstFrameUrl, setFirstFrameUrl] = useState<string>('/frames/frame_0001.webp');
+  const [desktopFirstFrame, setDesktopFirstFrame] = useState<string>('/frames/desktop/frame_0001.webp');
+  const [mobileFirstFrame, setMobileFirstFrame] = useState<string>('/frames/mobile/frame_0001.webp');
 
   useEffect(() => {
-    const fetchFirstFrame = () => {
-      getFirstFrameUrl().then((url) => {
-        if (url) setFirstFrameUrl(url);
+    const fetchFirstFrames = () => {
+      getFirstFrameUrl('desktop').then((url) => {
+        if (url) setDesktopFirstFrame(url);
+      });
+      getFirstFrameUrl('mobile').then((url) => {
+        if (url) setMobileFirstFrame(url);
       });
     };
-    fetchFirstFrame();
-    window.addEventListener('apex_custom_frames_updated', fetchFirstFrame);
-    return () => window.removeEventListener('apex_custom_frames_updated', fetchFirstFrame);
+    fetchFirstFrames();
+    window.addEventListener('apex_custom_frames_updated', fetchFirstFrames);
+    return () => window.removeEventListener('apex_custom_frames_updated', fetchFirstFrames);
   }, []);
 
   // Custom multi-tap tracker for dealer console access on mobile (esp. Safari iOS)
@@ -82,12 +86,23 @@ export default function CustomerLayout() {
 
       {/* Global Background - Permanent First Frame Showroom Backdrop (Crystal Clear) */}
       <div className="fixed top-0 bottom-0 left-0 right-0 z-0 bg-[#050507] overflow-hidden pointer-events-none">
+        {/* Desktop / Laptop Showroom Backdrop */}
         <SmartImage 
-          src={firstFrameUrl || siteConfig.homeHeroImage}
-          alt="Showroom Car Backdrop"
+          src={desktopFirstFrame || '/frames/desktop/frame_0001.webp'}
+          fallbackSrc="/frames/desktop/frame_0001.webp"
+          alt="Showroom Car Backdrop Desktop"
           loading="eager"
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="hidden md:block absolute inset-0 w-full h-full object-cover object-center"
+        />
+        {/* Mobile Showroom Backdrop (Portrait) */}
+        <SmartImage 
+          src={mobileFirstFrame || '/frames/mobile/frame_0001.webp'}
+          fallbackSrc="/frames/mobile/frame_0001.webp"
+          alt="Showroom Car Backdrop Mobile"
+          loading="eager"
+          decoding="async"
+          className="block md:hidden absolute inset-0 w-full h-full object-cover object-center"
         />
       </div>
 
