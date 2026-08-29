@@ -1,15 +1,22 @@
-// Frame sequence storage and custom frame manager
+// Frame sequence storage and custom frame manager (Desktop & Mobile Support)
 
 const DB_NAME = 'ApexFramesDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'frames';
+
+export type DeviceTarget = 'desktop' | 'mobile';
 
 export interface FrameSequenceMeta {
   isCustom: boolean;
   totalFrames: number;
   fps?: number;
   name?: string;
+  target: DeviceTarget;
   source: 'preset' | 'custom';
+}
+
+function getStoreKey(target: DeviceTarget): string {
+  return target === 'mobile' ? 'custom_frames_mobile' : 'custom_frames_sequence';
 }
 
 // Open IndexedDB
@@ -68,29 +75,31 @@ function isImageDataUrlBlack(dataUrl: string): Promise<boolean> {
   });
 }
 
-// Save custom uploaded frame blobs or data URLs
-export async function saveCustomFrames(images: string[]): Promise<void> {
+// Save custom uploaded frame blobs or data URLs for desktop or mobile
+export async function saveCustomFrames(images: string[], target: DeviceTarget = 'desktop'): Promise<void> {
   const db = await openDB();
+  const key = getStoreKey(target);
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    store.put({ id: 'custom_frames_sequence', urls: images, updatedAt: Date.now() });
+    store.put({ id: key, urls: images, target, updatedAt: Date.now() });
     tx.oncomplete = () => {
-      window.dispatchEvent(new CustomEvent('apex_custom_frames_updated'));
+      window.dispatchEvent(new CustomEvent('apex_custom_frames_updated', { detail: { target } }));
       resolve();
     };
     tx.onerror = () => reject(tx.error);
   });
 }
 
-// Load custom frames if any exist and automatically purge any leading black frames
-export async function loadCustomFrames(): Promise<string[] | null> {
+// Load custom frames if any exist for desktop or mobile and automatically purge any leading black frames
+export async function loadCustomFrames(target: DeviceTarget = 'desktop'): Promise<string[] | null> {
   try {
     const db = await openDB();
+    const key = getStoreKey(target);
     const urls: string[] | null = await new Promise((resolve) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const store = tx.objectStore(STORE_NAME);
-      const req = store.get('custom_frames_sequence');
+      const req = store.get(key);
       req.onsuccess = () => {
         if (req.result && Array.isArray(req.result.urls) && req.result.urls.length > 0) {
           resolve(req.result.urls);
@@ -118,10 +127,10 @@ export async function loadCustomFrames(): Promise<string[] | null> {
     if (firstValidIndex > 0) {
       const sanitized = urls.slice(firstValidIndex);
       if (sanitized.length >= 4) {
-        await saveCustomFrames(sanitized);
+        await saveCustomFrames(sanitized, target);
         return sanitized;
       } else {
-        await clearCustomFrames();
+        await clearCustomFrames(target);
         return null;
       }
     }
@@ -134,15 +143,20 @@ export async function loadCustomFrames(): Promise<string[] | null> {
 }
 
 // Clear custom frames and revert to default preset
-export async function clearCustomFrames(): Promise<void> {
+export async function clearCustomFrames(target: DeviceTarget | 'all' = 'all'): Promise<void> {
   try {
     const db = await openDB();
     return new Promise((resolve) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      store.delete('custom_frames_sequence');
+      if (target === 'all') {
+        store.delete('custom_frames_sequence');
+        store.delete('custom_frames_mobile');
+      } else {
+        store.delete(getStoreKey(target));
+      }
       tx.oncomplete = () => {
-        window.dispatchEvent(new CustomEvent('apex_custom_frames_updated'));
+        window.dispatchEvent(new CustomEvent('apex_custom_frames_updated', { detail: { target } }));
         resolve();
       };
       tx.onerror = () => resolve();
@@ -153,9 +167,9 @@ export async function clearCustomFrames(): Promise<void> {
 }
 
 // Get the first frame URL from either custom sequence or default preset sequence
-export async function getFirstFrameUrl(): Promise<string> {
+export async function getFirstFrameUrl(target: DeviceTarget = 'desktop'): Promise<string> {
   try {
-    const custom = await loadCustomFrames();
+    const custom = await loadCustomFrames(target);
     if (custom && custom.length > 0 && custom[0]) {
       return custom[0];
     }
@@ -166,9 +180,9 @@ export async function getFirstFrameUrl(): Promise<string> {
 }
 
 // Get the last frame URL from either custom sequence or default preset sequence
-export async function getLastFrameUrl(): Promise<string> {
+export async function getLastFrameUrl(target: DeviceTarget = 'desktop'): Promise<string> {
   try {
-    const custom = await loadCustomFrames();
+    const custom = await loadCustomFrames(target);
     if (custom && custom.length > 0 && custom[custom.length - 1]) {
       return custom[custom.length - 1];
     }
@@ -177,4 +191,5 @@ export async function getLastFrameUrl(): Promise<string> {
   }
   return '/frames/frame_0060.webp';
 }
+
 

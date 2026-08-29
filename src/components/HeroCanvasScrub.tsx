@@ -13,6 +13,7 @@ import {
   Phone
 } from 'lucide-react';
 import { loadCustomFrames, getFirstFrameUrl, clearCustomFrames } from '../lib/frameStore';
+import { useVehicles } from '../context/VehicleContext';
 
 interface HeroCanvasScrubProps {
   onExploreClick: () => void;
@@ -27,8 +28,10 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   onOpenFrameStudio,
   showDealerControls = false
 }) => {
+  const { siteConfig } = useVehicles();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
   
   // Direct DOM Refs for rigid, zero-stutter performance (no React re-renders during scroll)
   const phase1Ref = useRef<HTMLDivElement>(null);
@@ -40,6 +43,8 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   const scrubSliderRef = useRef<HTMLInputElement>(null);
   const scrubPercentRef = useRef<HTMLSpanElement>(null);
   const dragHintRef = useRef<HTMLDivElement>(null);
+
+  const activeMobileVideo = siteConfig.homeHeroMobileVideo || '/videos/hero-mobile.mp4';
 
   // Loading & Mode State
   const [firstFrameSrc, setFirstFrameSrc] = useState<string>('/frames/frame_0001.webp');
@@ -184,26 +189,36 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     // Initial immediate paint
     drawInterpolatedFrame(0);
 
-    // Check if custom sequences are saved in IndexedDB
-    getFirstFrameUrl().then((url) => {
+    // Check if custom sequences are saved in IndexedDB (Desktop or Mobile aware)
+    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+    const targetDevice = isMobileViewport ? 'mobile' : 'desktop';
+
+    getFirstFrameUrl(targetDevice).then((url) => {
       if (url) {
         setFirstFrameSrc(url);
         drawInterpolatedFrame(0);
       }
     });
 
-    loadCustomFrames().then((customFrames) => {
-      if (customFrames && customFrames.length > 0) {
+    const loadTargetSequence = async () => {
+      // First try mobile if mobile viewport, else desktop
+      let frames = await loadCustomFrames(targetDevice);
+      // If mobile sequence is not set, fallback to desktop custom sequence
+      if (!frames && targetDevice === 'mobile') {
+        frames = await loadCustomFrames('desktop');
+      }
+
+      if (frames && frames.length > 0) {
         setIsCustomSequence(true);
-        setTotalFrames(customFrames.length);
-        setFirstFrameSrc(customFrames[0]);
+        setTotalFrames(frames.length);
+        setFirstFrameSrc(frames[0]);
 
         const customImages: HTMLImageElement[] = [];
-        customFrames.forEach((src, idx) => {
+        frames.forEach((src, idx) => {
           const img = new Image();
           img.src = src;
           img.onload = () => {
-            const activeIdx = Math.floor(currentFrameRef.current % customFrames.length);
+            const activeIdx = Math.floor(currentFrameRef.current % frames.length);
             if (activeIdx === idx || idx === 0) {
               drawInterpolatedFrame(currentFrameRef.current);
             }
@@ -216,7 +231,18 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         imagesRef.current = customImages;
         drawInterpolatedFrame(0);
       }
-    });
+    };
+
+    loadTargetSequence();
+
+    const handleFramesUpdated = () => {
+      loadTargetSequence();
+    };
+
+    window.addEventListener('apex_custom_frames_updated', handleFramesUpdated);
+    return () => {
+      window.removeEventListener('apex_custom_frames_updated', handleFramesUpdated);
+    };
   }, [drawInterpolatedFrame]);
 
   // 3. Rigid Direct DOM Opacity Updates (NO translateY or transform transitions)
@@ -387,6 +413,15 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
       currentFrameRef.current = newFrame; // Zero-play instantaneous lock
       drawInterpolatedFrame(newFrame);
       updateOverlays(progress);
+
+      // Synchronize mobile video scroll position
+      if (mobileVideoRef.current && mobileVideoRef.current.duration) {
+        const vid = mobileVideoRef.current;
+        const targetTime = progress * vid.duration;
+        if (!isNaN(targetTime) && Math.abs(vid.currentTime - targetTime) > 0.02) {
+          vid.currentTime = Math.min(vid.duration - 0.05, Math.max(0, targetTime));
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -508,6 +543,33 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           ref={canvasRef} 
           className="relative z-[2] w-full h-full block touch-none pointer-events-none"
         />
+
+        {/* Mobile Section Scroll Video (Direct in-build asset, synchronized with scroll) */}
+        {activeMobileVideo && (
+          <video
+            ref={mobileVideoRef}
+            src={activeMobileVideo}
+            playsInline
+            muted
+            preload="auto"
+            className="md:hidden absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
+            onError={(e) => {
+              const target = e.currentTarget;
+              const currentSrc = target.getAttribute('src') || '';
+              // Try alternate paths if not found in /videos/
+              if (currentSrc === '/videos/hero-mobile.mp4') {
+                target.src = '/hero-mobile.mp4';
+              } else if (currentSrc === '/hero-mobile.mp4') {
+                target.src = '/videos/hero-mobile.mov';
+              } else if (currentSrc === '/videos/hero-mobile.mov') {
+                target.src = '/hero-mobile.mov';
+              } else {
+                // Seamlessly fallback to 360 canvas frames
+                target.style.display = 'none';
+              }
+            }}
+          />
+        )}
 
         {/* Floating Interaction Hint (Dealer Mode Only) */}
         {showDealerControls && (

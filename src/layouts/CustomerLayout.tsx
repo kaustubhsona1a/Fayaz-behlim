@@ -103,16 +103,20 @@ export default function CustomerLayout() {
             
             {/* Left Side: Branding Logo or Text */}
             <Link to="/" className="flex items-center shrink-0 select-none group">
-              {siteConfig.logo ? (
-                <SmartImage src={siteConfig.logo} alt="CYR Cars" className="h-9 sm:h-11 md:h-12 w-auto max-w-[200px] object-contain transition-all duration-300 group-hover:scale-105" />
-              ) : (
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl md:text-2xl font-cinzel font-bold tracking-[0.15em] text-white group-hover:text-zinc-300 transition-colors uppercase">
-                    CYR CARS
-                  </span>
-                  <span className="text-[7.5px] sm:text-[8px] font-mono tracking-[0.35em] text-zinc-400 uppercase font-semibold">Exotic & Luxury Motorcars</span>
-                </div>
-              )}
+              <img 
+                src={siteConfig.logo || '/logo.png'} 
+                alt="CYR Cars" 
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const currentSrc = target.getAttribute('src') || '';
+                  if (currentSrc === '/logo.png' || currentSrc === siteConfig.logo) {
+                    target.src = '/logo.svg';
+                  } else if (currentSrc === '/logo.svg') {
+                    target.src = '/logo.webp';
+                  }
+                }}
+                className="h-10 sm:h-12 md:h-14 w-auto max-w-[220px] object-contain transition-all duration-300 group-hover:scale-105" 
+              />
             </Link>
 
             {/* Right/Middle Side: Frosted Glass Icons & Navigation Links matching user screenshot */}
@@ -360,17 +364,20 @@ export default function CustomerLayout() {
         <div className="container mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-16 relative z-10 text-zinc-300">
           <div className="space-y-6 md:col-span-1">
             <div className="flex items-center inline-flex mb-4">
-              <SmartImage 
-                src={siteConfig.logo} 
+              <img 
+                src={siteConfig.logo || '/logo.png'} 
                 alt="CYR Cars" 
-                className="h-10 w-auto object-contain mr-3 max-w-[150px]" 
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const currentSrc = target.getAttribute('src') || '';
+                  if (currentSrc === '/logo.png' || currentSrc === siteConfig.logo) {
+                    target.src = '/logo.svg';
+                  } else if (currentSrc === '/logo.svg') {
+                    target.src = '/logo.webp';
+                  }
+                }}
+                className="h-10 sm:h-12 w-auto object-contain max-w-[180px]" 
               />
-              <div className="hidden flex-col items-start nv-logo-text">
-                <h1 className="text-xl font-cinzel tracking-[0.18em] leading-none font-bold uppercase text-white">
-                  CYR CARS
-                </h1>
-                <p className="text-[8px] uppercase tracking-[0.5em] text-zinc-400 font-sans mt-1 font-bold">BANDRA HILL VIEW ROAD • MUMBAI</p>
-              </div>
             </div>
             <p className="text-sm tracking-wide leading-relaxed text-zinc-300 font-light font-sans">
               Exotic & Luxury Motorcars. Located at Hill View Road, Bandra, CYR Cars delivers uncompromising certification, transparent transactions, and bespoke automotive excellence.

@@ -1,10 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useVehicles, sanitizeHeroImage } from '../../context/VehicleContext';
-import { UploadCloud, Trash2, Plus, Image as ImageIcon, Link as LinkIcon, AlertCircle, Wifi, WifiOff, Check, RotateCw, Play, Pause, Compass, Layers, Sparkles, Database, Copy, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  UploadCloud, 
+  Trash2, 
+  Plus, 
+  Image as ImageIcon, 
+  Link as LinkIcon, 
+  AlertCircle, 
+  Wifi, 
+  WifiOff, 
+  Check, 
+  RotateCw, 
+  Play, 
+  Pause, 
+  Compass, 
+  Layers, 
+  Sparkles, 
+  Database, 
+  Copy, 
+  ChevronDown, 
+  ChevronUp,
+  Laptop,
+  Smartphone,
+  Video,
+  Zap,
+  FolderOpen,
+  CheckCircle2,
+  FileCode
+} from 'lucide-react';
 import { uploadImageToStorage, cleanupLegacyImageVariants, supabase } from '../../lib/supabase';
 import { SmartImage } from '../../components/SmartImage';
-import { FrameUploaderModal } from '../../components/FrameUploaderModal';
-import { loadCustomFrames, clearCustomFrames, getLastFrameUrl } from '../../lib/frameStore';
 
 export default function AdminSettings() {
   const { siteConfig, updateSiteConfig } = useVehicles();
@@ -17,26 +42,12 @@ export default function AdminSettings() {
   const [showSqlHelper, setShowSqlHelper] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
 
-  // 360 Turntable Frame Sequence State
-  const [isFrameStudioOpen, setIsFrameStudioOpen] = useState(false);
-  const [customFrames, setCustomFrames] = useState<string[] | null>(null);
-  const [lastFrameSrc, setLastFrameSrc] = useState<string>('/frames/frame_0060.webp');
+  // 360 Turntable Frame Sequence State (In-Build Preset Preview)
+  const [activePreviewTarget, setActivePreviewTarget] = useState<'desktop' | 'mobile'>('desktop');
   const [dealerPreviewIdx, setDealerPreviewIdx] = useState(0);
   const [isDealerAutoSpinning, setIsDealerAutoSpinning] = useState(false);
-  const totalTurntableFrames = customFrames ? customFrames.length : 60;
 
-  const refreshFrames = async () => {
-    const loaded = await loadCustomFrames();
-    setCustomFrames(loaded);
-    const last = await getLastFrameUrl();
-    setLastFrameSrc(last);
-  };
-
-  useEffect(() => {
-    refreshFrames();
-    window.addEventListener('apex_custom_frames_updated', refreshFrames);
-    return () => window.removeEventListener('apex_custom_frames_updated', refreshFrames);
-  }, []);
+  const totalTurntableFrames = 60;
 
   // Dealer Turntable Auto Spin Player
   useEffect(() => {
@@ -46,16 +57,6 @@ export default function AdminSettings() {
     }, 1000 / 18);
     return () => clearInterval(interval);
   }, [isDealerAutoSpinning, totalTurntableFrames]);
-
-  const handleResetToPreset = async () => {
-    if (window.confirm('Reset 360 sequence back to the factory 60-frame showcase preset?')) {
-      await clearCustomFrames();
-      await refreshFrames();
-      setDealerPreviewIdx(0);
-      setSuccess('Reverted 360° showcase sequence to factory preset (60 frames).');
-      setTimeout(() => setSuccess(''), 4000);
-    }
-  };
 
   React.useEffect(() => {
     const checkConnection = async () => {
@@ -107,22 +108,22 @@ export default function AdminSettings() {
 
   
   const [reelUrl, setReelUrl] = useState('');
+  const [customLogoUrl, setCustomLogoUrl] = useState('');
   const [customAboutUrl, setCustomAboutUrl] = useState('');
   const [customHeroVideoUrl, setCustomHeroVideoUrl] = useState('');
   const [customHeroMobileVideoUrl, setCustomHeroMobileVideoUrl] = useState('');
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: 'logo' | 'aboutImage' | 'homeHeroVideo' | 'homeHeroMobileVideo' | 'homeHeroImage' | 'homeHeroMobileImage') => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: 'aboutImage' | 'homeHeroVideo' | 'homeHeroMobileVideo' | 'homeHeroImage' | 'homeHeroMobileImage') => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setIsCompressing(true);
       setErrorText('');
       try {
-        const subPath = key === 'logo' ? 'site_settings/logo' : 'site_settings';
+        const subPath = 'site_settings';
         const publicUrl = await uploadImageToStorage(file, subPath, 'site_settings');
         
         updateSiteConfig({ [key]: publicUrl });
         const labels: Record<string, string> = {
-          logo: 'Logo',
           homeHeroVideo: 'Home Hero Video',
           homeHeroMobileVideo: 'Home Hero Mobile Video',
           homeHeroImage: 'Home Hero Photo',
@@ -142,10 +143,11 @@ export default function AdminSettings() {
     }
   };
 
-  const handleSaveUrl = (key: 'aboutImage' | 'homeHeroVideo' | 'homeHeroMobileVideo', url: string) => {
+  const handleSaveUrl = (key: 'logo' | 'aboutImage' | 'homeHeroVideo' | 'homeHeroMobileVideo', url: string) => {
     if (url.trim()) {
       updateSiteConfig({ [key]: url.trim() });
       const labels: Record<string, string> = {
+        logo: 'Logo Path',
         homeHeroVideo: 'Hero Video URL',
         homeHeroMobileVideo: 'Hero Mobile Video URL',
         aboutImage: 'About Image URL'
@@ -153,6 +155,7 @@ export default function AdminSettings() {
       const labelText = labels[key] || 'Asset URL';
       setSuccess(`${labelText} updated successfully!`);
       setTimeout(() => setSuccess(''), 3000);
+      if (key === 'logo') setCustomLogoUrl('');
       if (key === 'homeHeroVideo') setCustomHeroVideoUrl('');
       if (key === 'homeHeroMobileVideo') setCustomHeroMobileVideoUrl('');
       if (key === 'aboutImage') setCustomAboutUrl('');
@@ -343,67 +346,79 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
 
       <div className="bg-zinc-950/65 backdrop-blur-md rounded-2xl border border-white/5 shadow-2xl p-4 sm:p-6 md:p-8 space-y-10">
         
-        {/* 360° Showroom Turntable Studio & Frame Sequence Manager */}
+        {/* 360° Showroom Turntable & Build Assets (Direct Build Architecture) */}
         <div className="border-l-2 border-white pl-3 sm:pl-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 sm:mb-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xs sm:text-sm font-serif font-bold text-white uppercase tracking-widest">360° Showcase Turntable Studio</h2>
-              <span className={`text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border ${
-                customFrames ? 'bg-white text-black border-white' : 'bg-white/10 text-white border-white/20'
-              }`}>
-                {customFrames ? `Custom (${customFrames.length} Frames)` : 'Factory Preset (60 Frames)'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                type="button"
-                id="btn-dealer-open-studio"
-                onClick={() => setIsFrameStudioOpen(true)}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg bg-white text-black hover:bg-zinc-200 text-[11px] sm:text-xs font-bold font-mono uppercase tracking-wider transition-all shadow-md active:scale-95 text-center"
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span>Upload 360 Video / Frames</span>
-              </button>
-              {customFrames && (
-                <button
-                  type="button"
-                  id="btn-dealer-reset-frames"
-                  onClick={handleResetToPreset}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg bg-zinc-900 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 text-[11px] sm:text-xs font-bold font-mono uppercase tracking-wider transition-all text-center"
-                  title="Revert to factory default sequence"
-                >
-                  <RotateCw className="w-3.5 h-3.5" />
-                  <span>Reset</span>
-                </button>
-              )}
+              <h2 className="text-xs sm:text-sm font-serif font-bold text-white uppercase tracking-widest">360° Showcase Turntable</h2>
+              <div className="flex items-center gap-1">
+                <span className="text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                  Direct In-Build Asset (60 Frames)
+                </span>
+                <span className="text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border bg-white/10 text-white border-white/20">
+                  $0 Supabase Egress
+                </span>
+              </div>
             </div>
           </div>
           <p className="text-zinc-400 text-[10px] uppercase font-mono tracking-wider mb-4 sm:mb-6">
-            Upload any car video (MP4/MOV) to automatically extract compressed 360° scroll frames, or upload individual high-resolution images.
+            Pre-bundled WebP 360° turntable sequence located at <code className="text-emerald-400">/public/frames/frame_0001.webp</code> to <code className="text-emerald-400">frame_0060.webp</code>. Served directly from the high-speed edge CDN with zero database costs.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 bg-black/40 p-3.5 sm:p-5 rounded-2xl border border-white/5">
             {/* Turntable Interactive Preview Window */}
             <div className="lg:col-span-7 flex flex-col space-y-3">
-              <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 flex items-center justify-center shadow-inner">
-                {customFrames && customFrames[dealerPreviewIdx] ? (
-                  <img 
-                    src={customFrames[dealerPreviewIdx]} 
-                    alt={`Frame ${dealerPreviewIdx + 1}`}
-                    className="w-full h-full object-cover select-none"
-                  />
-                ) : (
-                  <img 
-                    src={`/frames/frame_${String(dealerPreviewIdx + 1).padStart(4, '0')}.webp`}
-                    alt={`Preset Frame ${dealerPreviewIdx + 1}`}
-                    onError={(e) => {
-                      // fallback to 2-digit if needed
-                      const target = e.currentTarget;
-                      target.src = `/frames/frame_${String(dealerPreviewIdx + 1).padStart(2, '0')}.webp`;
+              
+              {/* Target Switcher for preview */}
+              <div className="flex items-center justify-between gap-2 bg-zinc-900/60 p-1.5 rounded-xl border border-white/5">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePreviewTarget('desktop');
+                      setDealerPreviewIdx(0);
                     }}
-                    className="w-full h-full object-cover select-none"
-                  />
-                )}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${
+                      activePreviewTarget === 'desktop'
+                        ? 'bg-white text-black shadow'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <Laptop className="w-3 h-3" />
+                    <span>Desktop Showcase</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePreviewTarget('mobile');
+                      setDealerPreviewIdx(0);
+                    }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${
+                      activePreviewTarget === 'mobile'
+                        ? 'bg-white text-black shadow'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <Smartphone className="w-3 h-3" />
+                    <span>Mobile Showcase</span>
+                  </button>
+                </div>
+                <span className="text-[9px] font-mono text-emerald-400 pr-1 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Build-Linked (60 Frames)</span>
+                </span>
+              </div>
+
+              <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-zinc-900/60 border border-white/10 flex items-center justify-center shadow-inner">
+                <img 
+                  src={`/frames/frame_${String(dealerPreviewIdx + 1).padStart(4, '0')}.webp`}
+                  alt={`Preset Frame ${dealerPreviewIdx + 1}`}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.src = `/frames/frame_${String(dealerPreviewIdx + 1).padStart(2, '0')}.webp`;
+                  }}
+                  className="w-full h-full object-cover select-none"
+                />
 
                 {/* Overlay Badge */}
                 <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-[10px] font-mono text-zinc-300">
@@ -444,35 +459,36 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
               </div>
             </div>
 
-            {/* Right details & Last Frame backdrop info */}
+            {/* Right details & Direct Build Guide */}
             <div className="lg:col-span-5 flex flex-col justify-between space-y-4 text-xs font-mono">
               <div className="space-y-3">
-                <div className="p-3.5 rounded-xl bg-zinc-900/30 border border-white/5">
-                  <div className="flex items-center gap-2 text-white font-bold uppercase tracking-wider mb-1">
-                    <Sparkles className="w-3.5 h-3.5 text-white" />
-                    <span>Permanent Backdrop Frame</span>
+                <div className="p-3.5 rounded-xl bg-zinc-900/40 border border-white/5 space-y-2.5">
+                  <div className="flex items-center gap-2 text-white font-bold uppercase tracking-wider">
+                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Direct In-Build Architecture</span>
                   </div>
-                  <p className="text-[10px] text-zinc-400 leading-relaxed font-sans mb-3">
-                    The last frame ({totalTurntableFrames} of {totalTurntableFrames}) is permanently set as the website backdrop for seamless visual continuity.
+                  <p className="text-[10.5px] text-zinc-400 leading-relaxed font-sans">
+                    360° rotation images and background videos reside directly in the build filesystem. This keeps dynamic Supabase database quotas reserved solely for active vehicle inventory and customer leads.
                   </p>
+                  <div className="p-2.5 rounded-lg bg-black/50 border border-white/5 text-[10px] font-mono text-zinc-300 space-y-1">
+                    <div className="flex items-center gap-1.5 text-emerald-400">
+                      <FileCode className="w-3 h-3" />
+                      <span className="font-bold">Build File Directory:</span>
+                    </div>
+                    <p className="text-zinc-400 break-all">/public/frames/frame_0001.webp - frame_0060.webp</p>
+                  </div>
                   <div className="aspect-[16/9] w-full rounded-lg overflow-hidden border border-white/10 bg-black/50">
                     <img 
-                      src={lastFrameSrc} 
+                      src="/frames/frame_0060.webp" 
                       alt="Permanent Background Preview" 
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.src = '/frames/frame_60.webp';
+                      }}
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsFrameStudioOpen(true)}
-                  className="w-full py-2.5 px-4 rounded-xl border border-dashed border-white/20 hover:border-white text-zinc-300 hover:text-white hover:bg-white/5 transition-all text-center text-xs font-mono uppercase tracking-wider"
-                >
-                  + Upload Video / 360 Sequence Files
-                </button>
               </div>
             </div>
           </div>
@@ -480,23 +496,217 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
 
         <hr className="border-white/5" />
 
-        {/* Logo Section */}
-        <div>
-          <h2 className="text-sm font-bold font-serif text-white mb-1 uppercase tracking-widest">Showroom Brand Logo</h2>
-          <p className="text-zinc-500 text-[10px] uppercase font-mono tracking-wider mb-6">Updates logo displayed inside primary front-end header and footer bars.</p>
+        {/* Home Hero Video (Desktop / Laptop) - In-Build Asset */}
+        <div className="border-l-2 border-white pl-4">
+          <div className="flex items-center space-x-2 mb-1">
+            <h2 className="text-sm font-serif font-bold text-white uppercase tracking-widest">Home Page Hero Video (Desktop / Laptop 16:9)</h2>
+            <span className="bg-white/10 text-white text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border border-white/15">Desktop</span>
+            <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border border-emerald-500/30">Direct In-Build Asset</span>
+          </div>
+          <p className="text-zinc-500 text-[10px] uppercase font-mono tracking-wider mb-6">
+            Directly bundled horizontal video at <code className="text-emerald-400">/public/videos/hero-desktop.mp4</code>.
+          </p>
           <div className="flex flex-col md:flex-row items-stretch md:items-start gap-6">
-            <div className="w-52 h-24 overflow-hidden rounded-xl border border-white/5 flex items-center justify-center p-4 bg-black/40 shrink-0 shadow-inner">
-              <img src={siteConfig.logo} alt="Logo Preview" className="max-h-16 max-w-full object-contain" />
+            <div className="w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30 shrink-0 relative shadow-sm flex items-center justify-center">
+              {siteConfig.homeHeroVideo ? (
+                <video src={siteConfig.homeHeroVideo} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-center p-4">
+                  <Video className="w-6 h-6 text-zinc-500 mx-auto mb-1" />
+                  <p className="text-[10px] text-zinc-400 font-mono uppercase">Interactive 360 Turntable Active</p>
+                </div>
+              )}
             </div>
-            <div className="flex-grow space-y-4">
-              <label className="block w-full cursor-pointer bg-zinc-900/25 border-2 border-dashed border-white/10 hover:border-white hover:bg-white/5 rounded-xl p-6 transition-all text-center">
-                <input type="file" accept="image/*" className="hidden" disabled={isCompressing} onChange={(e) => handleImageUpload(e, 'logo')} />
-                <UploadCloud className="w-8 h-8 text-zinc-500 mx-auto mb-2" />
-                <p className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                  {isCompressing ? 'Compacting Logo...' : 'Upload New Logo'}
-                </p>
-                <p className="text-[10px] text-zinc-500 font-mono mt-0.5 uppercase tracking-wider">Supports PNG or SVGs (automatically compressed)</p>
-              </label>
+            <div className="flex-grow space-y-3">
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="/videos/hero-desktop.mp4"
+                  value={customHeroVideoUrl || siteConfig.homeHeroVideo || ''}
+                  onChange={(e) => setCustomHeroVideoUrl(e.target.value)}
+                  className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSaveUrl('homeHeroVideo', customHeroVideoUrl)}
+                  className="w-full sm:w-auto px-4 py-2 bg-white text-black font-bold text-xs font-mono uppercase rounded-xl hover:bg-zinc-200"
+                >
+                  Save Path
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateSiteConfig({ homeHeroVideo: '/videos/hero-desktop.mp4' });
+                    setSuccess('Set to local in-build video (/videos/hero-desktop.mp4).');
+                    setTimeout(() => setSuccess(''), 4000);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-[10.5px] font-mono text-zinc-300 hover:text-white flex items-center gap-1.5"
+                >
+                  <FolderOpen className="w-3 h-3 text-emerald-400" />
+                  <span>Use Local In-Build Video (/videos/hero-desktop.mp4)</span>
+                </button>
+                {siteConfig.homeHeroVideo && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateSiteConfig({ homeHeroVideo: '' });
+                      setSuccess('Cleared video. Defaulting to interactive 360 turntable.');
+                      setTimeout(() => setSuccess(''), 4000);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-white/10 text-[10.5px] font-mono"
+                  >
+                    Use 360 Turntable Instead
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-white/5" />
+
+        {/* Home Hero Video (Mobile Phone) - In-Build Asset */}
+        <div className="border-l-2 border-white pl-4">
+          <div className="flex items-center space-x-2 mb-1">
+            <h2 className="text-sm font-serif font-bold text-white uppercase tracking-widest">Home Page Hero Video (Mobile Phone 9:16 / Portrait)</h2>
+            <span className="bg-white/10 text-white text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border border-white/15">Mobile</span>
+            <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border border-emerald-500/30">Direct In-Build Asset</span>
+          </div>
+          <p className="text-zinc-500 text-[10px] uppercase font-mono tracking-wider mb-6">
+            Directly bundled vertical video at <code className="text-emerald-400">/public/videos/hero-mobile.mp4</code>.
+          </p>
+          <div className="flex flex-col md:flex-row items-stretch md:items-start gap-6">
+            <div className="w-56 h-44 overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30 shrink-0 relative shadow-sm flex items-center justify-center">
+              {siteConfig.homeHeroMobileVideo ? (
+                <video src={siteConfig.homeHeroMobileVideo} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-center p-4">
+                  <Smartphone className="w-6 h-6 text-zinc-500 mx-auto mb-1" />
+                  <p className="text-[10px] text-zinc-400 font-mono uppercase">
+                    {siteConfig.homeHeroVideo ? 'Using Desktop Video Fallback' : 'Interactive 360 Turntable Active'}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex-grow space-y-3">
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="/videos/hero-mobile.mp4"
+                  value={customHeroMobileVideoUrl || siteConfig.homeHeroMobileVideo || ''}
+                  onChange={(e) => setCustomHeroMobileVideoUrl(e.target.value)}
+                  className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSaveUrl('homeHeroMobileVideo', customHeroMobileVideoUrl)}
+                  className="w-full sm:w-auto px-4 py-2 bg-white text-black font-bold text-xs font-mono uppercase rounded-xl hover:bg-zinc-200"
+                >
+                  Save Path
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateSiteConfig({ homeHeroMobileVideo: '/videos/hero-mobile.mp4' });
+                    setSuccess('Set to local in-build mobile video (/videos/hero-mobile.mp4).');
+                    setTimeout(() => setSuccess(''), 4000);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-[10.5px] font-mono text-zinc-300 hover:text-white flex items-center gap-1.5"
+                >
+                  <FolderOpen className="w-3 h-3 text-emerald-400" />
+                  <span>Use Local In-Build Mobile Video (/videos/hero-mobile.mp4)</span>
+                </button>
+                {siteConfig.homeHeroMobileVideo && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateSiteConfig({ homeHeroMobileVideo: '' });
+                      setSuccess('Cleared mobile video. Defaulting to interactive 360 turntable.');
+                      setTimeout(() => setSuccess(''), 4000);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-white/10 text-[10.5px] font-mono"
+                  >
+                    Use 360 Turntable Instead
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-white/5" />
+
+        {/* Logo Section (Direct In-Build Asset) */}
+        <div className="border-l-2 border-white pl-4">
+          <div className="flex items-center space-x-2 mb-1">
+            <h2 className="text-sm font-bold font-serif text-white uppercase tracking-widest">Showroom Brand Logo</h2>
+            <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border border-emerald-500/30">Direct In-Build Asset</span>
+          </div>
+          <p className="text-zinc-500 text-[10px] uppercase font-mono tracking-wider mb-6">
+            Logo file bundled directly in the build at <code className="text-emerald-400">/public/logo.svg</code> or <code className="text-emerald-400">/public/logo.png</code>. Displayed across the front-end navigation bar and footer.
+          </p>
+          <div className="flex flex-col md:flex-row items-stretch md:items-start gap-6">
+            <div className="w-56 h-28 overflow-hidden rounded-xl border border-white/10 flex items-center justify-center p-4 bg-zinc-900/40 shrink-0 shadow-inner">
+              <img src={siteConfig.logo || '/logo.svg'} alt="Logo Preview" className="max-h-16 max-w-full object-contain" />
+            </div>
+            <div className="flex-grow space-y-3">
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="/logo.svg or /logo.png"
+                  value={customLogoUrl || siteConfig.logo || ''}
+                  onChange={(e) => setCustomLogoUrl(e.target.value)}
+                  className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSaveUrl('logo', customLogoUrl)}
+                  className="w-full sm:w-auto px-4 py-2 bg-white text-black font-bold text-xs font-mono uppercase rounded-xl hover:bg-zinc-200"
+                >
+                  Save Path
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateSiteConfig({ logo: '/logo.svg' });
+                    setSuccess('Logo set to in-build vector SVG (/logo.svg).');
+                    setTimeout(() => setSuccess(''), 4000);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-[10.5px] font-mono text-zinc-300 hover:text-white flex items-center gap-1.5"
+                >
+                  <FolderOpen className="w-3 h-3 text-emerald-400" />
+                  <span>Use Local In-Build SVG (/logo.svg)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateSiteConfig({ logo: '/logo.png' });
+                    setSuccess('Logo set to in-build PNG (/logo.png).');
+                    setTimeout(() => setSuccess(''), 4000);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-[10.5px] font-mono text-zinc-300 hover:text-white flex items-center gap-1.5"
+                >
+                  <FolderOpen className="w-3 h-3 text-emerald-400" />
+                  <span>Use Local In-Build PNG (/logo.png)</span>
+                </button>
+              </div>
+
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-[10.5px] font-mono text-zinc-400 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>In-Build Zero Egress:</span>
+                </div>
+                <p>Place your vector logo (<code className="text-white">logo.svg</code>) or transparent PNG (<code className="text-white">logo.png</code>) directly into <code className="text-emerald-400">/public/</code>.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -720,13 +930,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
         </div>
 
       </div>
-
-      {/* 360° Studio Frame Uploader Modal */}
-      <FrameUploaderModal 
-        isOpen={isFrameStudioOpen} 
-        onClose={() => setIsFrameStudioOpen(false)} 
-        onFramesUpdated={refreshFrames}
-      />
     </div>
   );
 }
+

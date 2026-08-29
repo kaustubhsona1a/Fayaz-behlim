@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 450" width="100%" height="100%">
+  <defs>
+    <!-- Chrome Primary Gradient -->
+    <linearGradient id="chromeBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="18%" stop-color="#e6ebf0"/>
+      <stop offset="42%" stop-color="#cbd5e1"/>
+      <stop offset="48%" stop-color="#94a3b8"/>
+      <stop offset="50%" stop-color="#475569"/>
+      <stop offset="52%" stop-color="#1e293b"/>
+      <stop offset="56%" stop-color="#0f172a"/>
+      <stop offset="68%" stop-color="#64748b"/>
+      <stop offset="85%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+
+    <!-- Bevel Light Rim Gradient -->
+    <linearGradient id="chromeBevel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="25%" stop-color="#cbd5e1"/>
+      <stop offset="50%" stop-color="#334155"/>
+      <stop offset="75%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+
+    <!-- Deep Outer Bevel Stroke -->
+    <linearGradient id="outerBevelStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#64748b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="70%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+
+    <!-- Chrome Sheen Filter -->
+    <filter id="chromeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.85"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#ffffff" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#chromeGlow)" transform="translate(10, 10)">
+    
+    <!-- Outer Base / Thick Chrome Chamfer Extrusion -->
+    <g fill="url(#chromeBody)" stroke="url(#outerBevelStroke)" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+      
+      <!-- Letter C Outer Outline -->
+      <path d="M 120 70 
+               L 330 70 
+               L 370 110 
+               L 370 190 
+               L 290 190 
+               L 270 170 
+               L 180 170 
+               L 160 190 
+               L 160 270 
+               L 180 290 
+               L 270 290 
+               L 290 270 
+               L 370 270 
+               L 370 350 
+               L 330 390 
+               L 120 390 
+               L 70 340 
+               L 70 120 
+               Z" />
+
+      <!-- Middle Glyph (Y / L Stem Connection) -->
+      <path d="M 390 70 
+               L 470 70 
+               L 490 90 
+               L 490 170 
+               L 430 170 
+               L 430 190 
+               L 650 190 
+               L 690 230 
+               L 690 350 
+               L 650 390 
+               L 390 390 
+               L 350 350 
+               L 350 270 
+               L 410 270 
+               L 410 290 
+               L 610 290 
+               L 630 270 
+               L 630 250 
+               L 410 250 
+               L 370 210 
+               L 370 90 
+               Z" />
+
+      <!-- Letter R Glyph -->
+      <path d="M 640 70 
+               L 890 70 
+               L 940 120 
+               L 940 210 
+               L 890 260 
+               L 940 310 
+               L 940 390 
+               L 840 390 
+               L 790 330 
+               L 740 330 
+               L 740 390 
+               L 640 390 
+               L 600 350 
+               L 600 110 
+               Z" />
+    </g>
+
+    <!-- Inner Beveled Insets (Sculpted Cutouts) -->
+    <g fill="#181c24" stroke="url(#chromeBevel)" stroke-width="4" stroke-linejoin="round">
+      <!-- C Inner Hole -->
+      <path d="M 170 150 
+               L 250 150 
+               L 270 170 
+               L 270 290 
+               L 250 310 
+               L 170 310 
+               L 150 290 
+               L 150 170 
+               Z" fill="url(#chromeBody)" fill-opacity="0.9" />
+
+      <!-- R Inner Top Loop -->
+      <path d="M 720 140 
+               L 830 140 
+               L 860 170 
+               L 830 200 
+               L 720 200 
+               Z" fill="url(#chromeBody)" fill-opacity="0.95" />
+    </g>
+
+    <!-- Specular Highlight Lines -->
+    <g stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.85">
+      <line x1="125" y1="74" x2="325" y2="74" />
+      <line x1="395" y1="74" x2="465" y2="74" />
+      <line x1="645" y1="74" x2="885" y2="74" />
+      <line x1="74" y1="125" x2="74" y2="335" />
+    </g>
+
+  </g>
+</svg>

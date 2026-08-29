@@ -64,9 +64,9 @@ const DEFAULT_CONFIG: SiteConfig = {
   aboutImage: '',
   homeHeroImage: '',
   homeHeroVideo: '',
-  homeHeroMobileVideo: '',
+  homeHeroMobileVideo: '/videos/hero-mobile.mp4',
   homeHeroType: 'video',
-  logo: '/logo.png',
+  logo: '/logo.svg',
   clientDeliveries: [],
   instagramReels: []
 };
