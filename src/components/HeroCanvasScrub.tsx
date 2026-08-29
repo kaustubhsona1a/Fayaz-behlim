@@ -21,7 +21,7 @@ interface HeroCanvasScrubProps {
   showDealerControls?: boolean;
 }
 
-const DEFAULT_TOTAL_FRAMES = 60;
+const DEFAULT_TOTAL_FRAMES = 96;
 
 export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({ 
   onExploreClick,
@@ -31,8 +31,6 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   const { siteConfig } = useVehicles();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const desktopVideoRef = useRef<HTMLVideoElement>(null);
-  const mobileVideoRef = useRef<HTMLVideoElement>(null);
   
   // Direct DOM Refs for rigid, zero-stutter performance (no React re-renders during scroll)
   const phase1Ref = useRef<HTMLDivElement>(null);
@@ -45,15 +43,15 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   const scrubPercentRef = useRef<HTMLSpanElement>(null);
   const dragHintRef = useRef<HTMLDivElement>(null);
 
-  const desktopVideoSrc = siteConfig.homeHeroVideo || '/videos/hero-laptop.mp4';
-  const mobileVideoSrc = siteConfig.homeHeroMobileVideo || '/videos/hero-mobile.mp4';
-
-  // Target scroll progress ref (0 to 1) and smooth lerp progress ref for butter-smooth scrubbing
+  // Target scroll progress ref (0 to 1)
   const targetProgressRef = useRef<number>(0);
-  const smoothProgressRef = useRef<number>(0);
+
+  // Determine initial viewport device category
+  const getDeviceCategory = () => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'mobile' : 'desktop');
 
   // Loading & Mode State
-  const [firstFrameSrc, setFirstFrameSrc] = useState<string>('/frames/frame_0001.webp');
+  const initialDevice = getDeviceCategory();
+  const [firstFrameSrc, setFirstFrameSrc] = useState<string>(`/frames/${initialDevice}/frame_0001.webp`);
   const [totalFrames, setTotalFrames] = useState(DEFAULT_TOTAL_FRAMES);
   const [isCustomSequence, setIsCustomSequence] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -68,6 +66,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   const lastTimeRef = useRef<number>(performance.now());
   const isInteractingRef = useRef<boolean>(false);
   const hasInteractedRef = useRef<boolean>(false);
+  const currentDeviceRef = useRef<'desktop' | 'mobile'>(initialDevice);
 
   // Drag physics tracking
   const pointerStartXRef = useRef<number>(0);
@@ -152,7 +151,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     }
   }, []);
 
-  // Synchronous preloader for frame 1
+  // Synchronous preloader for first frame
   useEffect(() => {
     const f1 = new Image();
     f1.src = firstFrameSrc;
@@ -165,41 +164,14 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     }
   }, [firstFrameSrc, drawInterpolatedFrame]);
 
-  // 1. Immediately instantiate sequence without waiting for IndexedDB queries
-  useEffect(() => {
-    currentFrameRef.current = 0;
-    targetFrameRef.current = 0;
-    velocityRef.current = 0;
+  // Load appropriate frame sequence (Desktop vs Mobile)
+  const loadDeviceSequence = useCallback((device: 'desktop' | 'mobile') => {
+    currentDeviceRef.current = device;
+    const initialUrl = `/frames/${device}/frame_0001.webp`;
+    setFirstFrameSrc(initialUrl);
 
-    // Immediately create default 60-frame preset objects so imagesRef is populated synchronously
-    const presetImages: HTMLImageElement[] = [];
-    for (let i = 1; i <= DEFAULT_TOTAL_FRAMES; i++) {
-      const img = new Image();
-      const frameNum = String(i).padStart(4, '0');
-      img.src = `/frames/frame_${frameNum}.webp`;
-      const idx = i - 1;
-      img.onload = () => {
-        const activeIdx = Math.floor(currentFrameRef.current % DEFAULT_TOTAL_FRAMES);
-        if (activeIdx === idx || idx === 0) {
-          drawInterpolatedFrame(currentFrameRef.current);
-        }
-      };
-      if (img.complete && img.naturalWidth > 0 && i === 1) {
-        drawInterpolatedFrame(0);
-      }
-      presetImages.push(img);
-    }
-    imagesRef.current = presetImages;
-    setTotalFrames(DEFAULT_TOTAL_FRAMES);
-
-    // Initial immediate paint
-    drawInterpolatedFrame(0);
-
-    // Check if custom sequences are saved in IndexedDB (Desktop or Mobile aware)
-    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
-    const targetDevice = isMobileViewport ? 'mobile' : 'desktop';
-
-    getFirstFrameUrl(targetDevice).then((url) => {
+    // Check if custom sequences are saved in IndexedDB
+    getFirstFrameUrl(device).then((url) => {
       if (url) {
         setFirstFrameSrc(url);
         drawInterpolatedFrame(0);
@@ -207,10 +179,8 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     });
 
     const loadTargetSequence = async () => {
-      // First try mobile if mobile viewport, else desktop
-      let frames = await loadCustomFrames(targetDevice);
-      // If mobile sequence is not set, fallback to desktop custom sequence
-      if (!frames && targetDevice === 'mobile') {
+      let frames = await loadCustomFrames(device);
+      if (!frames && device === 'mobile') {
         frames = await loadCustomFrames('desktop');
       }
 
@@ -235,21 +205,54 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           customImages.push(img);
         });
         imagesRef.current = customImages;
-        drawInterpolatedFrame(0);
+        drawInterpolatedFrame(currentFrameRef.current);
+      } else {
+        // Factory 96-frame sequence for the given device
+        setIsCustomSequence(false);
+        setTotalFrames(DEFAULT_TOTAL_FRAMES);
+        const presetImages: HTMLImageElement[] = [];
+        for (let i = 1; i <= DEFAULT_TOTAL_FRAMES; i++) {
+          const img = new Image();
+          const frameNum = String(i).padStart(4, '0');
+          img.src = `/frames/${device}/frame_${frameNum}.webp`;
+          const idx = i - 1;
+          img.onload = () => {
+            const activeIdx = Math.floor(currentFrameRef.current % DEFAULT_TOTAL_FRAMES);
+            if (activeIdx === idx || idx === 0) {
+              drawInterpolatedFrame(currentFrameRef.current);
+            }
+          };
+          if (img.complete && img.naturalWidth > 0 && i === 1) {
+            drawInterpolatedFrame(0);
+          }
+          presetImages.push(img);
+        }
+        imagesRef.current = presetImages;
+        drawInterpolatedFrame(currentFrameRef.current);
       }
     };
 
     loadTargetSequence();
+  }, [drawInterpolatedFrame]);
+
+  // 1. Immediately instantiate sequence on mount
+  useEffect(() => {
+    currentFrameRef.current = 0;
+    targetFrameRef.current = 0;
+    velocityRef.current = 0;
+
+    const device = getDeviceCategory();
+    loadDeviceSequence(device);
 
     const handleFramesUpdated = () => {
-      loadTargetSequence();
+      loadDeviceSequence(currentDeviceRef.current);
     };
 
     window.addEventListener('apex_custom_frames_updated', handleFramesUpdated);
     return () => {
       window.removeEventListener('apex_custom_frames_updated', handleFramesUpdated);
     };
-  }, [drawInterpolatedFrame]);
+  }, [loadDeviceSequence]);
 
   // 3. Rigid Direct DOM Opacity Updates (NO translateY or transform transitions)
   // Eliminates rubber-banding and scroll stuttering
@@ -323,7 +326,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     }
   }, []);
 
-  // 4. Inertia physics animation loop + Continuous RAF video scrub sync
+  // 4. Inertia physics animation loop for direct drag gestures
   useEffect(() => {
     let isRunning = true;
 
@@ -341,30 +344,6 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         velocityRef.current *= Math.exp(-6.0 * dt); // Smooth friction decay
         currentFrameRef.current = targetFrameRef.current;
         drawInterpolatedFrame(currentFrameRef.current);
-      }
-
-      // Smooth continuous RAF video scrub sync (interpolated lerping prevents frame skipping)
-      const diff = targetProgressRef.current - smoothProgressRef.current;
-      smoothProgressRef.current += diff * 0.18; // Smooth dampening factor
-
-      const isDesktop = window.innerWidth >= 768;
-      const activeVid = isDesktop ? desktopVideoRef.current : mobileVideoRef.current;
-
-      if (activeVid && activeVid.duration && !isNaN(activeVid.duration) && activeVid.duration > 0 && activeVid.readyState >= 1) {
-        const targetTime = smoothProgressRef.current * activeVid.duration;
-        const safeTargetTime = Math.max(0, Math.min(activeVid.duration - 0.02, targetTime));
-        
-        if (!activeVid.seeking && Math.abs(activeVid.currentTime - safeTargetTime) > 0.008) {
-          if ('fastSeek' in activeVid) {
-            try {
-              (activeVid as any).fastSeek(safeTargetTime);
-            } catch {
-              activeVid.currentTime = safeTargetTime;
-            }
-          } else {
-            activeVid.currentTime = safeTargetTime;
-          }
-        }
       }
 
       // Update HUD metrics directly on DOM elements for zero-overhead performance
@@ -397,7 +376,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     };
   }, [drawInterpolatedFrame, totalFrames]);
 
-  // 5. Responsive Resize Observer with DevicePixelRatio
+  // 5. Responsive Resize Observer with DevicePixelRatio & Dynamic Device Switching
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
@@ -411,7 +390,13 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
       canvas.width = Math.floor(rect.width * dpr);
       canvas.height = Math.floor(rect.height * dpr);
 
-      drawInterpolatedFrame(currentFrameRef.current);
+      // Check if device category changed between mobile and desktop
+      const newDevice = window.innerWidth < 768 ? 'mobile' : 'desktop';
+      if (newDevice !== currentDeviceRef.current) {
+        loadDeviceSequence(newDevice);
+      } else {
+        drawInterpolatedFrame(currentFrameRef.current);
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -420,7 +405,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [drawInterpolatedFrame]);
+  }, [drawInterpolatedFrame, loadDeviceSequence]);
 
   // Global Pointer Release Listener to prevent interactions from getting stuck
   useEffect(() => {
@@ -544,22 +529,11 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
 
   const handleResetToPreset = async () => {
     await clearCustomFrames();
-    setIsCustomSequence(false);
-    setTotalFrames(DEFAULT_TOTAL_FRAMES);
-    setFirstFrameSrc('/frames/frame_0001.webp');
+    const device = currentDeviceRef.current;
+    loadDeviceSequence(device);
     targetFrameRef.current = 0;
     currentFrameRef.current = 0;
     velocityRef.current = 0;
-    
-    const presetImages: HTMLImageElement[] = [];
-    for (let i = 1; i <= DEFAULT_TOTAL_FRAMES; i++) {
-      const img = new Image();
-      const frameNum = String(i).padStart(4, '0');
-      img.src = `/frames/frame_${frameNum}.webp`;
-      presetImages.push(img);
-    }
-    imagesRef.current = presetImages;
-    drawInterpolatedFrame(0);
 
     if (containerRef.current) {
       window.scrollTo({ top: containerRef.current.offsetTop, behavior: 'smooth' });
@@ -585,62 +559,14 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
         />
 
-        {/* HTML5 Canvas for Apple-Style Frame Scrubbing Locked to Scroll */}
+        {/* HTML5 Canvas for Apple-Style Frame Scrubbing Locked to Scroll & Interactive Drag */}
         <canvas 
           ref={canvasRef} 
-          className="relative z-[2] w-full h-full block touch-none pointer-events-none"
-        />
-
-        {/* Desktop / Laptop Hero Scroll Video (Direct in-build asset, synchronized with scroll) */}
-        <video
-          ref={desktopVideoRef}
-          src={desktopVideoSrc}
-          playsInline
-          muted
-          preload="auto"
-          onLoadedMetadata={(e) => {
-            const vid = e.currentTarget;
-            vid.pause();
-            vid.currentTime = 0;
-          }}
-          className="hidden md:block absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
-          onError={(e) => {
-            const target = e.currentTarget;
-            const currentSrc = target.getAttribute('src') || '';
-            if (currentSrc === '/videos/hero-laptop.mp4') {
-              target.src = '/hero-laptop.mp4';
-            } else if (currentSrc === '/hero-laptop.mp4') {
-              target.src = '/videos/hero-desktop.mp4';
-            } else {
-              target.style.display = 'none';
-            }
-          }}
-        />
-
-        {/* Mobile Hero Scroll Video (Direct in-build asset, synchronized with scroll) */}
-        <video
-          ref={mobileVideoRef}
-          src={mobileVideoSrc}
-          playsInline
-          muted
-          preload="auto"
-          onLoadedMetadata={(e) => {
-            const vid = e.currentTarget;
-            vid.pause();
-            vid.currentTime = 0;
-          }}
-          className="block md:hidden absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
-          onError={(e) => {
-            const target = e.currentTarget;
-            const currentSrc = target.getAttribute('src') || '';
-            if (currentSrc === '/videos/hero-mobile.mp4') {
-              target.src = '/hero-mobile.mp4';
-            } else if (currentSrc === '/hero-mobile.mp4') {
-              target.src = '/videos/hero-laptop.mp4';
-            } else {
-              target.style.display = 'none';
-            }
-          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          className="relative z-[2] w-full h-full block cursor-grab active:cursor-grabbing touch-none"
         />
 
         {/* Floating Interaction Hint (Dealer Mode Only) */}
