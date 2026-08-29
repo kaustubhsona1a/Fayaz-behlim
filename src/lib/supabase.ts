@@ -404,7 +404,7 @@ export async function uploadImageToStorage(
 
   while (attempt < maxRetries) {
     try {
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, optimizedFile, {
           cacheControl: '31536000',
@@ -416,19 +416,21 @@ export async function uploadImageToStorage(
         throw uploadError;
       }
 
-      const { data } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath);
+      if (uploadData?.path) {
+        const { data } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(uploadData.path || filePath);
 
-      if (data?.publicUrl) {
-        return data.publicUrl;
+        if (data?.publicUrl) {
+          return data.publicUrl;
+        }
       }
     } catch (err: any) {
       lastError = err;
       attempt++;
       if (attempt < maxRetries) {
         console.warn(`[UPLOAD RETRY] Retrying upload for ${file.name} (Attempt ${attempt + 1} of ${maxRetries})...`, err);
-        await new Promise(r => setTimeout(r, 400 * attempt));
+        await new Promise(r => setTimeout(r, 200 * attempt));
       }
     }
   }

@@ -18,6 +18,7 @@ import AdminInventory from './pages/admin/Inventory';
 import AdminAddVehicle from './pages/admin/AddVehicle';
 import AdminLeads from './pages/admin/Leads';
 import AdminSettings from './pages/admin/Settings';
+import NotFound from './pages/NotFound';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -65,6 +66,7 @@ export default function App() {
                 <Route path="inventory/:id" element={<VehicleDetails />} />
                 <Route path="sell" element={<SellCar />} />
                 <Route path="about" element={<About />} />
+                <Route path="*" element={<NotFound />} />
               </Route>
 
               <Route path="/dealer-management" element={<AdminLayout />}>
@@ -75,6 +77,8 @@ export default function App() {
                 <Route path="leads" element={<AdminLeads />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
+
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </VehicleProvider>

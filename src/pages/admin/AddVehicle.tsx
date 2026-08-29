@@ -389,7 +389,8 @@ export default function AdminAddVehicle() {
                   alt={`Preview ${i}`} 
                   className="w-full h-full object-cover pointer-events-none" 
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/frames/desktop/frame_0001.webp";
+                    // Do not replace user's uploaded image with a default vehicle frame
+                    console.warn(`[PREVIEW WARNING] Image ${i + 1} failed to load:`, img);
                   }}
                 />
                 <div className="absolute top-2 left-2 bg-zinc-950/80 text-white text-[8px] font-bold px-1.5 py-0.5 rounded font-mono border border-white/10 shadow-sm pointer-events-none">
