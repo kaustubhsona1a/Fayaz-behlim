@@ -624,39 +624,22 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           </div>
         )}
 
-        {/* Phase 1: Brand & Hero Statement (0% - 25% Scroll) - Rigid, Stable Layout */}
+        {/* Phase 1: Clean Action Section (0% - 25% Scroll) - Unobstructed Hero View */}
         <div 
           ref={phase1Ref}
           id="hero-phase-1"
-          className="absolute inset-0 z-10 flex flex-col justify-between md:justify-center pt-36 sm:pt-44 md:pt-48 pb-8 px-6 sm:px-12 md:px-16 lg:px-24 pointer-events-none"
+          className="absolute inset-0 z-10 flex flex-col justify-end pb-8 sm:pb-12 md:pb-14 px-6 sm:px-12 md:px-16 lg:px-24 pointer-events-none"
         >
-          {/* Top Branding Section */}
-          <div className="max-w-2xl select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] mt-2 sm:mt-4 md:mt-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-2.5 sm:mb-4 font-sans backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-              40+ Years of Heritage & Trust
-            </div>
-            <h1 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-cinzel font-bold tracking-tight text-white leading-[1.08] mb-2 sm:mb-4 uppercase">
-              CYR CARS <br />
-              <span className="text-zinc-300 font-sans font-light tracking-wide text-xl sm:text-3xl md:text-5xl">
-                Exotic & Luxury Motorcars
-              </span>
-            </h1>
-            <p className="hidden sm:block text-sm sm:text-base md:text-lg text-zinc-200 max-w-xl leading-relaxed mb-6 font-normal font-sans">
-              Mumbai's premier destination for certified pre-owned, family & premium performance motorcars. Scroll or drag to experience precision in 360°.
-            </p>
-          </div>
-
-          {/* Bottom Action Section */}
-          <div className="select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] mt-auto md:mt-2">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-2.5 max-w-[280px] sm:max-w-none">
+          {/* Bottom Action Section with compact buttons */}
+          <div className="select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+            <div className="flex flex-row items-center gap-2 sm:gap-2.5 mb-2 max-w-[280px] sm:max-w-none">
               <Link
                 to="/inventory"
                 id="btn-hero-phase1-browse"
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all duration-300 shadow-[0_2px_12px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 pointer-events-auto"
+                className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-[0_2px_8px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95 pointer-events-auto"
               >
                 <span>Browse Inventory</span>
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-2.5 h-2.5" />
               </Link>
               <a
                 href="#contact"
@@ -668,13 +651,13 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
                     el.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[11px] sm:text-xs uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto"
+                className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto"
               >
-                <Phone className="w-3 h-3" />
+                <Phone className="w-2.5 h-2.5" />
                 <span>Contact Us</span>
               </a>
             </div>
-            <div className="flex items-center gap-2 text-[10px] sm:text-xs font-sans font-semibold text-zinc-400 uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-sans font-semibold text-zinc-400 uppercase tracking-widest">
               <span>Drag or scroll to rotate 360°</span>
             </div>
           </div>
