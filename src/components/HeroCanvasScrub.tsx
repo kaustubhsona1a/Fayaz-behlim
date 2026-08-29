@@ -431,60 +431,73 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     };
   }, []);
 
-  // 6. Direct Synchronous Scroll Sync with ZERO play or dead-zone
+  // 6. Direct Synchronous Scroll Sync with ZERO play or dead-zone (Optimized RAF loop)
   useEffect(() => {
-    const handleScroll = () => {
-      if (isInteractingRef.current) return;
-      const container = containerRef.current;
-      if (!container) return;
+    let ticking = false;
 
-      const rect = container.getBoundingClientRect();
-      const totalScrollableDist = rect.height - window.innerHeight;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const container = containerRef.current;
+          if (container) {
+            const rect = container.getBoundingClientRect();
+            const totalScrollableDist = rect.height - window.innerHeight;
 
-      if (totalScrollableDist <= 0) return;
+            if (totalScrollableDist > 0) {
+              const rawProgress = -rect.top / totalScrollableDist;
+              const progress = Math.max(0, Math.min(1, rawProgress));
 
-      // Calculate progress (0 at top, 1 at bottom)
-      const rawProgress = -rect.top / totalScrollableDist;
-      const progress = Math.max(0, Math.min(1, rawProgress));
+              targetProgressRef.current = progress;
 
-      targetProgressRef.current = progress;
-
-      const newFrame = progress * (totalFrames - 1);
-      targetFrameRef.current = newFrame;
-      currentFrameRef.current = newFrame; // Zero-play instantaneous lock
-      drawInterpolatedFrame(newFrame);
-      updateOverlays(progress);
+              const newFrame = progress * (totalFrames - 1);
+              targetFrameRef.current = newFrame;
+              currentFrameRef.current = newFrame;
+              drawInterpolatedFrame(newFrame);
+              updateOverlays(progress);
+            }
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', onScroll);
     };
   }, [totalFrames, updateOverlays, drawInterpolatedFrame]);
 
-  // 7. Interactive Direct Drag-to-Rotate on Canvas (Touch + Mouse)
+  // 7. Interactive Direct Drag-to-Rotate on Canvas (Touch-safe: Mouse drag on desktop, native scroll on mobile)
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    isInteractingRef.current = true;
-    setIsDragging(true);
-    hasInteractedRef.current = true;
+    // Only capture drag on mouse interactions to ensure mobile touch vertical scroll remains 100% native and fluid
+    if (e.pointerType === 'mouse') {
+      isInteractingRef.current = true;
+      setIsDragging(true);
+      hasInteractedRef.current = true;
 
-    if (dragHintRef.current) {
-      dragHintRef.current.style.opacity = '0';
+      if (dragHintRef.current) {
+        dragHintRef.current.style.opacity = '0';
+      }
+
+      pointerStartXRef.current = e.clientX;
+      pointerStartFrameRef.current = targetFrameRef.current;
+      lastPointerXRef.current = e.clientX;
+      lastPointerTimeRef.current = performance.now();
+      velocityRef.current = 0;
+
+      try {
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
     }
-
-    pointerStartXRef.current = e.clientX;
-    pointerStartFrameRef.current = targetFrameRef.current;
-    lastPointerXRef.current = e.clientX;
-    lastPointerTimeRef.current = performance.now();
-    velocityRef.current = 0;
-
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isInteractingRef.current) return;
+    if (!isInteractingRef.current || e.pointerType !== 'mouse') return;
 
     const deltaX = e.clientX - pointerStartXRef.current;
     // 9px of drag per frame gives precise natural tactile feel
@@ -566,7 +579,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="relative z-[2] w-full h-full block cursor-grab active:cursor-grabbing touch-none"
+          className="relative z-[2] w-full h-full block cursor-grab active:cursor-grabbing touch-pan-y"
         />
 
         {/* Floating Interaction Hint (Dealer Mode Only) */}
@@ -622,22 +635,22 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           </div>
         )}
 
-        {/* Phase 1: Clean Action Section (0% - 25% Scroll) - Unobstructed Hero View */}
+        {/* Phase 1: Clean Action Section (0% - 22% Scroll) - Non-Intrusive Bottom Left */}
         <div 
           ref={phase1Ref}
           id="hero-phase-1"
-          className="absolute inset-0 z-10 flex flex-col justify-end pb-8 sm:pb-12 md:pb-14 px-6 sm:px-12 md:px-16 lg:px-24 pointer-events-none"
+          className="absolute inset-0 z-10 flex flex-col justify-end pb-8 sm:pb-10 md:pb-12 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
         >
-          {/* Bottom Action Section with compact stacked buttons */}
-          <div className="select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-            <div className="flex flex-col items-start gap-2 mb-2.5">
+          {/* Bottom Action Section with compact sleek buttons completely clear of the central car */}
+          <div className="select-none max-w-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 mb-3">
               <Link
                 to="/inventory"
                 id="btn-hero-phase1-browse"
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-[0_2px_8px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95 pointer-events-auto"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[10.5px] sm:text-[11.5px] uppercase tracking-wider transition-all duration-300 shadow-[0_2px_12px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95 pointer-events-auto"
               >
                 <span>Browse Inventory</span>
-                <ArrowRight className="w-2.5 h-2.5" />
+                <ArrowRight className="w-3 h-3" />
               </Link>
               <a
                 href="#contact"
@@ -649,108 +662,95 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
                     el.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[10.5px] sm:text-[11.5px] uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto"
               >
-                <Phone className="w-2.5 h-2.5" />
+                <Phone className="w-3 h-3" />
                 <span>Contact Us</span>
               </a>
             </div>
             <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-sans font-semibold text-zinc-400 uppercase tracking-widest">
-              <span>Drag or scroll to rotate 360°</span>
+              <MoveHorizontal className="w-3 h-3 text-zinc-400" />
+              <span>Scroll down to rotate 360°</span>
             </div>
           </div>
         </div>
 
-        {/* Phase 2: Performance Specs Callout (25% - 55% Scroll) */}
+        {/* Phase 2: Performance Specs Callout (25% - 55% Scroll) - Discreet Bottom Right Corner */}
         <div 
           ref={phase2Ref}
           id="hero-phase-2"
-          className="absolute inset-0 z-10 flex flex-col justify-center items-end pt-20 sm:pt-24 md:pt-12 p-6 sm:p-12 md:p-16 lg:p-24 pointer-events-none opacity-0"
+          className="absolute inset-0 z-10 flex flex-col justify-end items-end pb-8 sm:pb-10 md:pb-12 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0"
         >
-          <div className="max-w-lg text-right select-none drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]">
-            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-sans font-bold tracking-[0.2em] uppercase text-white mb-2">
-              <Gauge className="w-4 h-4 text-white" />
+          <div className="max-w-xs sm:max-w-sm md:max-w-md bg-black/60 backdrop-blur-xl border border-white/15 p-4 sm:p-5 rounded-2xl text-right select-none shadow-2xl pointer-events-auto">
+            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.18em] uppercase text-sky-400 mb-1.5">
+              <Gauge className="w-3.5 h-3.5 text-sky-400" />
               <span>DYNAMIC PRECISION</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-cinzel font-bold text-white tracking-tight mb-5 sm:mb-6 uppercase leading-tight">
-              CURATED<br />MASTERPIECES
-            </h2>
-            <div className="space-y-3 font-mono text-xs sm:text-sm text-zinc-100 mb-5 max-w-md ml-auto">
-              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
-                <span className="text-zinc-400 tracking-wider">HERITAGE:</span>
-                <span className="text-white font-semibold tracking-wide">Bandra Hill View Road, Mumbai</span>
+            <h3 className="text-lg sm:text-xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-snug">
+              CURATED MASTERPIECES
+            </h3>
+            <div className="space-y-1.5 font-mono text-[11px] sm:text-xs text-zinc-200">
+              <div className="flex justify-between items-center pb-1.5 border-b border-white/10">
+                <span className="text-zinc-400">HERITAGE:</span>
+                <span className="text-white font-semibold">Bandra Hill View Rd, Mumbai</span>
               </div>
-              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
-                <span className="text-zinc-400 tracking-wider">CERTIFICATION:</span>
-                <span className="text-white font-semibold tracking-wide">150-Point Master Verified</span>
+              <div className="flex justify-between items-center pb-1.5 border-b border-white/10">
+                <span className="text-zinc-400">CERTIFICATION:</span>
+                <span className="text-white font-semibold">150-Point Verified</span>
               </div>
-              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
-                <span className="text-zinc-400 tracking-wider">PRICING:</span>
-                <span className="text-emerald-400 font-semibold tracking-wide">100% Transparent Non-Accidental</span>
-              </div>
-              <div className="flex justify-between items-center pb-2.5 border-b border-white/30">
-                <span className="text-zinc-400 tracking-wider">EXPERIENCE:</span>
-                <span className="text-white font-semibold tracking-wide">White-Glove Doorstep Delivery</span>
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-400">INTEGRITY:</span>
+                <span className="text-emerald-400 font-semibold">100% Non-Accidental</span>
               </div>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed max-w-md ml-auto">
-              Every motorcar in our collection undergoes rigorous mechanical, structural, and cosmetic inspection before reaching the showroom floor.
-            </p>
           </div>
         </div>
 
-        {/* Phase 3: Certified Quality Standards (55% - 80% Scroll) */}
+        {/* Phase 3: Certified Quality Standards (55% - 80% Scroll) - Discreet Bottom Left Corner */}
         <div 
           ref={phase3Ref}
           id="hero-phase-3"
-          className="absolute inset-0 z-10 flex flex-col justify-center items-start pt-20 sm:pt-24 md:pt-12 p-6 sm:p-12 md:p-16 lg:p-24 pointer-events-none opacity-0"
+          className="absolute inset-0 z-10 flex flex-col justify-end items-start pb-8 sm:pb-10 md:pb-12 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0"
         >
-          <div className="max-w-lg text-left select-none drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]">
-            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-sans font-bold tracking-[0.2em] uppercase text-emerald-400 mb-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <div className="max-w-xs sm:max-w-sm md:max-w-md bg-black/60 backdrop-blur-xl border border-white/15 p-4 sm:p-5 rounded-2xl text-left select-none shadow-2xl pointer-events-auto">
+            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.18em] uppercase text-emerald-400 mb-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>CYR CARS CERTIFIED</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-cinzel font-bold text-white tracking-tight mb-5 sm:mb-6 uppercase leading-tight">
-              150-POINT<br />INSPECTION
-            </h2>
-            <div className="space-y-3 text-xs sm:text-sm text-zinc-100 mb-5 font-sans max-w-md">
-              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                <span>Complete Ownership History & Paperwork Verification</span>
+            <h3 className="text-lg sm:text-xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-snug">
+              150-POINT INSPECTION
+            </h3>
+            <div className="space-y-1.5 text-[11px] sm:text-xs text-zinc-200 font-sans">
+              <div className="flex items-center gap-2 pb-1 border-b border-white/10">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>Complete History & Paperwork Verified</span>
               </div>
-              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                <span>Comprehensive Engine, Transmission & Diagnostics Audit</span>
+              <div className="flex items-center gap-2 pb-1 border-b border-white/10">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>Engine, Transmission & Diagnostics Audit</span>
               </div>
-              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                <span>Non-Accidental Structure & Authentic Mileage Guarantee</span>
-              </div>
-              <div className="flex items-start gap-3 pb-2.5 border-b border-white/30">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                <span>Full Interior & Exterior Detail Before Showroom Display</span>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>Authentic Mileage Guarantee & Detail</span>
               </div>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed">
-              Uncompromising quality delivering lifelong peace of mind.
-            </p>
           </div>
         </div>
 
-        {/* Phase 4: Final Reveal & Inventory CTA (80% - 100% Scroll) */}
+        {/* Phase 4: Final Reveal & Inventory CTA (82% - 100% Scroll) - Centered Completion */}
         <div 
           ref={phase4Ref}
           id="hero-phase-4"
           className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center p-6 md:p-12 pointer-events-none opacity-0"
         >
           <div className="max-w-xl text-center select-none pointer-events-auto drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)]">
-            <span className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-zinc-300 font-bold mb-3 block">
+            <span className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-zinc-300 font-bold mb-2.5 block">
               SHOWCASE COMPLETE
             </span>
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-cinzel font-bold text-white tracking-tight mb-4 uppercase">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-cinzel font-bold text-white tracking-tight mb-3.5 uppercase">
               Explore Available Collection
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-zinc-200 mb-8 leading-relaxed font-sans max-w-lg mx-auto">
+            <p className="text-xs sm:text-sm md:text-base text-zinc-200 mb-6 leading-relaxed font-sans max-w-md mx-auto">
               Discover our hand-picked collection of luxury SUVs, executive sedans, and family cars on Hill View Road, Bandra, Mumbai.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">

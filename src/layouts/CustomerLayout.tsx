@@ -92,10 +92,12 @@ export default function CustomerLayout() {
       </div>
 
       <div className="relative z-10 flex flex-col flex-grow min-h-screen">
-        {/* Main Navbar - Fixed Frosted Glass Header Overlay */}
+        {/* Main Navbar - Fixed Glass Header with Transparent Hero Transition */}
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled 
-            ? 'frost-nav-scrolled' 
+          isHomePage && !isScrolled
+            ? 'bg-transparent border-b-transparent shadow-none backdrop-blur-none'
+            : isScrolled
+            ? 'frost-nav-scrolled'
             : 'frost-nav'
         } text-zinc-100`}>
 
