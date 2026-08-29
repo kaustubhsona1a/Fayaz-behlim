@@ -154,13 +154,17 @@ export default function Inventory() {
 
   return (
     <div className="min-h-screen bg-transparent text-zinc-300 py-4 sm:py-8 font-sans z-10 relative">
+      {/* Darkening ambient backdrop overlay for high contrast and crystal-clear text */}
+      <div className="fixed inset-0 bg-black/60 pointer-events-none -z-10" />
+      <div className="fixed inset-0 bg-gradient-to-b from-black/85 via-black/65 to-black/95 pointer-events-none -z-10" />
+
       <div className="container mx-auto max-w-7xl px-3.5 sm:px-6">
         
-        {/* Header - Pure Monochrome Black & White with Rich Frosted Elements */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 md:mb-8 gap-3 sm:gap-6 border-b border-white/10 pb-4 md:pb-6">
-          <div>
+        {/* Header Banner - Dark Frosted Container with Crisp Typography */}
+        <div className="frost-card p-5 sm:p-7 md:p-8 rounded-2xl mb-6 sm:mb-8 border border-white/15 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
+          <div className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold tracking-wider sm:tracking-widest uppercase text-white">
-              Inventory Collection
+              Inventory
             </h1>
             <p className="text-zinc-300 mt-1.5 tracking-widest uppercase text-[11px] sm:text-xs font-sans">
               Explore <span className="text-white font-bold">{filteredCars.length}</span> Certified Motorcars on <span className="text-white font-semibold">Hill View Road, Bandra</span>
@@ -173,7 +177,7 @@ export default function Inventory() {
               <input 
                 type="text" 
                 placeholder="SEARCH BRAND OR MODEL..." 
-                className="w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3.5 bg-black/50 border border-white/20 backdrop-blur-xl rounded-full text-[11px] sm:text-xs tracking-wider uppercase text-white placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/70 transition-all shadow-sm font-sans"
+                className="w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3.5 bg-black/80 border border-white/25 backdrop-blur-2xl rounded-full text-[11px] sm:text-xs tracking-wider uppercase text-white placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black transition-all shadow-lg font-sans"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -185,9 +189,9 @@ export default function Inventory() {
         <div className="lg:hidden mb-5 font-sans">
           <button 
             onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-            className="flex items-center justify-between w-full p-3 sm:p-4 frost-pill rounded-xl text-white font-bold tracking-wider text-xs uppercase transition-colors shadow-sm"
+            className="flex items-center justify-between w-full p-3.5 sm:p-4 bg-black/75 backdrop-blur-xl border border-white/20 rounded-xl text-white font-bold tracking-wider text-xs uppercase transition-colors shadow-md hover:bg-black/90"
           >
-            <div className="flex items-center"><Filter className="w-3.5 h-3.5 mr-2.5 text-white" /> Filters & Sorting</div>
+            <div className="flex items-center"><Filter className="w-3.5 h-3.5 mr-2.5 text-white" /> Filters &amp; Sorting</div>
             <span className="text-[10px] text-zinc-300 lowercase">{isMobileFiltersOpen ? 'collapse' : 'expand'}</span>
           </button>
         </div>
@@ -482,9 +486,9 @@ export default function Inventory() {
                       <div className="frost-card hover:-translate-y-1.5 transition-all duration-300 ease-out flex flex-col h-full overflow-hidden rounded-2xl">
                         <div className="relative aspect-[16/10] sm:aspect-video md:aspect-auto md:h-64 overflow-hidden bg-black/60">
                           <SmartImage 
-                            src={car.images?.[0] || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"} 
+                            src={car.images?.[0] || "/frames/desktop/frame_0001.webp"} 
                             alt={`${car.make} ${car.model}`} 
-                            fallbackSrc="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"
+                            fallbackSrc="/frames/desktop/frame_0001.webp"
                             loading="lazy" 
                             decoding="async"
                             className="w-full h-full object-contain bg-black/40 transition-transform duration-500 ease-out group-hover:scale-[1.05]" 

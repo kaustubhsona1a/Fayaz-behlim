@@ -10,7 +10,7 @@ export default function About() {
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
 
   const deliveries = siteConfig.clientDeliveries || [];
-  const heroShowcaseImage = siteConfig.aboutImage || (deliveries.length > 0 ? deliveries[0] : "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=1400");
+  const heroShowcaseImage = siteConfig.aboutImage || (deliveries.length > 0 ? deliveries[0] : "/frames/desktop/frame_0025.webp");
 
   const handleNextPhoto = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -128,7 +128,7 @@ export default function About() {
             <SmartImage 
               src={heroShowcaseImage} 
               alt="Where Performance Meets Prestige - CYR Cars Showroom" 
-              fallbackSrc="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=1400"
+              fallbackSrc="/frames/desktop/frame_0025.webp"
               className="w-full h-full object-cover object-center brightness-90 group-hover:scale-[1.02] transition-all duration-700 ease-out"
             />
             {/* Gradient Overlay */}
@@ -289,7 +289,7 @@ export default function About() {
                       <SmartImage 
                         src={img} 
                         alt={`Client Delivery ${i + 1}`} 
-                        fallbackSrc="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=800"
+                        fallbackSrc="/frames/desktop/frame_0001.webp"
                         loading="lazy"
                         decoding="async"
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
@@ -359,7 +359,7 @@ export default function About() {
             <SmartImage 
               src={deliveries[activePhotoIndex]} 
               alt="Archival Patron Delivery" 
-              fallbackSrc="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=800"
+              fallbackSrc="/frames/desktop/frame_0001.webp"
               className="w-full h-full object-contain max-h-[70vh] rounded-2xl shadow-2xl border border-white/20 select-none bg-black/50"
             />
 

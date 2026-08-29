@@ -125,27 +125,23 @@ export async function cleanupLegacyImageVariants(bucket: string = 'vehicle-image
   return { deletedCount, errors };
 }
 
+/**
+ * High quality, super-fast client-side compression pipeline.
+ * Designed for iPhone HEIC, Android High-Res, and Laptop/Mac DSLR photos.
+ * Downscales to 1280px max-dimension and compresses to high-clarity WebP/JPEG under 200KB.
+ */
 export async function compressImage(
-  file: File,
-  options?: { maxDimension?: number; targetQuality?: number; isShowcase?: boolean; isLogo?: boolean; preserveTransparency?: boolean }
+  file: File, 
+  options?: { maxDimension?: number; targetQuality?: number; isShowcase?: boolean }
 ): Promise<File> {
-  // If it's an SVG, always return as-is to preserve sharp vector rendering & transparency
-  if (file.type.includes('svg') || file.name.endsWith('.svg')) {
+  // Skip compression for non-images or showcase branding assets if requested
+  if (options?.isShowcase || (!file.type.startsWith('image/') && !file.name.match(/\.(heic|heif|jpe?g|png|webp|mov)$/i))) {
     return file;
   }
 
-  const isLogo = options?.isLogo || file.name.toLowerCase().includes('logo');
-  const isPngOrWebp = file.type === 'image/png' || file.type === 'image/webp' || file.name.match(/\.(png|webp)$/i);
-  const shouldPreserveAlpha = options?.preserveTransparency || isLogo || isPngOrWebp;
-
-  // Skip compression for non-images
-  if (!file.type.startsWith('image/') && !file.name.match(/\.(heic|heif|jpe?g|png|webp|svg|mov)$/i)) {
-    return file;
-  }
-
-  // 1280px is optimal HD for galleries, 600px for logos
-  const maxDim = options?.maxDimension || (isLogo ? 800 : 1280);
-  const initialQuality = options?.targetQuality || 0.85;
+  // 1280px is optimal HD for retina mobile & desktop galleries
+  const maxDim = options?.maxDimension || 1280;
+  const initialQuality = options?.targetQuality || 0.75;
 
   try {
     let img: HTMLImageElement | null = new Image();
@@ -159,23 +155,20 @@ export async function compressImage(
       if (img.complete && img.naturalWidth) resolve(true);
     });
 
-    // If direct HTMLImageElement load failed (e.g. raw unconverted HEIC on desktop), try fallback
+    // If direct HTMLImageElement load failed (e.g. raw unconverted HEIC on desktop), try Web Worker fallback
     if (!loaded || !img.naturalWidth || !img.naturalHeight) {
       URL.revokeObjectURL(objectUrl);
-      if (shouldPreserveAlpha) {
-        return file; // Retain original PNG/WebP if canvas decode fails
-      }
       try {
         const fallbackOptions = {
-          maxSizeMB: 0.2,
+          maxSizeMB: 0.2, // ~200 KB target
           maxWidthOrHeight: maxDim,
           useWebWorker: true,
           initialQuality: 0.75
         };
         const compressedBlob = await imageCompression(file, fallbackOptions);
-        return new File([compressedBlob], file.name.replace(/\.[^/.]+$/, '') + '.jpg', {
-          type: 'image/jpeg',
-          lastModified: Date.now()
+        return new File([compressedBlob], file.name.replace(/\.[^/.]+$/, '') + '.jpg', { 
+          type: 'image/jpeg', 
+          lastModified: Date.now() 
         });
       } catch {
         return file;
@@ -199,25 +192,19 @@ export async function compressImage(
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
-      const ctx = canvas.getContext('2d', { alpha: true });
+      const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      
-      // CRITICAL: NEVER fill with #FFFFFF when alpha transparency is preserved (Logos, PNGs, etc.)
-      if (!shouldPreserveAlpha) {
-        ctx.fillStyle = '#050507';
-        ctx.fillRect(0, 0, width, height);
-      } else {
-        ctx.clearRect(0, 0, width, height);
-      }
-
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img!, 0, 0, width, height);
+
       return canvas;
     };
 
-    const getBlob = (canvas: HTMLCanvasElement, mimeType: string, q?: number): Promise<Blob | null> => {
+    const getBlob = (canvas: HTMLCanvasElement, mimeType: string, q: number): Promise<Blob | null> => {
       return new Promise((resolve) => {
         try {
           canvas.toBlob((b) => resolve(b), mimeType, q);
@@ -233,21 +220,7 @@ export async function compressImage(
       return file;
     }
 
-    // For logos or images with transparency, export as PNG or WebP with alpha preserved
-    if (shouldPreserveAlpha) {
-      URL.revokeObjectURL(objectUrl);
-      img = null;
-
-      // For logos, generate a pristine transparent PNG
-      const pngBlob = await getBlob(canvas, 'image/png');
-      if (pngBlob) {
-        const cleanBaseName = file.name.replace(/\.[^/.]+$/, '');
-        return new File([pngBlob], `${cleanBaseName}.png`, { type: 'image/png', lastModified: Date.now() });
-      }
-      return file;
-    }
-
-    // Step 1: Quality pass at 0.75 for standard photos
+    // Step 1: Quality pass at 0.75
     let jpegBlob = await getBlob(canvas, 'image/jpeg', initialQuality);
     let webpBlob = await getBlob(canvas, 'image/webp', initialQuality);
 
@@ -282,11 +255,11 @@ export async function compressImage(
 
     // Pick WebP if it is smaller, valid, and under 220KB; otherwise fallback to crisp JPEG
     if (
-      webpBlob &&
-      webpBlob.type === 'image/webp' &&
-      webpBlob.size > 0 &&
-      jpegBlob &&
-      webpBlob.size <= jpegBlob.size &&
+      webpBlob && 
+      webpBlob.type === 'image/webp' && 
+      webpBlob.size > 0 && 
+      jpegBlob && 
+      webpBlob.size <= jpegBlob.size && 
       webpBlob.size < 220 * 1024
     ) {
       finalBlob = webpBlob;
@@ -301,10 +274,37 @@ export async function compressImage(
     const cleanBaseName = file.name.replace(/\.[^/.]+$/, '');
     const newFileName = `${cleanBaseName}.${finalExt}`;
     return new File([finalBlob], newFileName, { type: finalType, lastModified: Date.now() });
+
   } catch (err) {
     console.warn('[IMAGE COMPRESS ERROR] Canvas compression failed, using original file:', err);
     return file;
   }
+}
+
+/**
+ * Storage upload integration that processes each file before upload
+ */
+export async function uploadVehicleImage(file: File, carId: string): Promise<string> {
+  const compressedFile = await compressImage(file);
+  const fileExt = compressedFile.name.split('.').pop() || 'jpg';
+  const fileName = `${carId}/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+  
+  const { error: uploadError } = await supabase.storage
+    .from('vehicle-images')
+    .upload(fileName, compressedFile, {
+      cacheControl: '31536000',
+      upsert: false
+    });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data } = supabase.storage
+    .from('vehicle-images')
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
 }
 
 /**
@@ -379,8 +379,7 @@ export async function uploadImageToStorage(
     optimizedFile = await compressImage(file, { 
       maxDimension: maxDim, 
       targetQuality: quality, 
-      isLogo, 
-      preserveTransparency: shouldPreserveAlpha 
+      isShowcase
     });
     fallbackDataUrl = await fileToDataUrl(optimizedFile);
   } catch (optErr) {

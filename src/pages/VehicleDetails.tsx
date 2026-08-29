@@ -208,9 +208,9 @@ export default function VehicleDetails() {
           onTouchEnd={handleTouchEnd}
         >
           <SmartImage 
-            src={car.images?.[activeImage] || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"} 
+            src={car.images?.[activeImage] || "/frames/desktop/frame_0001.webp"} 
             alt={car.make} 
-            fallbackSrc="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"
+            fallbackSrc="/frames/desktop/frame_0001.webp"
             className="w-full h-full object-contain transition-all duration-500 opacity-95 group-hover:opacity-100" 
           />
         </div>
@@ -224,7 +224,7 @@ export default function VehicleDetails() {
               <SmartImage 
                 src={img} 
                 alt={`Thumbnail ${i + 1}`} 
-                fallbackSrc="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"
+                fallbackSrc="/frames/desktop/frame_0001.webp"
                 loading="lazy" 
                 decoding="async"
                 className="w-full h-full object-cover" 
@@ -464,7 +464,7 @@ export default function VehicleDetails() {
   const pageTitle = `${car.year} ${car.make} ${car.model} ${car.variant} | CYR Cars`;
 
   const pageDescription = `Exquisite luxury pre-owned ${car.year} ${car.make} ${car.model}. Contact us today to arrange a viewing at our Showroom. ${car.description ? car.description.substring(0, 100) + '...' : ''}`;
-  const ogImageUrl = car.images?.[0] || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800";
+  const ogImageUrl = car.images?.[0] || "/frames/desktop/frame_0001.webp";
 
   return (
     <div className="min-h-screen bg-transparent text-zinc-750 py-5 sm:py-8 font-sans selection:bg-white selection:text-zinc-950 z-10 relative">
@@ -497,9 +497,9 @@ export default function VehicleDetails() {
             )}
 
             <SmartImage 
-              src={car.images?.[activeImage] || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"} 
+              src={car.images?.[activeImage] || "/frames/desktop/frame_0001.webp"} 
               alt={`Fullscreen ${car.make} ${car.model}`} 
-              fallbackSrc="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"
+              fallbackSrc="/frames/desktop/frame_0001.webp"
               className="max-w-full max-h-full object-contain cursor-default select-none transition-all duration-300"
               onClick={(e) => e.stopPropagation()}
             />
@@ -612,7 +612,7 @@ export default function VehicleDetails() {
               <div className="bg-zinc-950/40 border border-zinc-805 rounded-xl p-4 flex gap-4 items-center">
                 <div className="w-16 h-12 rounded overflow-hidden flex-shrink-0 bg-zinc-950">
                   <SmartImage 
-                    src={car.images?.[0] || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=100"} 
+                    src={car.images?.[0] || "/frames/desktop/frame_0001.webp"} 
                     alt={car.make} 
                     className="w-full h-full object-cover"
                   />

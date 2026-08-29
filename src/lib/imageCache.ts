@@ -13,7 +13,7 @@ const memoryBlobMap = new Map<string, string>();
 export function isCacheableUrl(url: string | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
   if (url.startsWith('data:') || url.startsWith('blob:')) return false;
-  return url.includes('supabase.co/storage/') || url.includes('unsplash.com');
+  return url.includes('supabase.co/storage/');
 }
 
 /**

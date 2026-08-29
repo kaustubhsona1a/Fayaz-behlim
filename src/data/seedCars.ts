@@ -22,12 +22,12 @@ export const SEED_CARS: Car[] = [
     mpg_city: 15,
     mpg_hwy: 18,
     description: 'Immaculate 2023 Porsche 911 GT3 Coupe in striking Shark Blue over Black Race-Tex interior. Equipped with the lightning-fast 7-speed PDK transmission, front axle lift system, Porsche Ceramic Composite Brakes (PCCB) with Yellow Calipers, Carbon Fiber Full Bucket Seats, and Extended Leather Package.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0001.webp',
     images: [
-      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0001.webp',
+      '/frames/desktop/frame_0008.webp',
+      '/frames/desktop/frame_0016.webp',
+      '/frames/desktop/frame_0024.webp'
     ],
     is_available: true,
     is_featured: true,
@@ -66,11 +66,11 @@ export const SEED_CARS: Car[] = [
     mpg_city: 16,
     mpg_hwy: 22,
     description: 'Breathtaking 2024 BMW M4 Competition with intelligent M xDrive all-wheel drive. Finished in head-turning Isle of Man Green over Kyalami Orange M Carbon Bucket seats. Features Executive Package, Carbon Exterior Package, M Drive Professional, and Harman Kardon Audio.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0025.webp',
     images: [
-      'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1555353540-64580b51c258?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0025.webp',
+      '/frames/desktop/frame_0032.webp',
+      '/frames/desktop/frame_0040.webp'
     ],
     is_available: true,
     is_featured: true,
@@ -109,11 +109,11 @@ export const SEED_CARS: Car[] = [
     mpg_city: 15,
     mpg_hwy: 20,
     description: 'Dominant executive super-sedan with 630 handcrafted horsepower. Features Designo Matte finish, AMG Aerodynamics Package, AMG Night Package II, Burmester High-End 3D Surround Sound, AMG Dynamic Plus Package with Drift Mode, and active rear-axle steering.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0048.webp',
     images: [
-      'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0048.webp',
+      '/frames/desktop/frame_0055.webp',
+      '/frames/desktop/frame_0060.webp'
     ],
     is_available: true,
     is_featured: true,
@@ -152,11 +152,11 @@ export const SEED_CARS: Car[] = [
     mpg_city: 15,
     mpg_hwy: 22,
     description: 'The ultimate super-wagon icon. This 2023 Audi RS6 Avant in timeless Nardo Grey pairs everyday wagon practicality with blistering twin-turbo V8 thrust. Loaded with Dynamic Package Plus, Ceramic Brakes, Carbon Optic Package, and Bang & Olufsen Advanced 3D Sound.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0065.webp',
     images: [
-      'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1541348263662-e0c8de4259ba?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0065.webp',
+      '/frames/desktop/frame_0070.webp',
+      '/frames/desktop/frame_0075.webp'
     ],
     is_available: true,
     is_featured: false,
@@ -195,11 +195,11 @@ export const SEED_CARS: Car[] = [
     mpg_city: 69,
     mpg_hwy: 71,
     description: 'Electrifying acceleration and precision German handling. 2023 Porsche Taycan Turbo S delivering up to 750 horsepower in overboost with Launch Control. 0-60 in an astonishing 2.6 seconds. Equipped with Porsche Ceramic Composite Brakes (PCCB), Rear Axle Steering, and 21-inch Mission E Design Wheels.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0080.webp',
     images: [
-      'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0080.webp',
+      '/frames/desktop/frame_0085.webp',
+      '/frames/desktop/frame_0090.webp'
     ],
     is_available: true,
     is_featured: false,
@@ -238,11 +238,11 @@ export const SEED_CARS: Car[] = [
     mpg_city: 14,
     mpg_hwy: 19,
     description: 'Top-tier Land Rover Defender 110 Carpathian Edition powered by the formidable 518-hp Supercharged V8. Finished in factory Satin Protective Film over Carpathian Grey. Quad outboard exhaust, electronic active differential, 22-inch gloss black alloys with blue Brembo calipers.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0010.webp',
     images: [
-      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1508974239320-0a029497e820?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0010.webp',
+      '/frames/desktop/frame_0018.webp',
+      '/frames/desktop/frame_0028.webp'
     ],
     is_available: true,
     is_featured: true,
@@ -281,10 +281,10 @@ export const SEED_CARS: Car[] = [
     mpg_city: 12,
     mpg_hwy: 19,
     description: 'The highest horsepower naturally aspirated V8 production car ever made! 2024 Corvette Z06 with the premium 3LZ package. Screaming 8,600 RPM redline, Z07 Carbon Ceramic Brakes, Carbon Flash Ground Effects, Carbon Fiber Removable Roof, and GT2 Sport Bucket Seats.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0035.webp',
     images: [
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0035.webp',
+      '/frames/desktop/frame_0045.webp'
     ],
     is_available: true,
     is_featured: false,
@@ -323,10 +323,10 @@ export const SEED_CARS: Car[] = [
     mpg_city: 119,
     mpg_hwy: 112,
     description: 'Mind-bending 1,020 horsepower Tri-Motor all-wheel-drive powertrain. 0-60 in 1.99 seconds and quarter mile in 9.23 seconds. Features 396 miles of range, Full Self-Driving Computer (Hardware 4), 21-inch Arachnid Wheels, Yoke Steering, and high-performance gaming computer in-dash.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0055.webp',
     images: [
-      'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0055.webp',
+      '/frames/desktop/frame_0065.webp'
     ],
     is_available: true,
     is_featured: false,
@@ -365,10 +365,10 @@ export const SEED_CARS: Car[] = [
     mpg_city: 16,
     mpg_hwy: 25,
     description: 'Sculptural automotive art. 2022 Lexus LC 500 equipped with the glorious sounding, ultra-reliable naturally aspirated 5.0L V8 and 10-speed Sport Direct-Shift transmission. Dynamic Handling Package with active rear steering, variable gear-ratio steering, and active speed-activated rear wing.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0070.webp',
     images: [
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0070.webp',
+      '/frames/desktop/frame_0080.webp'
     ],
     is_available: true,
     is_featured: false,
@@ -407,10 +407,10 @@ export const SEED_CARS: Car[] = [
     mpg_city: 10,
     mpg_hwy: 15,
     description: 'The pinnacle of desert-racing capability. The Raptor R houses the supercharged 5.2L V8 producing 700 horsepower. Equipped with standard 37-inch BFGoodrich All-Terrain tires, FOX Live Valve shocks with internal bypass, genuine carbon fiber accents, and twin-panel moonroof.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0085.webp',
     images: [
-      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0085.webp',
+      '/frames/desktop/frame_0092.webp'
     ],
     is_available: true,
     is_featured: false,
@@ -449,10 +449,10 @@ export const SEED_CARS: Car[] = [
     mpg_city: 15,
     mpg_hwy: 21,
     description: 'Flagship luxury grand tourer meeting hypercar acceleration. 617-hp Twin-Turbo V8 with M xDrive. Dravit Grey exterior with gold/bronze metallic flake under sunlight. Bowers & Wilkins Diamond Surround Sound, Driving Assistance Professional, and M Carbon Ceramic Brakes.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1555353540-64580b51c258?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0015.webp',
     images: [
-      'https://images.unsplash.com/photo-1555353540-64580b51c258?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0015.webp',
+      '/frames/desktop/frame_0028.webp'
     ],
     is_available: true,
     is_featured: false,
@@ -491,10 +491,10 @@ export const SEED_CARS: Car[] = [
     mpg_city: 18,
     mpg_hwy: 24,
     description: 'Iconic British design with intoxicating V8 exhaust note. Finished in hero launch color Lime Essence. Equipped with Carbon Ceramic Brakes, Carbon Fiber Body Pack, Sports Plus Collection, 360 Camera, and Aston Martin Premium Audio.',
-    thumbnail_url: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1000&q=80',
+    thumbnail_url: '/frames/desktop/frame_0042.webp',
     images: [
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1400&q=80'
+      '/frames/desktop/frame_0042.webp',
+      '/frames/desktop/frame_0058.webp'
     ],
     is_available: true,
     is_featured: false,

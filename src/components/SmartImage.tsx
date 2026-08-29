@@ -6,7 +6,7 @@ interface SmartImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   cacheLocally?: boolean;
 }
 
-const DEFAULT_FALLBACK = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800";
+const DEFAULT_FALLBACK = "/frames/desktop/frame_0001.webp";
 
 export const SmartImage: React.FC<SmartImageProps> = ({
   src,
