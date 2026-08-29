@@ -639,7 +639,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         <div 
           ref={phase1Ref}
           id="hero-phase-1"
-          className="absolute inset-0 z-10 flex flex-col justify-end pb-8 sm:pb-10 md:pb-12 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
+          className="absolute inset-0 z-10 flex flex-col justify-end pb-16 sm:pb-18 md:pb-20 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
         >
           {/* Bottom Action Section with compact sleek buttons completely clear of the central car */}
           <div className="select-none max-w-sm">
@@ -712,28 +712,35 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           id="hero-phase-3"
           className="absolute inset-0 z-10 flex flex-col justify-end items-start pb-8 sm:pb-10 md:pb-12 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0"
         >
-          <div className="max-w-xs sm:max-w-sm md:max-w-md bg-black/60 backdrop-blur-xl border border-white/15 p-4 sm:p-5 rounded-2xl text-left select-none shadow-2xl pointer-events-auto">
-            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.18em] uppercase text-emerald-400 mb-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="max-w-xs sm:max-w-sm md:max-w-md bg-black/60 backdrop-blur-xl border border-white/15 p-4 sm:p-6 rounded-2xl text-left select-none shadow-2xl pointer-events-auto">
+            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.18em] uppercase text-emerald-400 mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
               <span>CYR CARS CERTIFIED</span>
             </div>
-            <h3 className="text-lg sm:text-xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-snug">
-              150-POINT INSPECTION
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-4 uppercase leading-[1.1]">
+              150-POINT<br />INSPECTION
             </h3>
-            <div className="space-y-1.5 text-[11px] sm:text-xs text-zinc-200 font-sans">
-              <div className="flex items-center gap-2 pb-1 border-b border-white/10">
+            <div className="space-y-2 text-[11px] sm:text-xs text-zinc-200 font-sans">
+              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Complete History & Paperwork Verified</span>
+                <span>Complete Ownership History &amp; Paperwork Verification</span>
               </div>
-              <div className="flex items-center gap-2 pb-1 border-b border-white/10">
+              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Engine, Transmission & Diagnostics Audit</span>
+                <span>Comprehensive Engine, Transmission &amp; Diagnostics Audit</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Authentic Mileage Guarantee & Detail</span>
+                <span>Non-Accidental Structure &amp; Authentic Mileage Guarantee</span>
+              </div>
+              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>Full Interior &amp; Exterior Detail Before Showroom Display</span>
               </div>
             </div>
+            <p className="text-[11px] sm:text-xs text-zinc-300 font-sans mt-3.5 leading-relaxed">
+              Uncompromising quality delivering lifelong peace of mind.
+            </p>
           </div>
         </div>
 
@@ -751,7 +758,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
               Explore Available Collection
             </h2>
             <p className="text-xs sm:text-sm md:text-base text-zinc-200 mb-6 leading-relaxed font-sans max-w-md mx-auto">
-              Discover our hand-picked collection of luxury SUVs, executive sedans, and family cars on Hill View Road, Bandra, Mumbai.
+              Discover our hand-picked collection of exotic supercars, high-performance sports cars, and luxury flagship motorcars on Hill View Road, Bandra, Mumbai.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
               <Link

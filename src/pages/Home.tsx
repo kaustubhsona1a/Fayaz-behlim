@@ -12,7 +12,7 @@ export default function Home() {
   const featuredCars = vehicles.filter(v => v.status === 'Available').slice(0, 3);
   
   const siteUrl = "https://www.instagram.com/cashyourride/";
-  const defaultDesc = "CYR Cars | Mumbai's Premier Boutique for Certified Pre-Owned, Family & Premium Motorcars on Hill View Road, Bandra. Certified inspection, transparent pricing and fast delivery across Mumbai.";
+  const defaultDesc = "CYR Cars | Mumbai's Premier Boutique for Curated Luxury, Performance & Exotic Motorcars on Hill View Road, Bandra. 150-point certified inspection, transparent provenance, and bespoke acquisitions.";
 
   const scrollToCollection = () => {
     const el = document.getElementById('featured-collection-section');
@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-transparent text-zinc-200 font-sans">
       <SEO
-        title="CYR Cars | Certified Pre-Owned Motorcars Mumbai"
+        title="CYR Cars | Curated Luxury & Performance Motorcars Mumbai"
         description={defaultDesc}
         image={siteConfig.homeHeroImage}
         url={siteUrl}
@@ -164,7 +164,7 @@ export default function Home() {
              <span className="text-zinc-300 tracking-[0.25em] uppercase text-[10px] sm:text-xs font-bold mb-1.5 sm:mb-2 block font-sans">Verified Feedback</span>
              <h2 className="text-2xl sm:text-3xl md:text-4xl font-cinzel text-white tracking-wider font-bold uppercase">Customer Reviews</h2>
              <div className="w-16 sm:w-20 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent mx-auto mt-2.5 sm:mt-3"></div>
-             <p className="text-zinc-300 text-[11px] sm:text-xs mt-2 sm:mt-2.5 tracking-wider font-sans uppercase">Authentic experiences from families across Mumbai & Eastern Suburbs</p>
+             <p className="text-zinc-300 text-[11px] sm:text-xs mt-2 sm:mt-2.5 tracking-wider font-sans uppercase">Authentic experiences from collectors and performance enthusiasts across Mumbai</p>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5 lg:gap-6">

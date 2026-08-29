@@ -107,13 +107,13 @@ export default function CustomerLayout() {
       </div>
 
       <div className="relative z-10 flex flex-col flex-grow min-h-screen">
-        {/* Main Navbar - Fixed Glass Header with Transparent Hero Transition */}
-        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        {/* Main Navbar - Fixed Header (Translucent Black with Blur on Mobile, Frosted Transition on Desktop) */}
+        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-black/60 backdrop-blur-xl border-b border-white/10 ${
           isHomePage && !isScrolled
-            ? 'bg-transparent border-b-transparent shadow-none backdrop-blur-none'
+            ? 'md:bg-transparent md:border-b-transparent md:shadow-none md:backdrop-blur-none'
             : isScrolled
-            ? 'frost-nav-scrolled'
-            : 'frost-nav'
+            ? 'md:frost-nav-scrolled md:border-b md:border-white/15'
+            : 'md:frost-nav md:border-b md:border-white/10'
         } text-zinc-100`}>
 
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center">
@@ -287,7 +287,7 @@ export default function CustomerLayout() {
             </div>
           </div>
 
-          {/* Mobile Navigation Drawer with Translucent Frosted Glass Styling */}
+          {/* Mobile Navigation Drawer with Translucent Black Styling */}
           {isMenuOpen && (
             <div className="md:hidden absolute top-full left-0 right-0 bg-black/75 backdrop-blur-2xl border-b border-white/15 border-t border-white/10 px-5 py-5 flex flex-col space-y-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 animate-fade-in">
               <Link 

@@ -42,11 +42,11 @@ export default function About() {
             {/* Established Badge - Pure Monochrome Frost Pill */}
             <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/20 bg-white/[0.06] backdrop-blur-md text-zinc-200 text-[9px] sm:text-xs uppercase tracking-wider font-sans font-semibold shadow-sm mb-3 sm:mb-4">
               <Bookmark className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-white fill-white shrink-0" />
-              <span>ESTD. 1986 • CELEBRATING 40 YEARS OF FAMILY TRUST</span>
+              <span>ESTD. 1986 • CELEBRATING 40 YEARS OF MOTORING EXCELLENCE</span>
             </div>
 
             <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal max-w-2xl mx-auto px-2">
-              Mumbai's highly trusted destination for certified, high-quality family hatchbacks, SUVs, and sedans on Hill View Road, Bandra.
+              Mumbai's premier boutique destination for curated luxury, performance supercars, and flagship motorcars on Hill View Road, Bandra.
             </p>
           </div>
 
@@ -56,7 +56,7 @@ export default function About() {
             <div className="flex items-center gap-2 pb-3 sm:pb-4 border-b border-white/10 mb-4 sm:mb-6 text-[10px] sm:text-xs md:text-sm font-sans tracking-wider uppercase font-bold flex-wrap">
               <div className="flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" />
-                <span className="text-zinc-300 font-semibold">FOUR DECADES ON LBS MARG</span>
+                <span className="text-zinc-300 font-semibold">FOUR DECADES OF MOTORING HERITAGE</span>
               </div>
               <span className="text-zinc-500 hidden sm:inline">•</span>
               <span className="text-white font-bold">MILESTONES OF INTEGRITY (1986 - 2026)</span>
@@ -69,10 +69,10 @@ export default function About() {
                 <div>
                   <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">1986</div>
                   <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    THE IGNITION CORNER
+                    THE IGNITION APEX
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Started as a humble single-car display on L.B.S. Marg. Minimal glitz—just clean mechanics and 100% honest agreements.
+                    Founded on Bandra's enthusiast circuit with a strict vision: only acquiring spotless, mechanically immaculate motorcars with authentic provenance.
                   </p>
                 </div>
               </div>
@@ -82,10 +82,10 @@ export default function About() {
                 <div>
                   <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">1998</div>
                   <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    2,500TH VEHICLE KEY
+                    EXECUTIVE EXPANSION
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    As the classic Maruti Zen and Honda City ruled Mumbai roads, we became Mulund's local authority on hassle-free RTO paperwork.
+                    Pioneered precision verification for imported grand tourers, sports coupés, and luxury saloons with flawless documentation and zero compromise.
                   </p>
                 </div>
               </div>
@@ -95,10 +95,10 @@ export default function About() {
                 <div>
                   <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2012</div>
                   <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    GENERATIONAL TRUST
+                    COLLECTOR TRUST
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    The children of our 1980s buyers began returning for automatic family sedans, cementing three decades of peerless goodwill.
+                    Established private garage advisory for prominent Mumbai collectors, industrialists, and motorsport purists seeking rare V8 and twin-turbo icons.
                   </p>
                 </div>
               </div>
@@ -111,7 +111,7 @@ export default function About() {
                     40-YEAR JUBILEE
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    15,000+ family journeys launched! Celebrating four decades of pristine digital checklists, zero-discrepancy miles, and happy smiles.
+                    15,000+ handovers celebrated. A premier curation standards benchmark with 150-point telemetry inspection and bespoke white-glove handovers.
                   </p>
                 </div>
               </div>
@@ -127,17 +127,17 @@ export default function About() {
           <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-white/15 aspect-[16/11] sm:aspect-[16/9] md:aspect-[21/9] w-full bg-black/60 group">
             <SmartImage 
               src={heroShowcaseImage} 
-              alt="Where Trust Meets Integrity - CYR Cars Showroom" 
+              alt="Where Performance Meets Prestige - CYR Cars Showroom" 
               fallbackSrc="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=1400"
               className="w-full h-full object-cover object-center brightness-90 group-hover:scale-[1.02] transition-all duration-700 ease-out"
             />
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-8 md:p-12 pointer-events-none">
               <span className="text-zinc-300 font-sans font-bold text-[10px] sm:text-xs md:text-sm tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-1 sm:mb-1.5 block">
-                LBS MARG SHOWROOM
+                BANDRA SHOWROOM
               </span>
               <h2 className="text-white font-sans text-xl sm:text-3xl md:text-5xl font-black uppercase tracking-tight">
-                WHERE TRUST MEETS INTEGRITY
+                WHERE PERFORMANCE MEETS PRESTIGE
               </h2>
             </div>
           </div>
@@ -152,16 +152,16 @@ export default function About() {
             {/* Left Column: Narrative Story */}
             <div className="lg:col-span-7 space-y-4 sm:space-y-6 animate-fade-in">
               <h2 className="text-xl sm:text-2xl md:text-4xl font-sans font-black text-white tracking-tight uppercase leading-tight">
-                YOUR FAMILY'S SAFEST & MOST RELIABLE DRIVE RUNS HERE
+                UNCOMPROMISING CURATION FOR PERFORMANCE & LUXURY CONNOISSEURS
               </h2>
               
               <p className="text-zinc-200 text-xs sm:text-sm md:text-base leading-relaxed font-normal">
-                At CYR Cars, we understand that buying a pre-owned car is a milestone for your family. We are not interested in overhyping luxury. Instead, we focus on delivering high-quality, practical mass-market family cars—like Toyota, Hyundai, Maruti Suzuki, Honda, and Tata—at honest, transparent prices. Every family car in our inventory opposing Santoshimata Mandir undergoes an exhaustive multi-point check covering engine longevity, safety airbags, braking efficiency, and complete structural integrity so your loved ones remain safe.
+                At CYR Cars, we curate only the rarest, most immaculate automotive masterworks. Every high-performance sports car, flagship luxury SUV, and bespoke grand tourer on our showroom floor at Hill View Road, Bandra undergoes an exhaustive 150-point technical audit covering engine compression, gearbox telemetry, carbon-ceramic brake tolerances, ECU integrity, and 100% verified single-collector provenance. We reject over 90% of evaluated motorcars to guarantee that only the apex tier enters our private collection.
               </p>
 
               <div className="border-l-2 border-white pl-4 sm:pl-5 py-1.5 sm:py-2 mt-3 sm:mt-4">
                 <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed font-normal">
-                  We specialize in providing a 100% hassle-free buying experience. From certified on-road test drives to seamless RTO name transfer, insurance renewals, and verified loan assistance, our team walks with you at every step.
+                  We specialize in delivering a bespoke, white-glove automotive acquisition experience. From private trackway inspections to seamless title provenance, customized high-value financing, and insured enclosed logistics across India, our team caters exclusively to distinguished patrons.
                 </p>
               </div>
 
@@ -170,15 +170,15 @@ export default function About() {
                 <div className="frost-card p-3.5 sm:p-4 rounded-xl flex items-start gap-3">
                   <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">Multi-Point Check</h4>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed mt-0.5">Engine, transmission, chassis & flood-free guarantee.</p>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">150-Point Dyno & Telemetry</h4>
+                    <p className="text-zinc-300 text-[11px] leading-relaxed mt-0.5">Drivetrain, paint depth meter & flood-free provenance certificate.</p>
                   </div>
                 </div>
                 <div className="frost-card p-3.5 sm:p-4 rounded-xl flex items-start gap-3">
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">Hassle-Free RTO</h4>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed mt-0.5">Prompt, verified registration ownership transfers in Mumbai.</p>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">Bespoke Title Transfer</h4>
+                    <p className="text-zinc-300 text-[11px] leading-relaxed mt-0.5">Discreet, expedited VIP registration and ownership transfers.</p>
                   </div>
                 </div>
               </div>
@@ -313,7 +313,7 @@ export default function About() {
 
                       <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-white/10 flex justify-between items-center text-[10px] font-sans text-zinc-300 select-none">
                         <span className="font-semibold text-zinc-300">40+ YEARS LEGACY</span>
-                        <span className="text-zinc-200 font-bold">MULUND, MUMBAI</span>
+                        <span className="text-zinc-200 font-bold">BANDRA, MUMBAI</span>
                       </div>
                     </div>
                   </div>
@@ -447,14 +447,14 @@ export default function About() {
       {/* CTA Section */}
       <section className="py-12 sm:py-16 bg-transparent text-center border-t border-white/10 relative z-10 animate-fade-in overflow-hidden font-sans">
         <div className="container mx-auto max-w-3xl px-4 relative z-10">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black text-white mb-2.5 sm:mb-3 tracking-wide uppercase">Experience Honest Procurement</h2>
-          <p className="text-zinc-200 mb-6 sm:mb-7 font-normal tracking-wide text-xs sm:text-sm md:text-base">We welcome you to inspect our verified, certified pre-owned family vehicles in Mumbai.</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black text-white mb-2.5 sm:mb-3 tracking-wide uppercase">Experience Bespoke Curation</h2>
+          <p className="text-zinc-200 mb-6 sm:mb-7 font-normal tracking-wide text-xs sm:text-sm md:text-base">We welcome you to inspect our verified, certified pre-owned luxury and performance motorcars in Mumbai.</p>
           <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 justify-center text-[11px] sm:text-xs tracking-wider uppercase font-sans font-bold max-w-[240px] sm:max-w-none mx-auto">
             <Link to="/inventory" className="bg-white text-black hover:bg-zinc-200 px-5 sm:px-7 py-2.5 sm:py-3 transition-all duration-300 rounded-full shadow-md text-center">
               Browse Collection
             </Link>
             <Link to="/sell" className="frost-pill text-white hover:text-black px-5 sm:px-7 py-2.5 sm:py-3 transition-all duration-300 rounded-full shadow-sm text-center">
-              Sell Your Car
+              Consign Your Car
             </Link>
           </div>
         </div>

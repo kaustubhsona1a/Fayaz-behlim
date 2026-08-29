@@ -1,6 +1,6 @@
 {
   "name": "CYR Cars",
-  "description": "Premium pre-owned car dealership dedicated to providing quality inspected vehicles, transparent transactions and a hassle-free buying experience.",
+  "description": "Mumbai's premier boutique destination for curated luxury, exotic and high-performance motorcars on Hill View Road, Bandra. 150-point certified inspection, verified single-owner provenance, and bespoke acquisitions.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

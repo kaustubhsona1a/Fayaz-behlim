@@ -113,10 +113,10 @@ export default function SellCar() {
       <div className="container mx-auto max-w-3xl px-3.5 sm:px-4">
         
         <div className="text-center mb-6 sm:mb-10">
-          <span className="text-zinc-300 tracking-[0.2em] uppercase text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2 block font-sans">Direct Motorcar Valuation</span>
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-cinzel font-bold tracking-wide uppercase text-white mb-2 sm:mb-4">Sell Your Vehicle</h1>
+          <span className="text-zinc-300 tracking-[0.2em] uppercase text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2 block font-sans">Bespoke Motorcar Valuation</span>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-cinzel font-bold tracking-wide uppercase text-white mb-2 sm:mb-4">Consign & Sell Your Motorcar</h1>
           <p className="text-xs sm:text-sm md:text-base text-zinc-200 font-normal max-w-2xl mx-auto leading-relaxed font-sans">
-            We acquire verified pre-owned vehicles through an honest, streamlined walkthrough. Provide your vehicle details below for a professional evaluation from CYR Cars.
+            We acquire and consign verified pre-owned luxury, exotic, and performance vehicles through a discreet, white-glove valuation. Provide your vehicle specifications below for a bespoke appraisal from CYR Cars.
           </p>
         </div>
 

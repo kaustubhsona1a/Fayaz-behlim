@@ -100,38 +100,38 @@ export const MOCK_VEHICLES: Vehicle[] = [
 export const MOCK_REVIEWS = [
   {
     id: 1,
-    name: "Mahesh Kulkarni",
+    name: "Aryaman Singhania",
     rating: 5,
-    text: "Purchased a certified 2021 Hyundai Grand i10 Nios for my daily commute to BKC and family weekend trips. The car was in mint mechanical condition with original paint. CYR Cars handled the Mulund RTO transfer in just 4 days with complete honesty and zero agent hassles.",
-    date: "Mulund West • 3 weeks ago"
+    text: "Acquired a certified 2023 Porsche 911 GT3 RS with the Weissach Package for my weekend track sessions and coastal drives. The car was in flawless factory condition with full service provenance from Porsche Mumbai. CYR Cars managed the entire white-glove transfer and documentation within 48 hours.",
+    date: "Bandra West • 2 weeks ago"
   },
   {
     id: 2,
-    name: "Pooja & Shrikant Sawant",
+    name: "Kabir & Natasha Mehta",
     rating: 5,
-    text: "We were looking for a reliable, genuine family car on a strict middle-class budget and found a clean 2020 Maruti Suzuki Swift VXi here. Exact odometer reading, clean service book from authorized workshop, and very polite guidance by the team. Highly recommended for Eastern Suburbs families!",
-    date: "Thane West • 1 month ago"
+    text: "We were searching for an immaculate Mercedes-AMG G63 in Matte Obsidian Black with zero paint defects and authentic single-owner provenance. CYR Cars provided full telemetry logs, paint gauge depth readings, and chassis diagnostic reports. Truly Mumbai's most elite supercar and luxury motorcar boutique!",
+    date: "Worli Sea Face • 1 month ago"
   },
   {
     id: 3,
-    name: "Siddhesh Bhandare",
+    name: "Vikramaditya Roy",
     rating: 5,
-    text: "Got a verified 2022 Hyundai Venue SX for our family. Full transparency on chassis check, battery health, and test drive through LBS Marg. Transparent pricing without any hidden dealer commissions. Truly Mumbai's most dependable pre-owned car showroom.",
-    date: "Ghatkopar East • 2 months ago"
+    text: "Acquired an exceptional 2022 Land Rover Range Rover Autobiography LWB. Complete transparency on air suspension health, active telemetry checks, and a seamless private appointment at their Bandra showroom. Unmatched professionalism with no hidden fees.",
+    date: "Juhu • 2 months ago"
   },
   {
     id: 4,
-    name: "Nitin Kadam",
+    name: "Dr. Siddharth Merchant",
     rating: 5,
-    text: "Bought a 2019 Maruti Baleno Zeta. CYR Cars team guided us patiently through finance options and transferred the insurance seamlessly. Clean car, fair valuation for my old Alto exchange, and absolute peace of mind for daily office drive.",
-    date: "Bhandup West • 2 weeks ago"
+    text: "Purchased a 2024 BMW M4 Competition M xDrive. The CYR Cars team demonstrated deep technical mastery on the twin-turbo drivetrain and dynamic modes. Clean paperwork, pristine ceramic detailing, and absolute peace of mind for an enthusiast driver.",
+    date: "Altamount Road • 3 weeks ago"
   }
 ];
 
 export const MOCK_LEADS = [
-  { id: 'l1', name: 'Sanjay Gupta', phone: '9876543210', email: 'sanjay@example.com', car: 'Hyundai Creta', status: 'New Lead', date: '2026-06-05' },
-  { id: 'l2', name: 'Neha Singh', phone: '9988776655', email: 'neha@example.com', car: 'Honda City', status: 'Contacted', date: '2026-06-04' },
-  { id: 'l3', name: 'Vikram Joshi', phone: '9123456789', email: 'vikram@example.com', car: 'Kia Seltos', status: 'Negotiating', date: '2026-06-02' }
+  { id: 'l1', name: 'Sanjay Singhania', phone: '9876543210', email: 'sanjay@example.com', car: 'Porsche 911 GT3 RS', status: 'New Lead', date: '2026-06-05' },
+  { id: 'l2', name: 'Natasha Poonawalla', phone: '9988776655', email: 'natasha@example.com', car: 'Mercedes-AMG G63', status: 'Contacted', date: '2026-06-04' },
+  { id: 'l3', name: 'Vikram Godrej', phone: '9123456789', email: 'vikram@example.com', car: 'Range Rover Autobiography', status: 'Negotiating', date: '2026-06-02' }
 ];
 
 export const formatPrice = (price: number) => {
