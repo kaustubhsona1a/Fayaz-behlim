@@ -582,6 +582,10 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           className="relative z-[2] w-full h-full block cursor-grab active:cursor-grabbing touch-pan-y"
         />
 
+        {/* Ambient Darkening & Vignette Overlay */}
+        <div className="absolute inset-0 z-[3] bg-black/30 pointer-events-none" />
+        <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/50 via-transparent to-black/70 pointer-events-none" />
+
         {/* Floating Interaction Hint (Dealer Mode Only) */}
         {showDealerControls && (
           <div 
@@ -639,7 +643,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         <div 
           ref={phase1Ref}
           id="hero-phase-1"
-          className="absolute inset-0 z-10 flex flex-col justify-end pb-16 sm:pb-18 md:pb-20 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
+          className="absolute inset-0 z-10 flex flex-col justify-end pb-28 sm:pb-32 md:pb-36 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
         >
           {/* Bottom Action Section with compact sleek buttons completely clear of the central car */}
           <div className="select-none max-w-sm">
@@ -675,71 +679,70 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           </div>
         </div>
 
-        {/* Phase 2: Performance Specs Callout (25% - 55% Scroll) - Discreet Bottom Right Corner */}
+        {/* Phase 2: Performance & Curation Callout (25% - 55% Scroll) - Floating Typography Bottom Right */}
         <div 
           ref={phase2Ref}
           id="hero-phase-2"
-          className="absolute inset-0 z-10 flex flex-col justify-end items-end pb-8 sm:pb-10 md:pb-12 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0"
+          className="absolute inset-0 z-10 flex flex-col justify-end items-end pb-24 sm:pb-28 md:pb-32 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0"
         >
-          <div className="max-w-xs sm:max-w-sm md:max-w-md bg-black/60 backdrop-blur-xl border border-white/15 p-4 sm:p-5 rounded-2xl text-right select-none shadow-2xl pointer-events-auto">
-            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.18em] uppercase text-sky-400 mb-1.5">
+          <div className="max-w-xs sm:max-w-sm md:max-w-md text-right select-none pointer-events-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-sky-400 mb-1.5">
               <Gauge className="w-3.5 h-3.5 text-sky-400" />
-              <span>DYNAMIC PRECISION</span>
+              <span>DISCREET CURATION</span>
             </div>
-            <h3 className="text-lg sm:text-xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-snug">
-              CURATED MASTERPIECES
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-tight">
+              BESPOKE EXOTICS &amp; PERFORMANCE
             </h3>
-            <div className="space-y-1.5 font-mono text-[11px] sm:text-xs text-zinc-200">
-              <div className="flex justify-between items-center pb-1.5 border-b border-white/10">
-                <span className="text-zinc-400">HERITAGE:</span>
-                <span className="text-white font-semibold">Bandra Hill View Rd, Mumbai</span>
+            <div className="space-y-1.5 text-[11px] sm:text-xs text-zinc-300 font-sans">
+              <div className="flex justify-end items-center gap-2 pb-1 border-b border-white/15">
+                <span className="text-zinc-400 uppercase text-[9.5px] tracking-wider">Provenance:</span>
+                <span className="text-white font-semibold">Single-Collector Certified</span>
               </div>
-              <div className="flex justify-between items-center pb-1.5 border-b border-white/10">
-                <span className="text-zinc-400">CERTIFICATION:</span>
-                <span className="text-white font-semibold">150-Point Verified</span>
+              <div className="flex justify-end items-center gap-2 pb-1 border-b border-white/15">
+                <span className="text-zinc-400 uppercase text-[9.5px] tracking-wider">Telemetry:</span>
+                <span className="text-white font-semibold">Verified Drivetrain Health</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-400">INTEGRITY:</span>
-                <span className="text-emerald-400 font-semibold">100% Non-Accidental</span>
+              <div className="flex justify-end items-center gap-2">
+                <span className="text-zinc-400 uppercase text-[9.5px] tracking-wider">Delivery:</span>
+                <span className="text-emerald-400 font-semibold">White-Glove Enclosed Transport</span>
               </div>
             </div>
+            <p className="text-[10px] sm:text-[11px] text-zinc-400 uppercase tracking-widest mt-2.5 font-mono">
+              Bandra Hill View Rd • Mumbai
+            </p>
           </div>
         </div>
 
-        {/* Phase 3: Certified Quality Standards (55% - 80% Scroll) - Discreet Bottom Left Corner */}
+        {/* Phase 3: Concours Provenance Standards (55% - 80% Scroll) - Floating Typography Bottom Left */}
         <div 
           ref={phase3Ref}
           id="hero-phase-3"
-          className="absolute inset-0 z-10 flex flex-col justify-end items-start pb-8 sm:pb-10 md:pb-12 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0"
+          className="absolute inset-0 z-10 flex flex-col justify-end items-start pb-24 sm:pb-28 md:pb-32 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0"
         >
-          <div className="max-w-xs sm:max-w-sm md:max-w-md bg-black/60 backdrop-blur-xl border border-white/15 p-4 sm:p-6 rounded-2xl text-left select-none shadow-2xl pointer-events-auto">
-            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.18em] uppercase text-emerald-400 mb-2">
+          <div className="max-w-xs sm:max-w-sm md:max-w-md text-left select-none pointer-events-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-emerald-400 mb-1.5">
               <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
-              <span>CYR CARS CERTIFIED</span>
+              <span>CONCOURS STANDARDS</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-4 uppercase leading-[1.1]">
-              150-POINT<br />INSPECTION
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-[1.1]">
+              UNCOMPROMISING<br />PROVENANCE
             </h3>
             <div className="space-y-2 text-[11px] sm:text-xs text-zinc-200 font-sans">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
+              <div className="flex items-center gap-2.5 pb-1.5 border-b border-white/15">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Complete Ownership History &amp; Paperwork Verification</span>
+                <span>Precision Paint Meter &amp; Structural Integrity Audit</span>
               </div>
-              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
+              <div className="flex items-center gap-2.5 pb-1.5 border-b border-white/15">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Comprehensive Engine, Transmission &amp; Diagnostics Audit</span>
+                <span>Exotic ECU Diagnostics &amp; Dyno Telemetry Logs</span>
               </div>
-              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
+              <div className="flex items-center gap-2.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Non-Accidental Structure &amp; Authentic Mileage Guarantee</span>
-              </div>
-              <div className="flex items-center gap-2.5 pb-2 border-b border-white/15">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Full Interior &amp; Exterior Detail Before Showroom Display</span>
+                <span>Concours Ceramic Detail &amp; Multi-Stage Paint Correction</span>
               </div>
             </div>
-            <p className="text-[11px] sm:text-xs text-zinc-300 font-sans mt-3.5 leading-relaxed">
-              Uncompromising quality delivering lifelong peace of mind.
+            <p className="text-[11px] sm:text-xs text-zinc-400 font-sans mt-3 leading-relaxed">
+              Curating exclusively the finest 1% of luxury &amp; supercar acquisitions.
             </p>
           </div>
         </div>
