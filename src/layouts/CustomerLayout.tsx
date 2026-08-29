@@ -104,17 +104,8 @@ export default function CustomerLayout() {
             {/* Left Side: Branding Logo or Text */}
             <Link to="/" className="flex items-center shrink-0 select-none group">
               <img 
-                src={siteConfig.logo || '/logo.png'} 
+                src="/logo.png" 
                 alt="CYR Cars" 
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  const currentSrc = target.getAttribute('src') || '';
-                  if (currentSrc === '/logo.png' || currentSrc === siteConfig.logo) {
-                    target.src = '/logo.svg';
-                  } else if (currentSrc === '/logo.svg') {
-                    target.src = '/logo.webp';
-                  }
-                }}
                 className="h-10 sm:h-12 md:h-14 w-auto max-w-[220px] object-contain transition-all duration-300 group-hover:scale-105" 
               />
             </Link>
@@ -365,17 +356,8 @@ export default function CustomerLayout() {
           <div className="space-y-6 md:col-span-1">
             <div className="flex items-center inline-flex mb-4">
               <img 
-                src={siteConfig.logo || '/logo.png'} 
+                src="/logo.png" 
                 alt="CYR Cars" 
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  const currentSrc = target.getAttribute('src') || '';
-                  if (currentSrc === '/logo.png' || currentSrc === siteConfig.logo) {
-                    target.src = '/logo.svg';
-                  } else if (currentSrc === '/logo.svg') {
-                    target.src = '/logo.webp';
-                  }
-                }}
                 className="h-10 sm:h-12 w-auto object-contain max-w-[180px]" 
               />
             </div>

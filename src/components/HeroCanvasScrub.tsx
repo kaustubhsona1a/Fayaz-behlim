@@ -630,13 +630,13 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           id="hero-phase-1"
           className="absolute inset-0 z-10 flex flex-col justify-end pb-8 sm:pb-12 md:pb-14 px-6 sm:px-12 md:px-16 lg:px-24 pointer-events-none"
         >
-          {/* Bottom Action Section with compact buttons */}
+          {/* Bottom Action Section with compact stacked buttons */}
           <div className="select-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-            <div className="flex flex-row items-center gap-2 sm:gap-2.5 mb-2 max-w-[280px] sm:max-w-none">
+            <div className="flex flex-col items-start gap-2 mb-2.5">
               <Link
                 to="/inventory"
                 id="btn-hero-phase1-browse"
-                className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-[0_2px_8px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95 pointer-events-auto"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-[0_2px_8px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95 pointer-events-auto"
               >
                 <span>Browse Inventory</span>
                 <ArrowRight className="w-2.5 h-2.5" />
@@ -651,7 +651,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
                     el.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto"
               >
                 <Phone className="w-2.5 h-2.5" />
                 <span>Contact Us</span>

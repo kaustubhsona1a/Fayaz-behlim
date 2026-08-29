@@ -66,10 +66,17 @@ const DEFAULT_CONFIG: SiteConfig = {
   homeHeroVideo: '',
   homeHeroMobileVideo: '/videos/hero-mobile.mp4',
   homeHeroType: 'video',
-  logo: '/logo.svg',
+  logo: '/logo.png',
   clientDeliveries: [],
   instagramReels: []
 };
+
+export function sanitizeLogo(path: string | undefined): string {
+  if (!path || path === '/logo.svg' || path.trim() === '') {
+    return '/logo.png';
+  }
+  return path;
+}
 
 export function sanitizeHeroImage(path: string | undefined): string {
   if (!path || path === '/backdrop.jpg' || path.trim() === '') {
@@ -315,7 +322,10 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       }
       
       if (cachedConfig) {
-        setSiteConfig(cachedConfig);
+        setSiteConfig({
+          ...cachedConfig,
+          logo: sanitizeLogo(cachedConfig.logo)
+        });
       } else {
         setSiteConfig(DEFAULT_CONFIG);
       }
@@ -442,7 +452,7 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
               homeHeroVideo: fetchedHomeHeroVideo,
               homeHeroMobileVideo: fetchedHomeHeroMobileVideo,
               homeHeroType: fetchedHomeHeroType,
-              logo: siteData.logo || siteData.logo_url || DEFAULT_CONFIG.logo,
+              logo: sanitizeLogo(siteData.logo || siteData.logo_url || DEFAULT_CONFIG.logo),
               clientDeliveries: fetchedClientDeliveries || DEFAULT_CONFIG.clientDeliveries,
               instagramReels: fetchedInstagramReels || DEFAULT_CONFIG.instagramReels || []
             };

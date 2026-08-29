@@ -76,15 +76,8 @@ export default function AdminLayout() {
           
           <Link to="/" className="inline-flex flex-col items-center mb-8 group">
             <img 
-              src={siteConfig.logo || '/logo.png'} 
+              src="/logo.png" 
               alt="CYR Cars" 
-              onError={(e) => {
-                const target = e.currentTarget;
-                const currentSrc = target.getAttribute('src') || '';
-                if (currentSrc === '/logo.png' || currentSrc === siteConfig.logo) {
-                  target.src = '/logo.svg';
-                }
-              }}
               className="h-14 w-auto object-contain mb-3 max-w-[200px]" 
             />
             <h1 className="text-xl font-serif text-white tracking-widest leading-none font-bold uppercase block text-center">
