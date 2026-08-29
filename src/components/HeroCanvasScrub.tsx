@@ -31,6 +31,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   const { siteConfig } = useVehicles();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const desktopVideoRef = useRef<HTMLVideoElement>(null);
   const mobileVideoRef = useRef<HTMLVideoElement>(null);
   
   // Direct DOM Refs for rigid, zero-stutter performance (no React re-renders during scroll)
@@ -44,13 +45,12 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   const scrubPercentRef = useRef<HTMLSpanElement>(null);
   const dragHintRef = useRef<HTMLDivElement>(null);
 
-  const activeMobileVideo = siteConfig.homeHeroMobileVideo || '/videos/hero-mobile.mp4';
+  const desktopVideoSrc = siteConfig.homeHeroVideo || '/videos/hero-laptop.mp4';
+  const mobileVideoSrc = siteConfig.homeHeroMobileVideo || '/videos/hero-mobile.mp4';
 
-  // Video seeking queue refs to prevent browser decoding lock/freeze
-  const isVideoSeekingRef = useRef<boolean>(false);
-  const pendingVideoTimeRef = useRef<number | null>(null);
-  const seekTimeoutRef = useRef<number | null>(null);
-  const scrollRafIdRef = useRef<number | null>(null);
+  // Target scroll progress ref (0 to 1) and smooth lerp progress ref for butter-smooth scrubbing
+  const targetProgressRef = useRef<number>(0);
+  const smoothProgressRef = useRef<number>(0);
 
   // Loading & Mode State
   const [firstFrameSrc, setFirstFrameSrc] = useState<string>('/frames/frame_0001.webp');
@@ -323,7 +323,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     }
   }, []);
 
-  // 4. Inertia physics animation loop for direct drag gestures
+  // 4. Inertia physics animation loop + Continuous RAF video scrub sync
   useEffect(() => {
     let isRunning = true;
 
@@ -341,6 +341,30 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         velocityRef.current *= Math.exp(-6.0 * dt); // Smooth friction decay
         currentFrameRef.current = targetFrameRef.current;
         drawInterpolatedFrame(currentFrameRef.current);
+      }
+
+      // Smooth continuous RAF video scrub sync (interpolated lerping prevents frame skipping)
+      const diff = targetProgressRef.current - smoothProgressRef.current;
+      smoothProgressRef.current += diff * 0.18; // Smooth dampening factor
+
+      const isDesktop = window.innerWidth >= 768;
+      const activeVid = isDesktop ? desktopVideoRef.current : mobileVideoRef.current;
+
+      if (activeVid && activeVid.duration && !isNaN(activeVid.duration) && activeVid.duration > 0 && activeVid.readyState >= 1) {
+        const targetTime = smoothProgressRef.current * activeVid.duration;
+        const safeTargetTime = Math.max(0, Math.min(activeVid.duration - 0.02, targetTime));
+        
+        if (!activeVid.seeking && Math.abs(activeVid.currentTime - safeTargetTime) > 0.008) {
+          if ('fastSeek' in activeVid) {
+            try {
+              (activeVid as any).fastSeek(safeTargetTime);
+            } catch {
+              activeVid.currentTime = safeTargetTime;
+            }
+          } else {
+            activeVid.currentTime = safeTargetTime;
+          }
+        }
       }
 
       // Update HUD metrics directly on DOM elements for zero-overhead performance
@@ -398,57 +422,6 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     };
   }, [drawInterpolatedFrame]);
 
-  // Video seeking dispatcher with lock protection to prevent decoder stalls
-  const applyVideoSeek = useCallback((progress: number) => {
-    const vid = mobileVideoRef.current;
-    if (!vid || !vid.duration || isNaN(vid.duration) || vid.duration <= 0) return;
-
-    const safeTime = Math.min(Math.max(0, progress * vid.duration), Math.max(0, vid.duration - 0.04));
-
-    if (isVideoSeekingRef.current) {
-      pendingVideoTimeRef.current = safeTime;
-      return;
-    }
-
-    isVideoSeekingRef.current = true;
-
-    // Timeout safety watchdog: If browser doesn't emit 'seeked' within 80ms, release lock
-    if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
-    seekTimeoutRef.current = window.setTimeout(() => {
-      isVideoSeekingRef.current = false;
-      if (pendingVideoTimeRef.current !== null) {
-        const nextTime = pendingVideoTimeRef.current;
-        pendingVideoTimeRef.current = null;
-        if (vid && vid.duration) {
-          applyVideoSeek(nextTime / vid.duration);
-        }
-      }
-    }, 80);
-
-    if ('fastSeek' in vid) {
-      try {
-        (vid as any).fastSeek(safeTime);
-      } catch {
-        vid.currentTime = safeTime;
-      }
-    } else {
-      vid.currentTime = safeTime;
-    }
-  }, []);
-
-  const handleVideoSeeked = useCallback(() => {
-    if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
-    isVideoSeekingRef.current = false;
-    if (pendingVideoTimeRef.current !== null) {
-      const nextTime = pendingVideoTimeRef.current;
-      pendingVideoTimeRef.current = null;
-      const vid = mobileVideoRef.current;
-      if (vid && vid.duration) {
-        applyVideoSeek(nextTime / vid.duration);
-      }
-    }
-  }, [applyVideoSeek]);
-
   // Global Pointer Release Listener to prevent interactions from getting stuck
   useEffect(() => {
     const handleGlobalPointerRelease = () => {
@@ -489,14 +462,13 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
       const rawProgress = -rect.top / totalScrollableDist;
       const progress = Math.max(0, Math.min(1, rawProgress));
 
+      targetProgressRef.current = progress;
+
       const newFrame = progress * (totalFrames - 1);
       targetFrameRef.current = newFrame;
       currentFrameRef.current = newFrame; // Zero-play instantaneous lock
       drawInterpolatedFrame(newFrame);
       updateOverlays(progress);
-
-      // Synchronize video scroll position smoothly without lockups
-      applyVideoSeek(progress);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -504,9 +476,8 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
     };
-  }, [totalFrames, updateOverlays, drawInterpolatedFrame, applyVideoSeek]);
+  }, [totalFrames, updateOverlays, drawInterpolatedFrame]);
 
   // 7. Interactive Direct Drag-to-Rotate on Canvas (Touch + Mouse)
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -620,38 +591,57 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           className="relative z-[2] w-full h-full block touch-none pointer-events-none"
         />
 
-        {/* Hero Scroll Video (Direct in-build asset, synchronized with scroll on all devices) */}
-        {activeMobileVideo && (
-          <video
-            ref={mobileVideoRef}
-            src={activeMobileVideo}
-            playsInline
-            muted
-            preload="auto"
-            onSeeked={handleVideoSeeked}
-            onLoadedMetadata={(e) => {
-              e.currentTarget.pause();
-            }}
-            className="absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
-            onError={(e) => {
-              const target = e.currentTarget;
-              const currentSrc = target.getAttribute('src') || '';
-              // Try alternate paths if not found in /videos/
-              if (currentSrc === '/videos/hero-mobile.mp4') {
-                target.src = '/hero-mobile.mp4';
-              } else if (currentSrc === '/hero-mobile.mp4') {
-                target.src = '/videos/hero-laptop.mp4';
-              } else if (currentSrc === '/videos/hero-laptop.mp4') {
-                target.src = '/videos/hero-mobile.mov';
-              } else if (currentSrc === '/videos/hero-mobile.mov') {
-                target.src = '/hero-mobile.mov';
-              } else {
-                // Seamlessly fallback to 360 canvas frames
-                target.style.display = 'none';
-              }
-            }}
-          />
-        )}
+        {/* Desktop / Laptop Hero Scroll Video (Direct in-build asset, synchronized with scroll) */}
+        <video
+          ref={desktopVideoRef}
+          src={desktopVideoSrc}
+          playsInline
+          muted
+          preload="auto"
+          onLoadedMetadata={(e) => {
+            const vid = e.currentTarget;
+            vid.pause();
+            vid.currentTime = 0;
+          }}
+          className="hidden md:block absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
+          onError={(e) => {
+            const target = e.currentTarget;
+            const currentSrc = target.getAttribute('src') || '';
+            if (currentSrc === '/videos/hero-laptop.mp4') {
+              target.src = '/hero-laptop.mp4';
+            } else if (currentSrc === '/hero-laptop.mp4') {
+              target.src = '/videos/hero-desktop.mp4';
+            } else {
+              target.style.display = 'none';
+            }
+          }}
+        />
+
+        {/* Mobile Hero Scroll Video (Direct in-build asset, synchronized with scroll) */}
+        <video
+          ref={mobileVideoRef}
+          src={mobileVideoSrc}
+          playsInline
+          muted
+          preload="auto"
+          onLoadedMetadata={(e) => {
+            const vid = e.currentTarget;
+            vid.pause();
+            vid.currentTime = 0;
+          }}
+          className="block md:hidden absolute inset-0 w-full h-full object-cover object-center z-[3] pointer-events-none"
+          onError={(e) => {
+            const target = e.currentTarget;
+            const currentSrc = target.getAttribute('src') || '';
+            if (currentSrc === '/videos/hero-mobile.mp4') {
+              target.src = '/hero-mobile.mp4';
+            } else if (currentSrc === '/hero-mobile.mp4') {
+              target.src = '/videos/hero-laptop.mp4';
+            } else {
+              target.style.display = 'none';
+            }
+          }}
+        />
 
         {/* Floating Interaction Hint (Dealer Mode Only) */}
         {showDealerControls && (

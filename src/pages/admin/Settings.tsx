@@ -504,7 +504,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
             <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-bold font-mono px-2 py-0.5 rounded tracking-wider uppercase border border-emerald-500/30">Direct In-Build Asset</span>
           </div>
           <p className="text-zinc-500 text-[10px] uppercase font-mono tracking-wider mb-6">
-            Directly bundled horizontal video at <code className="text-emerald-400">/public/videos/hero-desktop.mp4</code>.
+            Directly bundled horizontal video at <code className="text-emerald-400">/public/videos/hero-laptop.mp4</code> or <code className="text-emerald-400">/public/videos/hero-desktop.mp4</code>.
           </p>
           <div className="flex flex-col md:flex-row items-stretch md:items-start gap-6">
             <div className="w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-zinc-900/30 shrink-0 relative shadow-sm flex items-center justify-center">
@@ -521,7 +521,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
               <div className="flex flex-col sm:flex-row items-center gap-2">
                 <input
                   type="text"
-                  placeholder="/videos/hero-desktop.mp4"
+                  placeholder="/videos/hero-laptop.mp4"
                   value={customHeroVideoUrl || siteConfig.homeHeroVideo || ''}
                   onChange={(e) => setCustomHeroVideoUrl(e.target.value)}
                   className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white"
@@ -539,6 +539,18 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
                 <button
                   type="button"
                   onClick={() => {
+                    updateSiteConfig({ homeHeroVideo: '/videos/hero-laptop.mp4' });
+                    setSuccess('Set to local in-build video (/videos/hero-laptop.mp4).');
+                    setTimeout(() => setSuccess(''), 4000);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-[10.5px] font-mono text-zinc-300 hover:text-white flex items-center gap-1.5"
+                >
+                  <FolderOpen className="w-3 h-3 text-emerald-400" />
+                  <span>Use /videos/hero-laptop.mp4</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
                     updateSiteConfig({ homeHeroVideo: '/videos/hero-desktop.mp4' });
                     setSuccess('Set to local in-build video (/videos/hero-desktop.mp4).');
                     setTimeout(() => setSuccess(''), 4000);
@@ -546,7 +558,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
                   className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-[10.5px] font-mono text-zinc-300 hover:text-white flex items-center gap-1.5"
                 >
                   <FolderOpen className="w-3 h-3 text-emerald-400" />
-                  <span>Use Local In-Build Video (/videos/hero-desktop.mp4)</span>
+                  <span>Use /videos/hero-desktop.mp4</span>
                 </button>
                 {siteConfig.homeHeroVideo && (
                   <button
