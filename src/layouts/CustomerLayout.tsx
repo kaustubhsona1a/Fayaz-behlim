@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { MapPin, Phone, Mail, Clock, MessageCircle, Instagram, Twitter, Menu, X, Star, Upload, Image, Check, ChevronRight } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, MessageCircle, Instagram, Twitter, Menu, X, Star, Upload, Image, Check, ChevronRight, Lock } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useVehicles } from '../context/VehicleContext';
 import { useAuth } from '../context/AuthContext';
@@ -34,9 +34,59 @@ export default function CustomerLayout() {
     return () => window.removeEventListener('apex_custom_frames_updated', fetchFirstFrames);
   }, []);
 
-  // Custom multi-tap tracker for dealer console access on mobile (esp. Safari iOS)
+  // Multi-tap tracker for secret dealer portal unlock on mobile / desktop (esp. Safari iOS)
   const tapHistoryRef = React.useRef<number[]>([]);
-  const lastTapEventTimeRef = React.useRef<number>(0);
+  const lastTapTimeRef = React.useRef<number>(0);
+
+  const handleSecretLogin = React.useCallback(() => {
+    setNotification('Opening Dealer Login...');
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([40, 60, 40]);
+      } catch {}
+    }
+    setTimeout(() => {
+      navigate('/dealer-management');
+      setNotification('');
+    }, 500);
+  }, [navigate]);
+
+  const handleSecretTap = React.useCallback((e: React.SyntheticEvent | React.TouchEvent | React.MouseEvent | React.PointerEvent) => {
+    if (e) {
+      // Prevent Safari iOS double-tap zoom & text selection
+      if ('preventDefault' in e && typeof e.preventDefault === 'function') {
+        try {
+          e.preventDefault();
+        } catch {}
+      }
+      if ('stopPropagation' in e && typeof e.stopPropagation === 'function') {
+        try {
+          e.stopPropagation();
+        } catch {}
+      }
+    }
+
+    const now = Date.now();
+    // Ignore duplicate synthetic events fired simultaneously (< 70ms)
+    if (now - lastTapTimeRef.current < 70) return;
+    lastTapTimeRef.current = now;
+
+    // Filter to taps that happened within the last 3000ms (3.0s window)
+    const recentTaps = [...tapHistoryRef.current.filter(t => now - t < 3000), now];
+    tapHistoryRef.current = recentTaps;
+
+    // Haptic feedback on mobile if supported
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(25);
+      } catch {}
+    }
+
+    if (recentTaps.length >= 3) {
+      tapHistoryRef.current = [];
+      handleSecretLogin();
+    }
+  }, [handleSecretLogin]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -49,30 +99,6 @@ export default function CustomerLayout() {
   }, []);
 
   const closeMenu = () => setIsMenuOpen(false);
-
-  const handleSecretLogin = () => {
-    setNotification('Opening Dealer Login...');
-    setTimeout(() => {
-      navigate('/dealer-management');
-      setNotification('');
-    }, 600);
-  };
-
-  const handleCopyrightTap = (e: React.SyntheticEvent) => {
-    const now = Date.now();
-    // Debounce duplicate events (e.g. touchend followed immediately by synthetic click)
-    if (now - lastTapEventTimeRef.current < 120) return;
-    lastTapEventTimeRef.current = now;
-
-    // Filter to taps that happened within the last 1500ms
-    const recentTaps = [...tapHistoryRef.current.filter(t => now - t < 1500), now];
-    tapHistoryRef.current = recentTaps;
-
-    if (recentTaps.length >= 3) {
-      tapHistoryRef.current = [];
-      handleSecretLogin();
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-zinc-300 relative bg-transparent">
@@ -408,18 +434,43 @@ export default function CustomerLayout() {
           </div>
         </div>
 
-        <div className="container mx-auto max-w-7xl mt-10 sm:mt-14 pt-6 border-t border-white/10 text-[10px] tracking-widest uppercase text-zinc-300 flex flex-col md:flex-row justify-between items-center font-sans font-semibold">
+        <div className="container mx-auto max-w-7xl mt-10 sm:mt-14 pt-6 border-t border-white/10 text-[10px] tracking-widest uppercase text-zinc-300 flex flex-col md:flex-row justify-between items-center font-sans font-semibold gap-3">
           <button 
             type="button"
-            onClick={handleCopyrightTap}
-            onTouchEnd={handleCopyrightTap}
-            className="select-none text-zinc-300 cursor-pointer touch-manipulation hover:text-white outline-none active:text-white transition-colors bg-transparent border-0 p-0 text-left text-[10px] tracking-widest uppercase font-sans font-semibold"
+            id="btn-footer-copyright-trigger"
+            onPointerDown={handleSecretTap}
+            onTouchStart={handleSecretTap}
+            onClick={handleSecretTap}
+            className="select-none text-zinc-400 cursor-pointer touch-manipulation hover:text-white outline-none active:text-white transition-colors bg-transparent border-0 py-2.5 px-2 -my-2 text-left text-[10px] sm:text-[11px] tracking-widest uppercase font-sans font-semibold inline-flex items-center min-h-[44px]"
+            style={{
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
+              WebkitTouchCallout: 'none',
+              touchAction: 'manipulation'
+            }}
           >
             &copy; 2020 - {new Date().getFullYear()} CYR Cars. Excellence on Hill View Road, Bandra, Mumbai.
           </button>
-          <div className="flex space-x-6 mt-4 md:mt-0 text-zinc-300 font-sans items-center">
-            <a href="#" className="hover:text-white">Privacy</a>
-            <a href="#" className="hover:text-white flex items-center">Terms</a>
+          <div className="flex space-x-6 text-zinc-400 font-sans items-center">
+            <a href="#" className="hover:text-white py-2 px-1">Privacy</a>
+            <a href="#" className="hover:text-white flex items-center py-2 px-1">Terms</a>
+            <button
+              type="button"
+              id="btn-footer-dealer-portal-access"
+              onPointerDown={handleSecretTap}
+              onTouchStart={handleSecretTap}
+              onClick={handleSecretTap}
+              className="text-zinc-600 hover:text-zinc-300 p-2 transition-colors opacity-60 hover:opacity-100"
+              title="Dealer Portal Access (Triple Tap or Click)"
+              style={{
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+                WebkitTouchCallout: 'none',
+                touchAction: 'manipulation'
+              }}
+            >
+              <Lock className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </footer>

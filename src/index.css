@@ -15,6 +15,7 @@
     touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
   }
   body {
     @apply bg-[#050505] text-zinc-300 font-sans antialiased selection:bg-white selection:text-black;
@@ -27,8 +28,13 @@
     scroll-behavior: smooth;
   }
   input, select, textarea {
-    font-size: 16px;
+    font-size: 16px !important;
     touch-action: manipulation;
+  }
+  @media screen and (max-width: 768px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
   }
 }
 
