@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CYR Cars | Exotic & Luxury Motorcars Mumbai</title>
+    <script type="text/javascript">
+      // Single Page App redirect for GitHub Pages & static web servers
+      // MIT License - https://github.com/rafgraph/spa-github-pages
+      var pathSegmentsToKeep = 0;
+      var l = window.location;
+      
+      // Auto-detect GitHub project pages (e.g., username.github.io/repo-name)
+      if (l.hostname.endsWith('github.io')) {
+        pathSegmentsToKeep = 1;
+      }
+
+      l.replace(
+        l.protocol + '//' + l.host + (l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/')) + '/?/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
