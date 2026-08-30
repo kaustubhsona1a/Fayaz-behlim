@@ -84,26 +84,9 @@ export default function CustomerLayout() {
         </div>
       )}
 
-      {/* Global Background - Permanent First Frame Showroom Backdrop (Crystal Clear) */}
+      {/* Global Background - Pristine Dark Showroom Canvas */}
       <div className="fixed top-0 bottom-0 left-0 right-0 z-0 bg-[#050507] overflow-hidden pointer-events-none">
-        {/* Desktop / Laptop Showroom Backdrop */}
-        <SmartImage 
-          src={desktopFirstFrame || '/frames/desktop/frame_0001.webp'}
-          fallbackSrc="/frames/desktop/frame_0001.webp"
-          alt="Showroom Car Backdrop Desktop"
-          loading="eager"
-          decoding="async"
-          className="hidden md:block absolute inset-0 w-full h-full object-cover object-center"
-        />
-        {/* Mobile Showroom Backdrop (Portrait) */}
-        <SmartImage 
-          src={mobileFirstFrame || '/frames/mobile/frame_0001.webp'}
-          fallbackSrc="/frames/mobile/frame_0001.webp"
-          alt="Showroom Car Backdrop Mobile"
-          loading="eager"
-          decoding="async"
-          className="block md:hidden absolute inset-0 w-full h-full object-cover object-center"
-        />
+        <div className="absolute inset-0 bg-radial-gradient from-zinc-900/20 via-transparent to-black pointer-events-none" />
       </div>
 
       <div className="relative z-10 flex flex-col flex-grow min-h-screen">
@@ -432,12 +415,9 @@ export default function CustomerLayout() {
             onTouchEnd={handleCopyrightTap}
             className="select-none text-zinc-300 cursor-pointer touch-manipulation hover:text-white outline-none active:text-white transition-colors bg-transparent border-0 p-0 text-left text-[10px] tracking-widest uppercase font-sans font-semibold"
           >
-            &copy; 1986 - {new Date().getFullYear()} CYR Cars. Excellence on Hill View Road, Bandra, Mumbai.
+            &copy; 2020 - {new Date().getFullYear()} CYR Cars. Excellence on Hill View Road, Bandra, Mumbai.
           </button>
           <div className="flex space-x-6 mt-4 md:mt-0 text-zinc-300 font-sans items-center">
-            <Link to="/dealer-management" className="text-white hover:text-zinc-300 font-mono text-[10px] uppercase tracking-wider flex items-center gap-1 border border-white/20 px-2 py-0.5 rounded">
-              Dealer Portal ↗
-            </Link>
             <a href="#" className="hover:text-white">Privacy</a>
             <a href="#" className="hover:text-white flex items-center">Terms</a>
           </div>

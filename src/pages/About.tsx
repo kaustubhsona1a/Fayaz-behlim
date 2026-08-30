@@ -42,7 +42,7 @@ export default function About() {
             {/* Established Badge - Pure Monochrome Frost Pill */}
             <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/20 bg-white/[0.06] backdrop-blur-md text-zinc-200 text-[9px] sm:text-xs uppercase tracking-wider font-sans font-semibold shadow-sm mb-3 sm:mb-4">
               <Bookmark className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-white fill-white shrink-0" />
-              <span>ESTD. 1986 • CELEBRATING 40 YEARS OF MOTORING EXCELLENCE</span>
+              <span>ESTD. 2020 • DISTINGUISHED LUXURY & PERFORMANCE MOTORCARS</span>
             </div>
 
             <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal max-w-2xl mx-auto px-2">
@@ -56,49 +56,49 @@ export default function About() {
             <div className="flex items-center gap-2 pb-3 sm:pb-4 border-b border-white/10 mb-4 sm:mb-6 text-[10px] sm:text-xs md:text-sm font-sans tracking-wider uppercase font-bold flex-wrap">
               <div className="flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" />
-                <span className="text-zinc-300 font-semibold">FOUR DECADES OF MOTORING HERITAGE</span>
+                <span className="text-zinc-300 font-semibold">MILESTONES OF INTEGRITY & PASSION</span>
               </div>
               <span className="text-zinc-500 hidden sm:inline">•</span>
-              <span className="text-white font-bold">MILESTONES OF INTEGRITY (1986 - 2026)</span>
+              <span className="text-white font-bold">THE JOURNEY (2020 - 2026)</span>
             </div>
 
             {/* Milestones 4-Column Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-              {/* 1986 */}
+              {/* 2020 */}
               <div className="bg-black/40 border border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 md:p-5 transition-all duration-300 flex flex-col justify-between">
                 <div>
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">1986</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2020</div>
                   <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    THE IGNITION APEX
+                    THE FOUNDATION
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Founded on Bandra's enthusiast circuit with a strict vision: only acquiring spotless, mechanically immaculate motorcars with authentic provenance.
+                    Founded in Bandra, Mumbai with an uncompromising vision: curating only pristine, low-mileage luxury and performance vehicles with verified provenance.
                   </p>
                 </div>
               </div>
 
-              {/* 1998 */}
+              {/* 2022 */}
               <div className="bg-black/40 border border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 md:p-5 transition-all duration-300 flex flex-col justify-between">
                 <div>
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">1998</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2022</div>
                   <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
                     EXECUTIVE EXPANSION
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Pioneered precision verification for imported grand tourers, sports coupés, and luxury saloons with flawless documentation and zero compromise.
+                    Pioneered comprehensive 150-point telemetry inspection for imported grand tourers, sports coupés, and flagship luxury SUVs.
                   </p>
                 </div>
               </div>
 
-              {/* 2012 */}
+              {/* 2024 */}
               <div className="bg-black/40 border border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 md:p-5 transition-all duration-300 flex flex-col justify-between">
                 <div>
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2012</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2024</div>
                   <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
                     COLLECTOR TRUST
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Established private garage advisory for prominent Mumbai collectors, industrialists, and motorsport purists seeking rare V8 and twin-turbo icons.
+                    Established private boutique advisory for prominent Mumbai auto enthusiasts, industrialists, and collectors seeking rare performance icons.
                   </p>
                 </div>
               </div>
@@ -108,10 +108,10 @@ export default function About() {
                 <div>
                   <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2026</div>
                   <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    40-YEAR JUBILEE
+                    FLAGSHIP EXCELLENCE
                   </h3>
                   <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    15,000+ handovers celebrated. A premier curation standards benchmark with 150-point telemetry inspection and bespoke white-glove handovers.
+                    Hundreds of bespoke handovers celebrated on Hill View Road. Setting the benchmark for curated pre-owned luxury motoring in Mumbai.
                   </p>
                 </div>
               </div>

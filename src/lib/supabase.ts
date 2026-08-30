@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import imageCompression from 'browser-image-compression';
+import heic2any from 'heic2any';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON || 'placeholder';
@@ -126,14 +127,60 @@ export async function cleanupLegacyImageVariants(bucket: string = 'vehicle-image
 }
 
 /**
+ * Converts HEIC/HEIF images (e.g. from iPhone cameras) to standard JPEG.
+ */
+export async function convertHeicToJpeg(file: File): Promise<File> {
+  const isHeic = file.name.match(/\.(heic|heif)$/i) || file.type.includes('heic') || file.type.includes('heif');
+  if (!isHeic) return file;
+
+  console.log(`[HEIC CONVERT] Processing iPhone HEIC file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+  try {
+    const conversionPromise = heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.85
+    });
+
+    // 10-second safety timeout on HEIC decoding
+    const timeoutPromise = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error('HEIC conversion timeout')), 10000)
+    );
+
+    const convertedBlob = await Promise.race([conversionPromise, timeoutPromise]);
+    const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+    const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+    console.log(`[HEIC CONVERT SUCCESS] Converted ${file.name} to ${newName}`);
+    return new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() });
+  } catch (err) {
+    console.warn('[HEIC CONVERT HEIC2ANY WARNING] Falling back to secondary image compressor:', err);
+    try {
+      const compressedBlob = await imageCompression(file, {
+        maxSizeMB: 1.0,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        initialQuality: 0.8
+      });
+      const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+      return new File([compressedBlob], newName, { type: 'image/jpeg', lastModified: Date.now() });
+    } catch (e) {
+      console.error('[HEIC CONVERSION FAILED] Could not convert, proceeding with original file:', e);
+      return file;
+    }
+  }
+}
+
+/**
  * High quality, super-fast client-side compression pipeline.
  * Designed for iPhone HEIC, Android High-Res, and Laptop/Mac DSLR photos.
  * Downscales to 1280px max-dimension and compresses to high-clarity WebP/JPEG under 200KB.
  */
 export async function compressImage(
-  file: File, 
+  inputFile: File, 
   options?: { maxDimension?: number; targetQuality?: number; isShowcase?: boolean }
 ): Promise<File> {
+  // 1. Process HEIC files first
+  const file = await convertHeicToJpeg(inputFile);
+
   // Skip compression for non-images or showcase branding assets if requested
   if (options?.isShowcase || (!file.type.startsWith('image/') && !file.name.match(/\.(heic|heif|jpe?g|png|webp|mov)$/i))) {
     return file;
@@ -150,9 +197,19 @@ export async function compressImage(
 
     const loaded = await new Promise<boolean>((resolve) => {
       if (!img) return resolve(false);
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      if (img.complete && img.naturalWidth) resolve(true);
+      const timer = setTimeout(() => resolve(false), 4000);
+      img.onload = () => {
+        clearTimeout(timer);
+        resolve(true);
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        resolve(false);
+      };
+      if (img.complete && img.naturalWidth) {
+        clearTimeout(timer);
+        resolve(true);
+      }
     });
 
     // If direct HTMLImageElement load failed (e.g. raw unconverted HEIC on desktop), try Web Worker fallback
@@ -160,7 +217,7 @@ export async function compressImage(
       URL.revokeObjectURL(objectUrl);
       try {
         const fallbackOptions = {
-          maxSizeMB: 0.2, // ~200 KB target
+          maxSizeMB: 0.25, // ~250 KB target
           maxWidthOrHeight: maxDim,
           useWebWorker: true,
           initialQuality: 0.75
@@ -224,26 +281,15 @@ export async function compressImage(
     let jpegBlob = await getBlob(canvas, 'image/jpeg', initialQuality);
     let webpBlob = await getBlob(canvas, 'image/webp', initialQuality);
 
-    // Step 2: If file is larger than 220KB, adaptively reduce quality to 0.68
-    if (jpegBlob && jpegBlob.size > 220 * 1024) {
+    // Step 2: If file is larger than 250KB, adaptively reduce quality to 0.68
+    if (jpegBlob && jpegBlob.size > 250 * 1024) {
       const tighterJpeg = await getBlob(canvas, 'image/jpeg', 0.68);
       if (tighterJpeg) jpegBlob = tighterJpeg;
     }
 
-    if (webpBlob && webpBlob.size > 220 * 1024) {
+    if (webpBlob && webpBlob.size > 250 * 1024) {
       const tighterWebp = await getBlob(canvas, 'image/webp', 0.68);
       if (tighterWebp) webpBlob = tighterWebp;
-    }
-
-    // Step 3: If STILL larger than 240KB (e.g. high-detail car reflections), downscale to 1080px
-    if (jpegBlob && jpegBlob.size > 240 * 1024) {
-      const canvas1080 = renderToCanvas(1080);
-      if (canvas1080) {
-        const scaledJpeg = await getBlob(canvas1080, 'image/jpeg', 0.70);
-        if (scaledJpeg) jpegBlob = scaledJpeg;
-        const scaledWebp = await getBlob(canvas1080, 'image/webp', 0.70);
-        if (scaledWebp) webpBlob = scaledWebp;
-      }
     }
 
     URL.revokeObjectURL(objectUrl);
@@ -253,14 +299,14 @@ export async function compressImage(
     let finalExt = 'jpg';
     let finalType = 'image/jpeg';
 
-    // Pick WebP if it is smaller, valid, and under 220KB; otherwise fallback to crisp JPEG
+    // Pick WebP if it is smaller, valid, and under 250KB; otherwise fallback to crisp JPEG
     if (
       webpBlob && 
       webpBlob.type === 'image/webp' && 
       webpBlob.size > 0 && 
       jpegBlob && 
       webpBlob.size <= jpegBlob.size && 
-      webpBlob.size < 220 * 1024
+      webpBlob.size < 250 * 1024
     ) {
       finalBlob = webpBlob;
       finalExt = 'webp';

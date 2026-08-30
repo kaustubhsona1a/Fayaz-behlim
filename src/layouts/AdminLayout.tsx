@@ -33,15 +33,25 @@ export default function AdminLayout() {
       });
 
       if (supabaseError) {
-        throw supabaseError;
+        console.warn('[SUPABASE AUTH NOTICE]', supabaseError.message);
+        const msg = supabaseError.message || '';
+        if (msg.toLowerCase().includes('invalid login credentials') || msg.toLowerCase().includes('invalid credentials')) {
+          setError('Invalid email or password. Please check your Supabase Auth user credentials.');
+        } else if (msg.toLowerCase().includes('email not confirmed')) {
+          setError('Email address not yet confirmed. You can disable "Confirm email" in Supabase Auth settings.');
+        } else {
+          setError(msg || 'Authentication failed. Please check your credentials.');
+        }
+        return;
       }
       
       if (!data?.user) {
-        throw new Error('Authentication failed. No user returned.');
+        setError('Authentication did not return a valid user session.');
+        return;
       }
     } catch (err: any) {
-      console.error('Supabase auth failed:', err);
-      setError(err?.message || 'Invalid email or password. Please verify credentials in your Supabase project.');
+      console.warn('[SUPABASE AUTH ERROR]', err?.message || err);
+      setError(err?.message || 'Unable to complete sign-in. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -194,9 +194,18 @@ export default function AdminAddVehicle() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setSaveNotice(null);
+
+    if (images.length === 0) {
+      setSaveNotice({
+        type: 'error',
+        message: 'Please upload at least one vehicle photo before saving.'
+      });
+      return;
+    }
+
     formSaved.current = true;
     setIsSaving(true);
-    setSaveNotice(null);
     
     try {
       if (isEditing && id) {
@@ -216,7 +225,7 @@ export default function AdminAddVehicle() {
           registration: formData.registration,
           description: formData.description,
           instagramReel: formData.instagramReel,
-          images: images.length > 0 ? images : ['/frames/desktop/frame_0001.webp'],
+          images: images,
         });
       } else {
         const newVehicle: Vehicle = {
@@ -236,7 +245,7 @@ export default function AdminAddVehicle() {
           registration: formData.registration,
           description: formData.description,
           instagramReel: formData.instagramReel,
-          images: images.length > 0 ? images : ['/frames/desktop/frame_0001.webp'],
+          images: images,
           features: ['Air Conditioning', 'Power Steering'], 
           status: 'Available',
         };

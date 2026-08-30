@@ -215,20 +215,22 @@ CREATE POLICY "Admins can manage admins" ON public.admins
 -- Vehicles RLS
 DROP POLICY IF EXISTS "Vehicles are viewable by everyone" ON public.vehicles;
 CREATE POLICY "Vehicles are viewable by everyone" ON public.vehicles
-    FOR SELECT USING (is_deleted = false OR public.is_admin() OR auth.role() = 'authenticated');
+    FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Vehicles are insertable by admins only" ON public.vehicles;
-CREATE POLICY "Vehicles are insertable by admins only" ON public.vehicles
-    FOR INSERT WITH CHECK (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Vehicles are insertable by all" ON public.vehicles;
+CREATE POLICY "Vehicles are insertable by all" ON public.vehicles
+    FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Vehicles are updatable by admins only" ON public.vehicles;
-CREATE POLICY "Vehicles are updatable by admins only" ON public.vehicles
-    FOR UPDATE USING (public.is_admin() OR auth.role() = 'authenticated') 
-    WITH CHECK (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Vehicles are updatable by all" ON public.vehicles;
+CREATE POLICY "Vehicles are updatable by all" ON public.vehicles
+    FOR UPDATE USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Vehicles are deletable by admins only" ON public.vehicles;
-CREATE POLICY "Vehicles are deletable by admins only" ON public.vehicles
-    FOR DELETE USING (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Vehicles are deletable by all" ON public.vehicles;
+CREATE POLICY "Vehicles are deletable by all" ON public.vehicles
+    FOR DELETE USING (true);
 
 -- Vehicle Images RLS
 DROP POLICY IF EXISTS "Vehicle images are viewable by everyone" ON public.vehicle_images;
@@ -236,9 +238,9 @@ CREATE POLICY "Vehicle images are viewable by everyone" ON public.vehicle_images
     FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Vehicle images are managed by admins only" ON public.vehicle_images;
-CREATE POLICY "Vehicle images are managed by admins only" ON public.vehicle_images
-    FOR ALL USING (public.is_admin() OR auth.role() = 'authenticated') 
-    WITH CHECK (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Vehicle images are managed by all" ON public.vehicle_images;
+CREATE POLICY "Vehicle images are managed by all" ON public.vehicle_images
+    FOR ALL USING (true) WITH CHECK (true);
 
 -- Leads RLS
 DROP POLICY IF EXISTS "Leads are insertable by everyone" ON public.leads;
@@ -246,17 +248,19 @@ CREATE POLICY "Leads are insertable by everyone" ON public.leads
     FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Leads are viewable by admins only" ON public.leads;
-CREATE POLICY "Leads are viewable by admins only" ON public.leads
-    FOR SELECT USING (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Leads are viewable by all" ON public.leads;
+CREATE POLICY "Leads are viewable by all" ON public.leads
+    FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Leads are updatable by admins only" ON public.leads;
-CREATE POLICY "Leads are updatable by admins only" ON public.leads
-    FOR UPDATE USING (public.is_admin() OR auth.role() = 'authenticated') 
-    WITH CHECK (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Leads are updatable by all" ON public.leads;
+CREATE POLICY "Leads are updatable by all" ON public.leads
+    FOR UPDATE USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Leads are deletable by admins only" ON public.leads;
-CREATE POLICY "Leads are deletable by admins only" ON public.leads
-    FOR DELETE USING (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Leads are deletable by all" ON public.leads;
+CREATE POLICY "Leads are deletable by all" ON public.leads
+    FOR DELETE USING (true);
 
 -- Site Settings RLS
 DROP POLICY IF EXISTS "Site settings viewable by everyone" ON public.site_settings;
@@ -264,9 +268,9 @@ CREATE POLICY "Site settings viewable by everyone" ON public.site_settings
     FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Site settings updatable by admins only" ON public.site_settings;
-CREATE POLICY "Site settings updatable by admins only" ON public.site_settings
-    FOR ALL USING (public.is_admin() OR auth.role() = 'authenticated')
-    WITH CHECK (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Site settings managed by all" ON public.site_settings;
+CREATE POLICY "Site settings managed by all" ON public.site_settings
+    FOR ALL USING (true) WITH CHECK (true);
 
 -- Metadata Versions RLS
 DROP POLICY IF EXISTS "Metadata viewable by everyone" ON public.metadata_versions;
@@ -274,9 +278,9 @@ CREATE POLICY "Metadata viewable by everyone" ON public.metadata_versions
     FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Metadata managed by admins" ON public.metadata_versions;
-CREATE POLICY "Metadata managed by admins" ON public.metadata_versions
-    FOR ALL USING (public.is_admin() OR auth.role() = 'authenticated')
-    WITH CHECK (public.is_admin() OR auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Metadata managed by all" ON public.metadata_versions;
+CREATE POLICY "Metadata managed by all" ON public.metadata_versions
+    FOR ALL USING (true) WITH CHECK (true);
 
 -- ==============================================================================
 -- 6. Storage Buckets & Storage Policies
@@ -289,7 +293,7 @@ VALUES (
     'vehicle-images',
     true,
     52428800,
-    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/heic']
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/heic', 'image/heif']
 )
 ON CONFLICT (id) DO UPDATE SET
     public = true,
@@ -302,7 +306,7 @@ VALUES (
     'site_settings',
     true,
     104857600,
-    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/heic', 'video/mp4', 'video/webm', 'video/quicktime']
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/heic', 'image/heif', 'video/mp4', 'video/webm', 'video/quicktime']
 )
 ON CONFLICT (id) DO UPDATE SET
     public = true,
@@ -314,32 +318,38 @@ CREATE POLICY "Public Access to Vehicle Images" ON storage.objects
     FOR SELECT USING (bucket_id = 'vehicle-images');
 
 DROP POLICY IF EXISTS "Admin Insert to Vehicle Images" ON storage.objects;
-CREATE POLICY "Admin Insert to Vehicle Images" ON storage.objects
-    FOR INSERT TO authenticated WITH CHECK (bucket_id = 'vehicle-images');
+DROP POLICY IF EXISTS "Public Insert to Vehicle Images" ON storage.objects;
+CREATE POLICY "Public Insert to Vehicle Images" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'vehicle-images');
 
 DROP POLICY IF EXISTS "Admin Update to Vehicle Images" ON storage.objects;
-CREATE POLICY "Admin Update to Vehicle Images" ON storage.objects
-    FOR UPDATE TO authenticated USING (bucket_id = 'vehicle-images');
+DROP POLICY IF EXISTS "Public Update to Vehicle Images" ON storage.objects;
+CREATE POLICY "Public Update to Vehicle Images" ON storage.objects
+    FOR UPDATE USING (bucket_id = 'vehicle-images');
 
 DROP POLICY IF EXISTS "Admin Delete to Vehicle Images" ON storage.objects;
-CREATE POLICY "Admin Delete to Vehicle Images" ON storage.objects
-    FOR DELETE TO authenticated USING (bucket_id = 'vehicle-images');
+DROP POLICY IF EXISTS "Public Delete to Vehicle Images" ON storage.objects;
+CREATE POLICY "Public Delete to Vehicle Images" ON storage.objects
+    FOR DELETE USING (bucket_id = 'vehicle-images');
 
 DROP POLICY IF EXISTS "Public Access to Site Settings Images" ON storage.objects;
 CREATE POLICY "Public Access to Site Settings Images" ON storage.objects
     FOR SELECT USING (bucket_id = 'site_settings');
 
 DROP POLICY IF EXISTS "Admin Insert to Site Settings Images" ON storage.objects;
-CREATE POLICY "Admin Insert to Site Settings Images" ON storage.objects
-    FOR INSERT TO authenticated WITH CHECK (bucket_id = 'site_settings');
+DROP POLICY IF EXISTS "Public Insert to Site Settings Images" ON storage.objects;
+CREATE POLICY "Public Insert to Site Settings Images" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'site_settings');
 
 DROP POLICY IF EXISTS "Admin Update to Site Settings Images" ON storage.objects;
-CREATE POLICY "Admin Update to Site Settings Images" ON storage.objects
-    FOR UPDATE TO authenticated USING (bucket_id = 'site_settings');
+DROP POLICY IF EXISTS "Public Update to Site Settings Images" ON storage.objects;
+CREATE POLICY "Public Update to Site Settings Images" ON storage.objects
+    FOR UPDATE USING (bucket_id = 'site_settings');
 
 DROP POLICY IF EXISTS "Admin Delete to Site Settings Images" ON storage.objects;
-CREATE POLICY "Admin Delete to Site Settings Images" ON storage.objects
-    FOR DELETE TO authenticated USING (bucket_id = 'site_settings');
+DROP POLICY IF EXISTS "Public Delete to Site Settings Images" ON storage.objects;
+CREATE POLICY "Public Delete to Site Settings Images" ON storage.objects
+    FOR DELETE USING (bucket_id = 'site_settings');
 
 -- ==============================================================================
 -- 7. Verification Status Confirmation
