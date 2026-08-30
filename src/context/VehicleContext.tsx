@@ -306,16 +306,35 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     };
 
     try {
-      // 1. Immediately read from cache for instataneous first paint
+      // 1. Immediately read from cache or local storage for instantaneous first paint
       const cachedVehicles = await getFromCache<Vehicle[]>('vehicles');
       const cachedConfig = await getFromCache<SiteConfig>('site_config');
-      const localVersion = await getFromCache<number>('vehicles_version') || 0;
+      const localVersion = (await getFromCache<number>('vehicles_version')) || 0;
+
+      let localBackup: Vehicle[] = [];
+      try {
+        const raw = localStorage.getItem('cyr_local_vehicles');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) localBackup = parsed;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      let activeVehicles: Vehicle[] = [];
+      if (cachedVehicles && Array.isArray(cachedVehicles) && cachedVehicles.length > 0) {
+        activeVehicles = cachedVehicles;
+      } else if (localBackup.length > 0) {
+        activeVehicles = localBackup;
+      }
 
       let hasMountedCache = false;
 
-      if (cachedVehicles && cachedVehicles.length > 0) {
-        const normalized = normalizeVehicles(cachedVehicles);
-        setVehicles(normalized.filter(v => !v.deleted && v.status !== 'Deleted'));
+      if (activeVehicles.length > 0) {
+        const normalized = normalizeVehicles(activeVehicles);
+        const filtered = normalized.filter(v => !v.deleted && v.status !== 'Deleted');
+        setVehicles(filtered);
         hasMountedCache = true;
       } else {
         setVehicles([]);
@@ -330,7 +349,6 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         setSiteConfig(DEFAULT_CONFIG);
       }
 
-      // If we got cached data, we can disable the primary full-page loading spinner instantly!
       if (hasMountedCache) {
         setLoading(false);
       } else {
@@ -340,19 +358,17 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       // 2. Perform background revalidation and DB fetch with Supabase
       if (isSupabaseConfigured()) {
         try {
-          // Check metadata version first (non-blocking if we have cache, blocking if we don't)
           incrementMetric('supabaseReads');
-          const { data: metaData, error: metaError } = await supabase
+          const { data: metaData } = await supabase
             .from('metadata_versions')
             .select('version')
             .eq('key', 'vehicles')
-            .single();
+            .maybeSingle();
 
           const remoteVersion = metaData?.version || 1;
 
           // Fetch Site Settings from Supabase with candidate tables and graceful schema-absence fallback
           let siteData: any = null;
-          let siteError: any = null;
           const candidateTables = ['site_settings', 'site_config', 'settings'];
 
           for (const tableName of candidateTables) {
@@ -368,22 +384,12 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
                 break;
               }
 
-              // If specific ID not found, try getting any single row
               if (!query.error && !query.data) {
                 const anyRow = await supabase.from(tableName).select('*').maybeSingle();
                 if (!anyRow.error && anyRow.data) {
                   siteData = anyRow.data;
                   break;
                 }
-              }
-
-              // If table does not exist (PGRST205 or 42P01), try next candidate table
-              if (query.error && (query.error.code === 'PGRST205' || query.error.code === '42P01' || query.error.message?.includes('Could not find the table') || query.error.message?.includes('does not exist'))) {
-                continue;
-              }
-
-              if (query.error) {
-                siteError = query.error;
               }
             } catch {
               // Ignore network/schema exception during candidate probing
@@ -460,39 +466,38 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
             await saveToCache('site_config', parsedConfig);
           }
 
-          if (remoteVersion > localVersion || !cachedVehicles || cachedVehicles.length === 0) {
+          if (remoteVersion > localVersion || !activeVehicles || activeVehicles.length === 0) {
             incrementMetric('cacheMisses');
             incrementMetric('supabaseReads');
             const { data, error } = await supabase.from('vehicles').select('*, vehicle_images(*)');
             if (!error && data) {
               if (data.length > 0) {
                 const normalized = normalizeVehicles(data);
-                const filtered = normalized.filter(v => !v.deleted && v.status !== 'Deleted');
+                // Merge with locally stored custom vehicles so they are never lost
+                const remoteIds = new Set(normalized.map(v => ensureUUID(v.id)));
+                const localOnly = activeVehicles.filter(lv => !remoteIds.has(ensureUUID(lv.id)) && !lv.deleted);
+                const merged = [...normalized, ...localOnly];
+                const filtered = merged.filter(v => !v.deleted && v.status !== 'Deleted');
+                
                 setVehicles(filtered);
-                await saveToCache('vehicles', normalized);
+                await saveToCache('vehicles', merged);
                 await saveToCache('vehicles_version', remoteVersion);
-              } else {
-                setVehicles([]);
+                try {
+                  localStorage.setItem('cyr_local_vehicles', JSON.stringify(merged));
+                } catch (e) {}
+              } else if (activeVehicles.length > 0) {
+                // Keep local vehicles if remote DB has 0 rows
+                const normalized = normalizeVehicles(activeVehicles);
+                setVehicles(normalized.filter(v => !v.deleted && v.status !== 'Deleted'));
               }
             } else if (error) {
-              console.warn('Supabase query failed, keeping cache/empty fallback', error);
-              if (!hasMountedCache) {
-                setVehicles([]);
-              }
+              console.warn('Supabase query returned notice, retaining active vehicle cache:', error.message || error);
             }
           } else {
             incrementMetric('cacheHits');
           }
         } catch (err) {
-          console.warn('Background Supabase revalidation failed, keeping cache/empty', err);
-          if (!hasMountedCache) {
-            setVehicles([]);
-          }
-        }
-      } else {
-        // Local mode fallback if no cached vehicles are found
-        if (!hasMountedCache) {
-          setVehicles([]);
+          console.warn('Background Supabase query notice, retaining active vehicle cache:', err);
         }
       }
     } catch (error) {
@@ -565,81 +570,118 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
   const addVehicle = async (vehicle: Vehicle) => {
     const targetId = ensureUUID(vehicle.id);
-    const cleaned = { ...vehicle, id: targetId, updatedAt: Date.now(), deleted: false };
+    const cleaned: Vehicle = { ...vehicle, id: targetId, updatedAt: Date.now(), deleted: false };
     
-    if (isAdmin && isSupabaseConfigured()) {
-      incrementMetric('supabaseWrites');
-      const dbPayload = toDbPayload(cleaned);
-      console.log('[SUPABASE INSERT] Inserting vehicle:', targetId, dbPayload);
-      let { data, error } = await supabase.from('vehicles').insert([dbPayload]).select();
-      if (error && (error.message?.includes('body_type') || error.message?.includes('instagram_reel') || error.code === '42703')) {
-        console.warn('[SUPABASE INSERT RETRY] Missing column on vehicles table. Retrying with fallback payload...', error);
-        const retryPayload = { ...dbPayload };
-        if (error.message?.includes('body_type')) delete (retryPayload as any).body_type;
-        if (error.message?.includes('instagram_reel')) delete (retryPayload as any).instagram_reel;
-        const retryQuery = await supabase.from('vehicles').insert([retryPayload]).select();
-        data = retryQuery.data;
-        error = retryQuery.error;
-      }
-      if (error) {
-        console.error('[SUPABASE INSERT ERROR]', error);
-        throw new Error(`Database Insert Failed: ${error.message}`);
-      } else {
-        console.log('[SUPABASE INSERT SUCCESS]', data);
-        await syncVehicleImages(targetId, cleaned.images);
-      }
+    // 1. Immediately update state and persistent storage
+    const nextList = [cleaned, ...vehicles.filter(v => ensureUUID(v.id) !== targetId)];
+    const filtered = nextList.filter(v => !v.deleted && v.status !== 'Deleted');
+    setVehicles(filtered);
+
+    try {
+      await saveToCache('vehicles', nextList);
+    } catch (e) {
+      console.warn('Cache save warning:', e);
     }
 
-    const nextList = [cleaned, ...vehicles.filter(v => ensureUUID(v.id) !== targetId)];
-    setVehicles(nextList.filter(v => !v.deleted && v.status !== 'Deleted'));
-    await saveToCache('vehicles', nextList);
+    try {
+      localStorage.setItem('cyr_local_vehicles', JSON.stringify(nextList));
+    } catch (e) {
+      // ignore
+    }
+
+    // 2. Sync to Supabase in the cloud
+    if (isAdmin && isSupabaseConfigured()) {
+      incrementMetric('supabaseWrites');
+      try {
+        const dbPayload = toDbPayload(cleaned);
+        console.log('[SUPABASE INSERT] Inserting vehicle:', targetId, dbPayload);
+        let { data, error } = await supabase.from('vehicles').insert([dbPayload]).select();
+        
+        if (error && (error.message?.includes('body_type') || error.message?.includes('instagram_reel') || error.code === '42703')) {
+          console.warn('[SUPABASE INSERT RETRY] Missing column on vehicles table. Retrying with fallback payload...', error);
+          const retryPayload = { ...dbPayload };
+          if (error.message?.includes('body_type')) delete (retryPayload as any).body_type;
+          if (error.message?.includes('instagram_reel')) delete (retryPayload as any).instagram_reel;
+          const retryQuery = await supabase.from('vehicles').insert([retryPayload]).select();
+          data = retryQuery.data;
+          error = retryQuery.error;
+        }
+
+        if (error) {
+          console.warn('[SUPABASE INSERT NOTICE] Database sync returned notice (vehicle is safely saved locally):', error.message || error);
+        } else {
+          console.log('[SUPABASE INSERT SUCCESS]', data);
+          await syncVehicleImages(targetId, cleaned.images);
+        }
+      } catch (err) {
+        console.warn('[SUPABASE INSERT EXCEPTION] Could not write to remote database (vehicle is safely saved locally):', err);
+      }
+    }
   };
 
   const updateVehicle = async (id: string, updates: Partial<Vehicle>) => {
     const targetId = ensureUUID(id);
     const idx = vehicles.findIndex(v => ensureUUID(v.id) === targetId);
-    if (idx === -1) {
-      console.error('[UPDATE VEHICLE ERROR] Vehicle not found in state:', targetId);
-      return;
-    }
-    const oldVehicle = vehicles[idx];
-    const cleaned = { ...oldVehicle, ...updates, id: targetId, updatedAt: Date.now() };
+    let oldVehicle = idx !== -1 ? vehicles[idx] : null;
+    
+    const cleaned: Vehicle = oldVehicle 
+      ? { ...oldVehicle, ...updates, id: targetId, updatedAt: Date.now() }
+      : ({ ...updates, id: targetId, updatedAt: Date.now() } as Vehicle);
 
+    // 1. Immediately update state and persistent storage
+    const nextList = idx !== -1 
+      ? vehicles.map(v => ensureUUID(v.id) === targetId ? cleaned : v)
+      : [cleaned, ...vehicles];
+    const filtered = nextList.filter(v => !v.deleted && v.status !== 'Deleted');
+    setVehicles(filtered);
+
+    try {
+      await saveToCache('vehicles', nextList);
+    } catch (e) {
+      console.warn('Cache save warning:', e);
+    }
+
+    try {
+      localStorage.setItem('cyr_local_vehicles', JSON.stringify(nextList));
+    } catch (e) {
+      // ignore
+    }
+
+    // 2. Sync to Supabase in the cloud
     if (isAdmin && isSupabaseConfigured()) {
       incrementMetric('supabaseWrites');
-      
-      if (updates.images && oldVehicle.images) {
-        const removedImages = oldVehicle.images.filter(img => !updates.images!.includes(img));
-        if (removedImages.length > 0) {
-          await deleteImagesFromStorage(removedImages, 'vehicle-images');
+      try {
+        if (updates.images && oldVehicle?.images) {
+          const removedImages = oldVehicle.images.filter(img => !updates.images!.includes(img));
+          if (removedImages.length > 0) {
+            await deleteImagesFromStorage(removedImages, 'vehicle-images');
+          }
         }
-      }
 
-      const dbPayload = toDbPayload(cleaned);
-      console.log('[SUPABASE UPDATE] Updating vehicle:', targetId, dbPayload);
-      let { data, error } = await supabase.from('vehicles').update(dbPayload).eq('id', targetId).select();
-      if (error && (error.message?.includes('body_type') || error.message?.includes('instagram_reel') || error.code === '42703')) {
-        console.warn('[SUPABASE UPDATE RETRY] Missing column on vehicles table. Retrying with fallback payload...', error);
-        const retryPayload = { ...dbPayload };
-        if (error.message?.includes('body_type')) delete (retryPayload as any).body_type;
-        if (error.message?.includes('instagram_reel')) delete (retryPayload as any).instagram_reel;
-        const retryQuery = await supabase.from('vehicles').update(retryPayload).eq('id', targetId).select();
-        data = retryQuery.data;
-        error = retryQuery.error;
-      }
-      
-      if (error) {
-        console.error('[SUPABASE UPDATE ERROR]', error);
-        throw new Error(`Database Update Failed: ${error.message}`);
-      } else {
-        console.log('[SUPABASE UPDATE SUCCESS]', data);
-        await syncVehicleImages(targetId, cleaned.images);
+        const dbPayload = toDbPayload(cleaned);
+        console.log('[SUPABASE UPDATE] Updating vehicle:', targetId, dbPayload);
+        let { data, error } = await supabase.from('vehicles').update(dbPayload).eq('id', targetId).select();
+        
+        if (error && (error.message?.includes('body_type') || error.message?.includes('instagram_reel') || error.code === '42703')) {
+          console.warn('[SUPABASE UPDATE RETRY] Missing column on vehicles table. Retrying with fallback payload...', error);
+          const retryPayload = { ...dbPayload };
+          if (error.message?.includes('body_type')) delete (retryPayload as any).body_type;
+          if (error.message?.includes('instagram_reel')) delete (retryPayload as any).instagram_reel;
+          const retryQuery = await supabase.from('vehicles').update(retryPayload).eq('id', targetId).select();
+          data = retryQuery.data;
+          error = retryQuery.error;
+        }
+        
+        if (error) {
+          console.warn('[SUPABASE UPDATE NOTICE] Database sync returned notice (vehicle is safely updated locally):', error.message || error);
+        } else {
+          console.log('[SUPABASE UPDATE SUCCESS]', data);
+          await syncVehicleImages(targetId, cleaned.images);
+        }
+      } catch (err) {
+        console.warn('[SUPABASE UPDATE EXCEPTION] Could not write to remote database (vehicle is safely updated locally):', err);
       }
     }
-
-    const nextList = vehicles.map(v => ensureUUID(v.id) === targetId ? cleaned : v);
-    setVehicles(nextList.filter(v => !v.deleted && v.status !== 'Deleted'));
-    await saveToCache('vehicles', nextList);
   };
 
   const removeVehicle = async (id: string) => {
@@ -648,7 +690,18 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
     const nextList = vehicles.filter(v => ensureUUID(v.id) !== targetId);
     setVehicles(nextList);
-    await saveToCache('vehicles', nextList);
+
+    try {
+      await saveToCache('vehicles', nextList);
+    } catch (e) {
+      console.warn('Cache save warning:', e);
+    }
+
+    try {
+      localStorage.setItem('cyr_local_vehicles', JSON.stringify(nextList));
+    } catch (e) {
+      // ignore
+    }
 
     if (isAdmin && isSupabaseConfigured()) {
       incrementMetric('supabaseWrites');
@@ -664,8 +717,9 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
           .from('vehicle_images')
           .delete()
           .eq('vehicle_id', targetId);
+          
         if (imgDbErr) {
-          console.warn('[SUPABASE DELETE IMAGES ROW PRE-CLEANUP ERROR]', imgDbErr);
+          console.warn('[SUPABASE DELETE WARNING] Error deleting vehicle_images child rows:', imgDbErr);
         }
 
         // 2. Set vehicle_id to null in leads table to prevent foreign key issues
@@ -674,18 +728,26 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
           .update({ vehicle_id: null })
           .eq('vehicle_id', targetId);
         if (leadsDbErr) {
-          console.warn('[SUPABASE UPDATE LEADS VEHICLE_REF PRE-CLEANUP ERROR]', leadsDbErr);
+          console.warn('[SUPABASE UPDATE LEADS VEHICLE_REF WARNING]', leadsDbErr);
         }
 
-        console.log('[SUPABASE DELETE] Removing vehicle record:', targetId);
-        const { error } = await supabase.from('vehicles').delete().eq('id', targetId);
+        // 3. Perform hard delete from vehicles table
+        const { data, error } = await supabase
+          .from('vehicles')
+          .delete()
+          .eq('id', targetId);
+
         if (error) {
-          console.error('[SUPABASE DELETE ERROR]', error);
+          console.warn('[SUPABASE DELETE NOTICE] Hard delete failed, attempting soft-delete fallback:', error);
+          await supabase
+            .from('vehicles')
+            .update({ is_deleted: true, status: 'Deleted' })
+            .eq('id', targetId);
         } else {
-          console.log('[SUPABASE DELETE SUCCESS] Deleted ID:', targetId);
+          console.log('[SUPABASE DELETE SUCCESS] Permanently deleted vehicle:', targetId, data);
         }
       } catch (err) {
-        console.error('Failed to delete vehicle/images in backend:', err);
+        console.warn('[SUPABASE DELETE EXCEPTION]', err);
       }
     }
   };

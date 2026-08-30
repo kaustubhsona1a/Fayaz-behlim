@@ -29,8 +29,10 @@ export default function AdminAddVehicle() {
   }, []);
 
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
   const [uploadNotice, setUploadNotice] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
+  const [saveNotice, setSaveNotice] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
 
   const [formData, setFormData] = useState({
     make: '',
@@ -190,55 +192,65 @@ export default function AdminAddVehicle() {
   };
 
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     formSaved.current = true;
+    setIsSaving(true);
+    setSaveNotice(null);
     
-    if (isEditing && id) {
-      updateVehicle(id, {
-        make: formData.make,
-        model: formData.model,
-        variant: formData.variant,
-        year: Number(formData.year),
-        price: Number(formData.price),
-        mileage: Number(formData.mileage),
-        bodyType: formData.bodyType,
-        fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'CNG' | 'Electric',
-        transmission: formData.transmission as 'Manual' | 'Automatic',
-        engine: formData.engine || 'Standard',
-        color: formData.color || 'Standard',
-        ownership: formData.ownership,
-        registration: formData.registration,
-        description: formData.description,
-        instagramReel: formData.instagramReel,
-        images: images.length > 0 ? images : ['/frames/desktop/frame_0001.webp'],
+    try {
+      if (isEditing && id) {
+        await updateVehicle(id, {
+          make: formData.make,
+          model: formData.model,
+          variant: formData.variant,
+          year: Number(formData.year),
+          price: Number(formData.price),
+          mileage: Number(formData.mileage),
+          bodyType: formData.bodyType,
+          fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'CNG' | 'Electric',
+          transmission: formData.transmission as 'Manual' | 'Automatic',
+          engine: formData.engine || 'Standard',
+          color: formData.color || 'Standard',
+          ownership: formData.ownership,
+          registration: formData.registration,
+          description: formData.description,
+          instagramReel: formData.instagramReel,
+          images: images.length > 0 ? images : ['/frames/desktop/frame_0001.webp'],
+        });
+      } else {
+        const newVehicle: Vehicle = {
+          id: 'v' + Date.now().toString(),
+          make: formData.make,
+          model: formData.model,
+          variant: formData.variant,
+          year: Number(formData.year),
+          price: Number(formData.price),
+          mileage: Number(formData.mileage),
+          bodyType: formData.bodyType,
+          fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'CNG' | 'Electric',
+          transmission: formData.transmission as 'Manual' | 'Automatic',
+          engine: formData.engine || 'Standard',
+          color: formData.color || 'Standard',
+          ownership: formData.ownership,
+          registration: formData.registration,
+          description: formData.description,
+          instagramReel: formData.instagramReel,
+          images: images.length > 0 ? images : ['/frames/desktop/frame_0001.webp'],
+          features: ['Air Conditioning', 'Power Steering'], 
+          status: 'Available',
+        };
+        await addVehicle(newVehicle);
+      }
+      navigate('/dealer-management/inventory');
+    } catch (err: any) {
+      console.error('[SAVE VEHICLE ERROR]', err);
+      setSaveNotice({
+        type: 'error',
+        message: err?.message || 'Failed to save vehicle. Please check required fields and try again.'
       });
-    } else {
-      const newVehicle: Vehicle = {
-        id: 'v' + Date.now().toString(),
-        make: formData.make,
-        model: formData.model,
-        variant: formData.variant,
-        year: Number(formData.year),
-        price: Number(formData.price),
-        mileage: Number(formData.mileage),
-        bodyType: formData.bodyType,
-        fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'CNG' | 'Electric',
-        transmission: formData.transmission as 'Manual' | 'Automatic',
-        engine: formData.engine || 'Standard',
-        color: formData.color || 'Standard',
-        ownership: formData.ownership,
-        registration: formData.registration,
-        description: formData.description,
-        instagramReel: formData.instagramReel,
-        images: images.length > 0 ? images : ['/frames/desktop/frame_0001.webp'],
-        features: ['Air Conditioning', 'Power Steering'], 
-        status: 'Available',
-      };
-      addVehicle(newVehicle);
+      setIsSaving(false);
     }
-    
-    navigate('/dealer-management/inventory');
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -247,6 +259,15 @@ export default function AdminAddVehicle() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl font-sans">
+      {saveNotice && (
+        <div className={`p-4 rounded-xl border flex items-center gap-3 text-xs font-mono font-medium ${
+          saveNotice.type === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+        }`}>
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{saveNotice.message}</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-widest uppercase">{isEditing ? 'Edit Vehicle' : 'Add New Vehicle'}</h1>
@@ -256,7 +277,20 @@ export default function AdminAddVehicle() {
           <Link to="/dealer-management/inventory" className="flex-grow sm:flex-grow-0 text-center px-4 sm:px-5 py-3.5 bg-zinc-900/40 border border-white/5 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-xl text-xs font-bold tracking-widest font-mono uppercase transition-all">
             Cancel
           </Link>
-          <button type="submit" className="flex-grow sm:flex-grow-0 text-center px-4 sm:px-6 py-3.5 bg-white hover:bg-zinc-900 text-zinc-950 hover:text-white border border-transparent hover:border-white/20 rounded-xl text-xs font-bold tracking-widest font-mono uppercase transition-all shadow-sm">{isEditing ? 'Save Changes' : 'Save Vehicle'}</button>
+          <button 
+            type="submit" 
+            disabled={isSaving || isCompressing}
+            className="flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 px-4 sm:px-6 py-3.5 bg-white hover:bg-zinc-200 text-zinc-950 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent rounded-xl text-xs font-bold tracking-widest font-mono uppercase transition-all shadow-sm"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <span>{isEditing ? 'Save Changes' : 'Save Vehicle'}</span>
+            )}
+          </button>
         </div>
       </div>
 
@@ -447,6 +481,27 @@ export default function AdminAddVehicle() {
         <div>
           <h2 className="text-sm font-bold font-serif text-white mb-6 border-b border-white/5 pb-2 uppercase tracking-widest">Description & Notes</h2>
           <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Enter any specific luxury features, vehicle condition detail, or custom service information..." className="flex w-full rounded-xl border border-white/5 bg-zinc-900/30 px-4 py-3 text-xs text-zinc-200 placeholder-zinc-700 min-h-[120px] outline-none focus:border-white transition-all font-mono" />
+        </div>
+
+        {/* Bottom Actions */}
+        <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-end items-center gap-3">
+          <Link to="/dealer-management/inventory" className="w-full sm:w-auto text-center px-6 py-3.5 bg-zinc-900/40 border border-white/5 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-xl text-xs font-bold tracking-widest font-mono uppercase transition-all">
+            Cancel
+          </Link>
+          <button 
+            type="submit" 
+            disabled={isSaving || isCompressing}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-white hover:bg-zinc-200 text-zinc-950 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent rounded-xl text-xs font-bold tracking-widest font-mono uppercase transition-all shadow-sm"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
+                <span>Saving Vehicle...</span>
+              </>
+            ) : (
+              <span>{isEditing ? 'Save Changes' : 'Save Vehicle'}</span>
+            )}
+          </button>
         </div>
 
       </div>
