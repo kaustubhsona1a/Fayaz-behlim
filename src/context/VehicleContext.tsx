@@ -92,8 +92,17 @@ export function sanitizeAboutImage(path: string | undefined): string {
   return path;
 }
 
-const isSupabaseConfigured = () => {
-  return import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'YOUR_SUPABASE_URL';
+export const isSupabaseConfigured = () => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON;
+  return Boolean(
+    url &&
+    url !== 'YOUR_SUPABASE_URL' &&
+    url !== 'https://placeholder.supabase.co' &&
+    !url.includes('placeholder') &&
+    key &&
+    key !== 'placeholder'
+  );
 };
 
 // Helper to guarantee a valid UUID format. If ID is already a UUID, returns it.
@@ -355,17 +364,10 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         setLoading(true);
       }
 
-      // 2. Perform background revalidation and DB fetch with Supabase
+      // 2. Perform authoritative background revalidation and DB fetch with Supabase
       if (isSupabaseConfigured()) {
         try {
           incrementMetric('supabaseReads');
-          const { data: metaData } = await supabase
-            .from('metadata_versions')
-            .select('version')
-            .eq('key', 'vehicles')
-            .maybeSingle();
-
-          const remoteVersion = metaData?.version || 1;
 
           // Fetch Site Settings from Supabase with candidate tables and graceful schema-absence fallback
           let siteData: any = null;
@@ -466,38 +468,36 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
             await saveToCache('site_config', parsedConfig);
           }
 
-          if (remoteVersion > localVersion || !activeVehicles || activeVehicles.length === 0) {
-            incrementMetric('cacheMisses');
-            incrementMetric('supabaseReads');
-            const { data, error } = await supabase.from('vehicles').select('*, vehicle_images(*)');
-            if (!error && data) {
-              if (data.length > 0) {
-                const normalized = normalizeVehicles(data);
-                // Merge with locally stored custom vehicles so they are never lost
-                const remoteIds = new Set(normalized.map(v => ensureUUID(v.id)));
-                const localOnly = activeVehicles.filter(lv => !remoteIds.has(ensureUUID(lv.id)) && !lv.deleted);
-                const merged = [...normalized, ...localOnly];
-                const filtered = merged.filter(v => !v.deleted && v.status !== 'Deleted');
-                
-                setVehicles(filtered);
-                await saveToCache('vehicles', merged);
-                await saveToCache('vehicles_version', remoteVersion);
-                try {
-                  localStorage.setItem('cyr_local_vehicles', JSON.stringify(merged));
-                } catch (e) {}
-              } else if (activeVehicles.length > 0) {
-                // Keep local vehicles if remote DB has 0 rows
-                const normalized = normalizeVehicles(activeVehicles);
-                setVehicles(normalized.filter(v => !v.deleted && v.status !== 'Deleted'));
-              }
-            } else if (error) {
-              console.warn('Supabase query returned notice, retaining active vehicle cache:', error.message || error);
-            }
-          } else {
-            incrementMetric('cacheHits');
+          // Authoritative fetch of vehicles from Supabase database
+          incrementMetric('supabaseReads');
+          const { data, error } = await supabase.from('vehicles').select('*, vehicle_images(*)');
+          if (!error && data) {
+            console.log(`[SUPABASE INVENTORY FETCH] Received ${data.length} vehicle records from remote database.`);
+            const normalized = normalizeVehicles(data);
+            const filtered = normalized.filter(v => !v.deleted && v.status !== 'Deleted');
+            
+            // Set authoritative list in state
+            setVehicles(filtered);
+            
+            // Overwrite and sanitize the local cache so old stale records (like the 3rd mock car) are evicted
+            await saveToCache('vehicles', filtered);
+            try {
+              localStorage.setItem('cyr_local_vehicles', JSON.stringify(filtered));
+            } catch (e) {}
+          } else if (error) {
+            console.warn('Supabase query returned notice, retaining active vehicle cache:', error.message || error);
           }
         } catch (err) {
           console.warn('Background Supabase query notice, retaining active vehicle cache:', err);
+        }
+      } else {
+        // Offline / demo fallback when Supabase is not configured
+        if (activeVehicles.length === 0) {
+          setVehicles(MOCK_VEHICLES);
+          await saveToCache('vehicles', MOCK_VEHICLES);
+          try {
+            localStorage.setItem('cyr_local_vehicles', JSON.stringify(MOCK_VEHICLES));
+          } catch (e) {}
         }
       }
     } catch (error) {
@@ -566,6 +566,36 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchInventory();
     fetchLeads();
+
+    // Subscribe to Supabase Realtime changes on vehicles and vehicle_images
+    if (isSupabaseConfigured()) {
+      const channel = supabase
+        .channel('realtime_vehicles_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicles' }, () => {
+          console.log('[REALTIME UPDATE] Vehicles modified remotely. Refreshing inventory...');
+          fetchInventory();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicle_images' }, () => {
+          fetchInventory();
+        })
+        .subscribe();
+
+      const handleRevalidate = () => {
+        fetchInventory();
+      };
+
+      window.addEventListener('focus', handleRevalidate);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          handleRevalidate();
+        }
+      });
+
+      return () => {
+        supabase.removeChannel(channel);
+        window.removeEventListener('focus', handleRevalidate);
+      };
+    }
   }, [isAdmin]);
 
   const addVehicle = async (vehicle: Vehicle) => {
