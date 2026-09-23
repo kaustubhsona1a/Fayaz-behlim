@@ -4,13 +4,14 @@ import { useVehicles } from '../context/VehicleContext';
 import { MOCK_REVIEWS } from '../data/mockData';
 import React, { useState } from 'react';
 import { SmartImage } from '../components/SmartImage';
+import { DELIVERY_PLACEHOLDER_IMAGE } from '../constants/placeholders';
 
 export default function About() {
   const { siteConfig } = useVehicles();
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
 
   const deliveries = siteConfig.clientDeliveries || [];
-  const heroShowcaseImage = siteConfig.aboutImage || (deliveries.length > 0 ? deliveries[0] : "/frames/desktop/frame_0025.webp");
+  const heroShowcaseImage = siteConfig.aboutImage || (deliveries.length > 0 ? deliveries[0] : "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80");
 
   const handleNextPhoto = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -128,7 +129,7 @@ export default function About() {
             <SmartImage 
               src={heroShowcaseImage} 
               alt="Where Performance Meets Prestige - CYR Cars Showroom" 
-              fallbackSrc="/frames/desktop/frame_0025.webp"
+              fallbackSrc={DELIVERY_PLACEHOLDER_IMAGE}
               className="w-full h-full object-cover object-center brightness-90 group-hover:scale-[1.02] transition-all duration-700 ease-out"
             />
             {/* Gradient Overlay */}
@@ -289,7 +290,7 @@ export default function About() {
                       <SmartImage 
                         src={img} 
                         alt={`Client Delivery ${i + 1}`} 
-                        fallbackSrc="/frames/desktop/frame_0001.webp"
+                        fallbackSrc={DELIVERY_PLACEHOLDER_IMAGE}
                         loading="lazy"
                         decoding="async"
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
@@ -359,7 +360,7 @@ export default function About() {
             <SmartImage 
               src={deliveries[activePhotoIndex]} 
               alt="Archival Patron Delivery" 
-              fallbackSrc="/frames/desktop/frame_0001.webp"
+              fallbackSrc={DELIVERY_PLACEHOLDER_IMAGE}
               className="w-full h-full object-contain max-h-[70vh] rounded-2xl shadow-2xl border border-white/20 select-none bg-black/50"
             />
 

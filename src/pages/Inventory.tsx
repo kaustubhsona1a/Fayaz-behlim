@@ -4,6 +4,7 @@ import { formatPrice, BODY_TYPES } from '../data/mockData';
 import { Search, Filter, Car, Gauge, Fuel, Cog, Instagram } from 'lucide-react';
 import { useVehicles } from '../context/VehicleContext';
 import { SmartImage } from '../components/SmartImage';
+import { CAR_PLACEHOLDER_IMAGE } from '../constants/placeholders';
 
 export default function Inventory() {
   const { vehicles, loading } = useVehicles();
@@ -152,6 +153,19 @@ export default function Inventory() {
   const ALL_TRANSMISSIONS = ['Automatic', 'Manual'];
   const ALL_FUELS = ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'CNG'];
 
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (budgetIndex < BUDGET_OPTIONS.length - 1) count++;
+    if (minYear !== null) count++;
+    if (selectedBodyTypes.length > 0) count += selectedBodyTypes.length;
+    if (selectedOwners.length > 0) count += selectedOwners.length;
+    if (selectedTransmissions.length > 0) count += selectedTransmissions.length;
+    if (maxMileage !== null) count++;
+    if (selectedFuelTypes.length > 0) count += selectedFuelTypes.length;
+    if (searchTerm.trim()) count++;
+    return count;
+  }, [budgetIndex, minYear, selectedBodyTypes, selectedOwners, selectedTransmissions, maxMileage, selectedFuelTypes, searchTerm]);
+
   return (
     <div className="min-h-screen bg-transparent text-zinc-300 py-4 sm:py-8 font-sans z-10 relative">
       {/* Darkening ambient backdrop overlay for high contrast and crystal-clear text */}
@@ -189,10 +203,20 @@ export default function Inventory() {
         <div className="lg:hidden mb-5 font-sans">
           <button 
             onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-            className="flex items-center justify-between w-full p-3.5 sm:p-4 bg-black/75 backdrop-blur-xl border border-white/20 rounded-xl text-white font-bold tracking-wider text-xs uppercase transition-colors shadow-md hover:bg-black/90"
+            className="flex items-center justify-between w-full p-3.5 sm:p-4 bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl text-white font-bold tracking-wider text-xs uppercase transition-colors shadow-md hover:bg-black/90 active:scale-[0.99]"
           >
-            <div className="flex items-center"><Filter className="w-3.5 h-3.5 mr-2.5 text-white" /> Filters &amp; Sorting</div>
-            <span className="text-[10px] text-zinc-300 lowercase">{isMobileFiltersOpen ? 'collapse' : 'expand'}</span>
+            <div className="flex items-center">
+              <Filter className="w-3.5 h-3.5 mr-2.5 text-white" /> 
+              <span>Filters &amp; Sorting</span>
+              {activeFiltersCount > 0 && (
+                <span className="ml-2.5 px-2 py-0.5 rounded-full bg-white text-black text-[10px] font-bold">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-zinc-300 uppercase tracking-widest font-semibold">
+              {isMobileFiltersOpen ? 'Close ▲' : 'Open ▼'}
+            </span>
           </button>
         </div>
 
@@ -460,6 +484,16 @@ export default function Inventory() {
                     })}
                   </div>
                 </div>
+
+                {/* Mobile Apply Filters Button */}
+                <div className="lg:hidden pt-4 border-t border-white/10">
+                  <button
+                    onClick={() => setIsMobileFiltersOpen(false)}
+                    className="w-full py-3 bg-white text-black font-sans font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-zinc-100 transition-colors shadow-lg active:scale-98"
+                  >
+                    Apply &amp; View {filteredCars.length} Motorcars
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -486,9 +520,9 @@ export default function Inventory() {
                       <div className="frost-card hover:-translate-y-1.5 transition-all duration-300 ease-out flex flex-col h-full overflow-hidden rounded-2xl">
                         <div className="relative aspect-[16/10] sm:aspect-video md:aspect-auto md:h-64 overflow-hidden bg-black/60">
                           <SmartImage 
-                            src={car.images?.[0] || "/frames/desktop/frame_0001.webp"} 
+                            src={car.images?.[0] || CAR_PLACEHOLDER_IMAGE} 
                             alt={`${car.make} ${car.model}`} 
-                            fallbackSrc="/frames/desktop/frame_0001.webp"
+                            fallbackSrc={CAR_PLACEHOLDER_IMAGE}
                             loading="lazy" 
                             decoding="async"
                             className="w-full h-full object-contain bg-black/40 transition-transform duration-500 ease-out group-hover:scale-[1.05]" 

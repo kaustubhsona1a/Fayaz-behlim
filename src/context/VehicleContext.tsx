@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Vehicle, MOCK_VEHICLES, MOCK_LEADS } from '../data/mockData';
 import { supabase, handleSupabaseError, OperationType, deleteImagesFromStorage, getSupabaseUrl, getSupabaseAnonKey } from '../lib/supabase';
 import { useAuth } from './AuthContext';
@@ -147,6 +147,24 @@ export function ensureUUID(id: string): string {
 // Convert a vehicle object into a database payload matching schema.sql's columns exactly
 export function toDbPayload(v: any) {
   const reelVal = v.instagramReel || v.instagram_reel || null;
+  const rawImages = Array.isArray(v.images) ? v.images : [];
+  
+  // Clean user features and embed image URLs so they are resiliently persisted on the vehicles row
+  const cleanFeatures = Array.isArray(v.features)
+    ? v.features.filter((f: any) => typeof f === 'string' && !f.startsWith('instagram_reel:') && !f.startsWith('__img__:') && !f.startsWith('img_url:'))
+    : [];
+
+  const combinedFeatures = [...cleanFeatures];
+  if (reelVal) {
+    combinedFeatures.push(`instagram_reel:${reelVal}`);
+  }
+  // Embed image URLs into the features TEXT[] column as a persistent backup
+  rawImages.forEach((imgUrl: string) => {
+    if (imgUrl && typeof imgUrl === 'string' && !imgUrl.includes('/frames/desktop/frame_') && !imgUrl.includes('/frames/mobile/frame_')) {
+      combinedFeatures.push(`__img__:${imgUrl}`);
+    }
+  });
+
   return {
     id: ensureUUID(v.id),
     make: v.make || '',
@@ -167,9 +185,7 @@ export function toDbPayload(v: any) {
     description: v.description || null,
     instagram_reel: reelVal,
     inspection_notes: v.inspection_notes || v.inspectionNotes || null,
-    features: Array.isArray(v.features) ? (
-      reelVal ? [...v.features.filter((f: string) => !f.startsWith('instagram_reel:')), `instagram_reel:${reelVal}`] : v.features.filter((f: string) => !f.startsWith('instagram_reel:'))
-    ) : (reelVal ? [`instagram_reel:${reelVal}`] : []),
+    features: combinedFeatures,
     is_deleted: v.deleted !== undefined ? v.deleted : (v.is_deleted !== undefined ? v.is_deleted : false)
   };
 }
@@ -178,43 +194,53 @@ export function toDbPayload(v: any) {
 export async function syncVehicleImages(vehicleId: string, imageUrls: string[]) {
   if (!imageUrls || !Array.isArray(imageUrls)) return;
   const targetVehicleId = ensureUUID(vehicleId);
+  const cleanUrls = imageUrls.filter(url => typeof url === 'string' && url && !url.includes('/frames/desktop/frame_') && !url.includes('/frames/mobile/frame_'));
   
-  console.log(`[SYNC IMAGES] Clearing old records for vehicle: ${targetVehicleId}`);
-  const { error: deleteError } = await supabase
-    .from('vehicle_images')
-    .delete()
-    .eq('vehicle_id', targetVehicleId);
-    
-  if (deleteError) {
-    console.error(`[SYNC IMAGES ERROR] Failed to delete existing images for: ${targetVehicleId}`, deleteError);
-  }
-
-  if (imageUrls.length > 0) {
-    const rows = imageUrls.map((url, index) => ({
-      vehicle_id: targetVehicleId,
-      image_url: url,
-      display_order: index
-    }));
-    
-    console.log(`[SYNC IMAGES] Inserting ${rows.length} records for vehicle: ${targetVehicleId}`);
-    const { error: insertError } = await supabase
+  try {
+    console.log(`[SYNC IMAGES] Clearing old records for vehicle: ${targetVehicleId}`);
+    const { error: deleteError } = await supabase
       .from('vehicle_images')
-      .insert(rows);
+      .delete()
+      .eq('vehicle_id', targetVehicleId);
       
-    if (insertError) {
-      console.error(`[SYNC IMAGES ERROR] Failed to insert images for: ${targetVehicleId}`, insertError);
-    } else {
-      console.log(`[SYNC IMAGES SUCCESS] Synced images for: ${targetVehicleId}`);
+    if (deleteError) {
+      console.warn(`[SYNC IMAGES NOTICE] Failed to delete existing images for: ${targetVehicleId}`, deleteError.message);
     }
+
+    if (cleanUrls.length > 0) {
+      const rows = cleanUrls.map((url, index) => ({
+        vehicle_id: targetVehicleId,
+        image_url: url,
+        display_order: index
+      }));
+      
+      console.log(`[SYNC IMAGES] Inserting ${rows.length} records for vehicle: ${targetVehicleId}`);
+      const { error: insertError } = await supabase
+        .from('vehicle_images')
+        .insert(rows);
+        
+      if (insertError) {
+        console.warn(`[SYNC IMAGES NOTICE] Failed to insert images for: ${targetVehicleId}`, insertError.message);
+      } else {
+        console.log(`[SYNC IMAGES SUCCESS] Synced images for: ${targetVehicleId}`);
+      }
+    }
+  } catch (err) {
+    console.warn(`[SYNC IMAGES EXCEPTION]`, err);
   }
 }
 
 export function VehicleProvider({ children }: { children: ReactNode }) {
   const { isAdmin } = useAuth();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const currentVehiclesRef = useRef<Vehicle[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    currentVehiclesRef.current = vehicles;
+  }, [vehicles]);
 
   const [metrics, setMetrics] = useState<DiagnosticMetrics>({
     supabaseReads: 0,
@@ -238,6 +264,8 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     const normalizeVehicles = (list: any[]) => {
       return list.map(v => {
         if (!v) return null;
+        const targetId = ensureUUID(v.id);
+
         // Map database snake_case columns to React camelCase properties symmetrically
         const fuelType = v.fuelType || v.fuel_type || 'Petrol';
         const transmission = v.transmission || 'Automatic';
@@ -246,16 +274,10 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         const deleted = v.deleted !== undefined ? v.deleted : (v.is_deleted !== undefined ? v.is_deleted : false);
         const updatedAt = v.updatedAt || (v.updated_at ? new Date(v.updated_at).getTime() : Date.now());
         
-        let images = v.images || [];
-        if (v.vehicle_images && Array.isArray(v.vehicle_images)) {
-          const sortedImg = [...v.vehicle_images].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
-          const mappedFromRelations = sortedImg.map(img => img.image_url || img.gallery_url || img.fullscreen_url || img.thumbnail_url || '').filter(Boolean);
-          if (mappedFromRelations.length > 0) {
-            images = mappedFromRelations;
-          }
-        }
-        if (images && Array.isArray(images)) {
-          images = images.map((img: any) => {
+        // 1. Direct v.images array
+        let images: string[] = [];
+        if (v.images && Array.isArray(v.images)) {
+          images = v.images.map((img: any) => {
             if (typeof img === 'string') return img;
             if (img && typeof img === 'object') {
               return img.gallery_url || img.fullscreen_url || img.thumbnail_url || img.image_url || '';
@@ -263,19 +285,62 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
             return '';
           }).filter(Boolean);
         }
-        
-        let features = v.features || [];
-        let instagramReel = v.instagram_reel || '';
-        
-        if (Array.isArray(features)) {
-          const reelFeature = features.find((f: any) => typeof f === 'string' && f.startsWith('instagram_reel:'));
-          if (reelFeature) {
-            if (!instagramReel) {
-              instagramReel = reelFeature.slice(15);
-            }
-            features = features.filter((f: any) => f !== reelFeature);
+
+        // 2. Relations joined from vehicle_images table
+        if (images.length === 0 && v.vehicle_images && Array.isArray(v.vehicle_images) && v.vehicle_images.length > 0) {
+          const sortedImg = [...v.vehicle_images].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+          const mappedFromRelations = sortedImg.map(img => img.image_url || img.gallery_url || img.fullscreen_url || img.thumbnail_url || '').filter(Boolean);
+          if (mappedFromRelations.length > 0) {
+            images = mappedFromRelations;
           }
         }
+        
+        // 3. Embedded backup inside features TEXT[] column
+        let rawFeatures = Array.isArray(v.features) ? v.features : [];
+        let instagramReel = v.instagram_reel || '';
+        const cleanFeatures: string[] = [];
+        const embeddedImages: string[] = [];
+
+        for (const f of rawFeatures) {
+          if (typeof f === 'string') {
+            if (f.startsWith('instagram_reel:')) {
+              if (!instagramReel) instagramReel = f.slice(15);
+            } else if (f.startsWith('__img__:') || f.startsWith('img_url:')) {
+              const url = f.replace(/^(__img__|img_url):/, '');
+              if (url) embeddedImages.push(url);
+            } else {
+              cleanFeatures.push(f);
+            }
+          }
+        }
+
+        if (images.length === 0 && embeddedImages.length > 0) {
+          images = embeddedImages;
+        }
+
+        // 4. In-memory and local storage preservation fallback
+        if (images.length === 0) {
+          const inMemoryCar = currentVehiclesRef.current?.find(c => ensureUUID(c.id) === targetId);
+          if (inMemoryCar && inMemoryCar.images && inMemoryCar.images.length > 0) {
+            images = inMemoryCar.images;
+          } else {
+            try {
+              const rawLocal = localStorage.getItem('cyr_local_vehicles');
+              if (rawLocal) {
+                const parsed = JSON.parse(rawLocal);
+                if (Array.isArray(parsed)) {
+                  const localCar = parsed.find((c: any) => ensureUUID(c.id) === targetId);
+                  if (localCar && localCar.images && localCar.images.length > 0) {
+                    images = localCar.images;
+                  }
+                }
+              }
+            } catch {}
+          }
+        }
+
+        // 5. Sanitize: Strictly purge video frame URLs from car images so they NEVER appear
+        images = images.filter(url => typeof url === 'string' && url && !url.includes('/frames/desktop/frame_') && !url.includes('/frames/mobile/frame_'));
 
         // Safe primitives casting to prevent rendering crash from malformed/empty column rows
         const price = typeof v.price === 'number' ? v.price : Number(v.price || 0);
@@ -291,7 +356,7 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
         return {
           ...v,
-          id: ensureUUID(v.id),
+          id: targetId,
           make,
           model,
           variant,
@@ -309,7 +374,7 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
           deleted,
           updatedAt,
           images,
-          features,
+          features: cleanFeatures,
           instagramReel
         } as Vehicle;
       }).filter(Boolean) as Vehicle[];
@@ -636,11 +701,13 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
   const addVehicle = async (vehicle: Vehicle) => {
     const targetId = ensureUUID(vehicle.id);
-    const cleaned: Vehicle = { ...vehicle, id: targetId, updatedAt: Date.now(), deleted: false };
+    const cleanedImages = (vehicle.images || []).filter(url => typeof url === 'string' && url && !url.includes('/frames/desktop/frame_') && !url.includes('/frames/mobile/frame_'));
+    const cleaned: Vehicle = { ...vehicle, id: targetId, images: cleanedImages, updatedAt: Date.now(), deleted: false };
     
     // 1. Immediately update state and persistent storage
     const nextList = [cleaned, ...vehicles.filter(v => ensureUUID(v.id) !== targetId)];
     const filtered = nextList.filter(v => !v.deleted && v.status !== 'Deleted');
+    currentVehiclesRef.current = filtered;
     setVehicles(filtered);
 
     try {
@@ -690,15 +757,19 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     const idx = vehicles.findIndex(v => ensureUUID(v.id) === targetId);
     let oldVehicle = idx !== -1 ? vehicles[idx] : null;
     
+    const incomingImages = updates.images !== undefined ? updates.images : oldVehicle?.images;
+    const cleanedImages = (incomingImages || []).filter(url => typeof url === 'string' && url && !url.includes('/frames/desktop/frame_') && !url.includes('/frames/mobile/frame_'));
+
     const cleaned: Vehicle = oldVehicle 
-      ? { ...oldVehicle, ...updates, id: targetId, updatedAt: Date.now() }
-      : ({ ...updates, id: targetId, updatedAt: Date.now() } as Vehicle);
+      ? { ...oldVehicle, ...updates, id: targetId, images: cleanedImages, updatedAt: Date.now() }
+      : ({ ...updates, id: targetId, images: cleanedImages, updatedAt: Date.now() } as Vehicle);
 
     // 1. Immediately update state and persistent storage
     const nextList = idx !== -1 
       ? vehicles.map(v => ensureUUID(v.id) === targetId ? cleaned : v)
       : [cleaned, ...vehicles];
     const filtered = nextList.filter(v => !v.deleted && v.status !== 'Deleted');
+    currentVehiclesRef.current = filtered;
     setVehicles(filtered);
 
     try {

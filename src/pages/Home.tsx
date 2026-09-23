@@ -6,6 +6,7 @@ import { useVehicles } from '../context/VehicleContext';
 import { SEO } from '../components/SEO';
 import { SmartImage } from '../components/SmartImage';
 import { HeroCanvasScrub } from '../components/HeroCanvasScrub';
+import { CAR_PLACEHOLDER_IMAGE } from '../constants/placeholders';
 
 export default function Home() {
   const { vehicles, siteConfig } = useVehicles();
@@ -47,13 +48,13 @@ export default function Home() {
           <div className="container mx-auto max-w-7xl px-4 sm:px-6">
             
             {/* Header Row */}
-            <div className="flex flex-row justify-between items-center mb-8 sm:mb-12">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 sm:mb-12">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-sans font-extrabold text-white tracking-tight">
                 Featured Collection
               </h2>
               <Link 
                 to="/inventory" 
-                className="inline-flex items-center gap-1.5 text-[10.5px] sm:text-xs uppercase font-sans font-semibold tracking-[0.18em] text-zinc-300 hover:text-white transition-colors group"
+                className="inline-flex items-center gap-1.5 text-[10.5px] sm:text-xs uppercase font-sans font-semibold tracking-[0.18em] text-zinc-300 hover:text-white transition-colors group py-1"
               >
                 <span>VIEW ENTIRE COLLECTION</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -73,9 +74,9 @@ export default function Home() {
                     {/* Top Image Container with Badges */}
                     <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden bg-black/80 mb-4 sm:mb-5">
                       <SmartImage 
-                        src={car.images[0] || "/frames/desktop/frame_0001.webp"} 
+                        src={car.images[0] || CAR_PLACEHOLDER_IMAGE} 
                         alt={`${car.make} ${car.model}`}
-                        fallbackSrc="/frames/desktop/frame_0001.webp"
+                        fallbackSrc={CAR_PLACEHOLDER_IMAGE}
                         className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105" 
                       />
                       

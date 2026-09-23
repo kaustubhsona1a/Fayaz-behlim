@@ -5,6 +5,7 @@ import { formatPrice, Vehicle, BODY_TYPES } from '../../data/mockData';
 import { Search, Plus, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { useVehicles } from '../../context/VehicleContext';
 import { SmartImage } from '../../components/SmartImage';
+import { CAR_PLACEHOLDER_IMAGE } from '../../constants/placeholders';
 
 export default function AdminInventory() {
   const { vehicles, updateVehicle, removeVehicle } = useVehicles();
@@ -92,9 +93,9 @@ export default function AdminInventory() {
                     <div className="flex items-center space-x-4">
                       <div className="w-16 h-12 rounded-lg border border-white/5 overflow-hidden shrink-0">
                         <SmartImage 
-                          src={car.images?.[0] || "/frames/desktop/frame_0001.webp"} 
+                          src={car.images?.[0] || CAR_PLACEHOLDER_IMAGE} 
                           alt="" 
-                          fallbackSrc="/frames/desktop/frame_0001.webp"
+                          fallbackSrc={CAR_PLACEHOLDER_IMAGE}
                           className="w-full h-full object-cover" 
                         />
                       </div>
@@ -144,9 +145,9 @@ export default function AdminInventory() {
               <div className="flex space-x-4 items-start">
                 <div className="w-20 h-16 rounded-lg border border-white/5 overflow-hidden shrink-0">
                   <SmartImage 
-                    src={car.images?.[0] || "/frames/desktop/frame_0001.webp"} 
+                    src={car.images?.[0] || CAR_PLACEHOLDER_IMAGE} 
                     alt="" 
-                    fallbackSrc="/frames/desktop/frame_0001.webp"
+                    fallbackSrc={CAR_PLACEHOLDER_IMAGE}
                     className="w-full h-full object-cover" 
                   />
                 </div>

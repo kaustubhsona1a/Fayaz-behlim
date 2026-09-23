@@ -9,8 +9,7 @@ import {
   ArrowRight, 
   Compass, 
   Upload,
-  MoveHorizontal,
-  Phone
+  MoveHorizontal
 } from 'lucide-react';
 import { loadCustomFrames, getFirstFrameUrl, clearCustomFrames } from '../lib/frameStore';
 import { useVehicles } from '../context/VehicleContext';
@@ -562,7 +561,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
       style={{ height: '360vh' }}
     >
       {/* Sticky Canvas Viewport */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+      <div className="sticky top-0 h-[100dvh] h-screen w-full overflow-hidden flex items-center justify-center">
         
         {/* Immediate First Frame Poster - Always visible instantly before scrolling or loading */}
         <img 
@@ -644,11 +643,11 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         <div 
           ref={phase1Ref}
           id="hero-phase-1"
-          className="absolute inset-0 z-30 flex flex-col justify-end pb-28 sm:pb-32 md:pb-36 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
+          className="absolute inset-0 z-30 flex flex-col justify-end pb-20 sm:pb-28 md:pb-36 px-4 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
         >
           {/* Bottom Action Section with compact sleek buttons completely clear of the central car */}
           <div className="select-none max-w-sm">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 mb-3">
+            <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
               <Link
                 to="/inventory"
                 id="btn-hero-phase1-browse"
@@ -656,27 +655,22 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
                   e.stopPropagation();
                   navigate('/inventory');
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[10.5px] sm:text-[11.5px] uppercase tracking-wider transition-all duration-300 shadow-[0_2px_12px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[10.5px] sm:text-[11.5px] uppercase tracking-wider transition-all duration-300 shadow-[0_2px_12px_rgba(255,255,255,0.25)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
               >
                 <span>Browse Inventory</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
-              <a
-                href="#contact"
-                id="btn-hero-contact-us"
+              <Link
+                to="/sell"
+                id="btn-hero-sell-car"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const el = document.getElementById('contact');
-                  if (el) {
-                    e.preventDefault();
-                    el.scrollIntoView({ behavior: 'smooth' });
-                  }
+                  navigate('/sell');
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[10.5px] sm:text-[11.5px] uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[10.5px] sm:text-[11.5px] uppercase tracking-wider border border-white/25 transition-all backdrop-blur-md hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
               >
-                <Phone className="w-3 h-3" />
-                <span>Contact Us</span>
-              </a>
+                <span>Sell Your Car</span>
+              </Link>
             </div>
             <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-sans font-semibold text-zinc-400 uppercase tracking-widest">
               <MoveHorizontal className="w-3 h-3 text-zinc-400" />
@@ -689,31 +683,31 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         <div 
           ref={phase2Ref}
           id="hero-phase-2"
-          className="absolute inset-0 z-20 flex flex-col justify-end items-end pb-24 sm:pb-28 md:pb-32 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0 invisible"
+          className="absolute inset-0 z-20 flex flex-col justify-end items-end pb-20 sm:pb-28 md:pb-32 px-4 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0 invisible"
         >
-          <div className="max-w-xs sm:max-w-sm md:max-w-md text-right select-none pointer-events-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-sky-400 mb-1.5">
+          <div className="max-w-[280px] xs:max-w-xs sm:max-w-sm md:max-w-md text-right select-none pointer-events-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] bg-black/60 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none p-3.5 sm:p-0 rounded-2xl sm:rounded-none border border-white/10 sm:border-0">
+            <div className="inline-flex items-center gap-1.5 text-[9.5px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-sky-400 mb-1 sm:mb-1.5">
               <Gauge className="w-3.5 h-3.5 text-sky-400" />
               <span>DISCREET CURATION</span>
             </div>
-            <h3 className="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-tight">
+            <h3 className="text-lg sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-tight mb-2 sm:mb-3 uppercase leading-tight">
               BESPOKE EXOTICS &amp; PERFORMANCE
             </h3>
-            <div className="space-y-1.5 text-[11px] sm:text-xs text-zinc-300 font-sans">
+            <div className="space-y-1 sm:space-y-1.5 text-[10px] sm:text-xs text-zinc-300 font-sans">
               <div className="flex justify-end items-center gap-2 pb-1 border-b border-white/15">
-                <span className="text-zinc-400 uppercase text-[9.5px] tracking-wider">Provenance:</span>
+                <span className="text-zinc-400 uppercase text-[9px] sm:text-[9.5px] tracking-wider">Provenance:</span>
                 <span className="text-white font-semibold">Single-Collector Certified</span>
               </div>
               <div className="flex justify-end items-center gap-2 pb-1 border-b border-white/15">
-                <span className="text-zinc-400 uppercase text-[9.5px] tracking-wider">Telemetry:</span>
+                <span className="text-zinc-400 uppercase text-[9px] sm:text-[9.5px] tracking-wider">Telemetry:</span>
                 <span className="text-white font-semibold">Verified Drivetrain Health</span>
               </div>
               <div className="flex justify-end items-center gap-2">
-                <span className="text-zinc-400 uppercase text-[9.5px] tracking-wider">Delivery:</span>
+                <span className="text-zinc-400 uppercase text-[9px] sm:text-[9.5px] tracking-wider">Delivery:</span>
                 <span className="text-emerald-400 font-semibold">White-Glove Enclosed Transport</span>
               </div>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-zinc-400 uppercase tracking-widest mt-2.5 font-mono">
+            <p className="text-[9px] sm:text-[11px] text-zinc-400 uppercase tracking-widest mt-2 sm:mt-2.5 font-mono">
               Bandra Hill View Rd • Mumbai
             </p>
           </div>
@@ -723,82 +717,55 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         <div 
           ref={phase3Ref}
           id="hero-phase-3"
-          className="absolute inset-0 z-20 flex flex-col justify-end items-start pb-24 sm:pb-28 md:pb-32 px-6 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0 invisible"
+          className="absolute inset-0 z-20 flex flex-col justify-end items-start pb-20 sm:pb-28 md:pb-32 px-4 sm:px-10 md:px-14 lg:px-16 pointer-events-none opacity-0 invisible"
         >
-          <div className="max-w-xs sm:max-w-sm md:max-w-md text-left select-none pointer-events-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-emerald-400 mb-1.5">
+          <div className="max-w-[280px] xs:max-w-xs sm:max-w-sm md:max-w-md text-left select-none pointer-events-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] bg-black/60 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none p-3.5 sm:p-0 rounded-2xl sm:rounded-none border border-white/10 sm:border-0">
+            <div className="inline-flex items-center gap-1.5 text-[9.5px] sm:text-xs font-sans font-bold tracking-[0.2em] uppercase text-emerald-400 mb-1 sm:mb-1.5">
               <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
               <span>CONCOURS STANDARDS</span>
             </div>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-3 uppercase leading-[1.1]">
+            <h3 className="text-xl sm:text-3xl md:text-4xl font-cinzel font-bold text-white tracking-tight mb-2 sm:mb-3 uppercase leading-[1.1]">
               UNCOMPROMISING<br />PROVENANCE
             </h3>
-            <div className="space-y-2 text-[11px] sm:text-xs text-zinc-200 font-sans">
-              <div className="flex items-center gap-2.5 pb-1.5 border-b border-white/15">
+            <div className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-zinc-200 font-sans">
+              <div className="flex items-center gap-2 sm:gap-2.5 pb-1 sm:pb-1.5 border-b border-white/15">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Precision Paint Meter &amp; Structural Integrity Audit</span>
+                <span>Precision Paint Meter &amp; Integrity Audit</span>
               </div>
-              <div className="flex items-center gap-2.5 pb-1.5 border-b border-white/15">
+              <div className="flex items-center gap-2 sm:gap-2.5 pb-1 sm:pb-1.5 border-b border-white/15">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Exotic ECU Diagnostics &amp; Dyno Telemetry Logs</span>
+                <span>Exotic ECU &amp; Telemetry Logs</span>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2 sm:gap-2.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>Concours Ceramic Detail &amp; Multi-Stage Paint Correction</span>
+                <span>Concours Ceramic Detail &amp; Correction</span>
               </div>
             </div>
-            <p className="text-[11px] sm:text-xs text-zinc-400 font-sans mt-3 leading-relaxed">
-              Curating exclusively the finest 1% of luxury &amp; supercar acquisitions.
+            <p className="text-[10px] sm:text-xs text-zinc-400 font-sans mt-2 sm:mt-2.5 leading-relaxed">
+              Curating exclusively the finest 1% of luxury &amp; supercars.
             </p>
           </div>
         </div>
 
-        {/* Phase 4: Final Reveal & Inventory CTA (82% - 100% Scroll) - Centered Completion */}
+        {/* Phase 4: Final Reveal (Last Frame) - Clean Minimalist View Inventory */}
         <div 
           ref={phase4Ref}
           id="hero-phase-4"
-          className="absolute inset-0 z-30 flex flex-col justify-center items-center text-center p-6 md:p-12 pointer-events-none opacity-0 invisible"
+          className="absolute inset-0 z-30 flex flex-col justify-center items-center text-center p-4 sm:p-6 pointer-events-none opacity-0 invisible"
         >
-          <div className="max-w-xl text-center select-none pointer-events-auto drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)]">
-            <span className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-zinc-300 font-bold mb-2.5 block">
-              SHOWCASE COMPLETE
-            </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-cinzel font-bold text-white tracking-tight mb-3.5 uppercase">
-              Explore Available Collection
-            </h2>
-            <p className="text-xs sm:text-sm md:text-base text-zinc-200 mb-6 leading-relaxed font-sans max-w-md mx-auto">
-              Discover our hand-picked collection of exotic supercars, high-performance sports cars, and luxury flagship motorcars on Hill View Road, Bandra, Mumbai.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
-              <Link
-                to="/inventory"
-                id="btn-hero-browse-stock"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate('/inventory');
-                }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all duration-300 shadow-[0_4px_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
-              >
-                <span>Browse Full Inventory</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <a
-                href="#contact"
-                id="btn-hero-phase4-contact"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const el = document.getElementById('contact');
-                  if (el) {
-                    e.preventDefault();
-                    el.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full bg-black/80 hover:bg-white hover:text-black text-white font-sans font-semibold text-[11px] sm:text-xs uppercase tracking-wider border border-white/25 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg backdrop-blur-md pointer-events-auto cursor-pointer"
-              >
-                <Phone className="w-3.5 h-3.5" />
-                <span>Contact Us</span>
-              </a>
-            </div>
+          <div className="select-none pointer-events-auto">
+            <Link
+              to="/inventory"
+              id="btn-hero-view-inventory"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/inventory');
+              }}
+              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-bold text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_4px_25px_rgba(255,255,255,0.35)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
+            >
+              <span>View Inventory</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
 

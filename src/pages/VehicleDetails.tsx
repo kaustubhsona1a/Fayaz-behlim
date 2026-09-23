@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useVehicles } from '../context/VehicleContext';
 import { SEO } from '../components/SEO';
 import { SmartImage } from '../components/SmartImage';
+import { CAR_PLACEHOLDER_IMAGE } from '../constants/placeholders';
 
 export default function VehicleDetails() {
   const { vehicles, loading } = useVehicles();
@@ -208,9 +209,9 @@ export default function VehicleDetails() {
           onTouchEnd={handleTouchEnd}
         >
           <SmartImage 
-            src={car.images?.[activeImage] || "/frames/desktop/frame_0001.webp"} 
+            src={car.images?.[activeImage] || CAR_PLACEHOLDER_IMAGE} 
             alt={car.make} 
-            fallbackSrc="/frames/desktop/frame_0001.webp"
+            fallbackSrc={CAR_PLACEHOLDER_IMAGE}
             className="w-full h-full object-contain transition-all duration-500 opacity-95 group-hover:opacity-100" 
           />
         </div>
@@ -224,7 +225,7 @@ export default function VehicleDetails() {
               <SmartImage 
                 src={img} 
                 alt={`Thumbnail ${i + 1}`} 
-                fallbackSrc="/frames/desktop/frame_0001.webp"
+                fallbackSrc={CAR_PLACEHOLDER_IMAGE}
                 loading="lazy" 
                 decoding="async"
                 className="w-full h-full object-cover" 
@@ -464,7 +465,7 @@ export default function VehicleDetails() {
   const pageTitle = `${car.year} ${car.make} ${car.model} ${car.variant} | CYR Cars`;
 
   const pageDescription = `Exquisite luxury pre-owned ${car.year} ${car.make} ${car.model}. Contact us today to arrange a viewing at our Showroom. ${car.description ? car.description.substring(0, 100) + '...' : ''}`;
-  const ogImageUrl = car.images?.[0] || "/frames/desktop/frame_0001.webp";
+  const ogImageUrl = car.images?.[0] || "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1200&q=80";
 
   return (
     <div className="min-h-screen bg-transparent text-zinc-750 py-5 sm:py-8 font-sans selection:bg-white selection:text-zinc-950 z-10 relative">
@@ -497,9 +498,9 @@ export default function VehicleDetails() {
             )}
 
             <SmartImage 
-              src={car.images?.[activeImage] || "/frames/desktop/frame_0001.webp"} 
+              src={car.images?.[activeImage] || CAR_PLACEHOLDER_IMAGE} 
               alt={`Fullscreen ${car.make} ${car.model}`} 
-              fallbackSrc="/frames/desktop/frame_0001.webp"
+              fallbackSrc={CAR_PLACEHOLDER_IMAGE}
               className="max-w-full max-h-full object-contain cursor-default select-none transition-all duration-300"
               onClick={(e) => e.stopPropagation()}
             />
@@ -612,8 +613,9 @@ export default function VehicleDetails() {
               <div className="bg-zinc-950/40 border border-zinc-805 rounded-xl p-4 flex gap-4 items-center">
                 <div className="w-16 h-12 rounded overflow-hidden flex-shrink-0 bg-zinc-950">
                   <SmartImage 
-                    src={car.images?.[0] || "/frames/desktop/frame_0001.webp"} 
+                    src={car.images?.[0] || CAR_PLACEHOLDER_IMAGE} 
                     alt={car.make} 
+                    fallbackSrc={CAR_PLACEHOLDER_IMAGE}
                     className="w-full h-full object-cover"
                   />
                 </div>

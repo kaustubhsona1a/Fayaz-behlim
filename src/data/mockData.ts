@@ -44,7 +44,11 @@ export const MOCK_VEHICLES: Vehicle[] = [
     color: "Lizard Green / Carbon Accent",
     ownership: "1st Owner",
     registration: "MH-01-EE-9000",
-    images: ["/frames/desktop/frame_0001.webp", "/frames/desktop/frame_0012.webp", "/frames/desktop/frame_0025.webp"],
+    images: [
+      "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1600&q=80"
+    ],
     features: ["Weissach Package", "Carbon Ceramic Brakes (PCCB)", "Rear Axle Steering", "Front Axle Lift System", "Magnesium Racing Wheels", "Club Sport Package"],
     status: "Available",
     description: "A road-legal track masterpiece. This Lizard Green 911 GT3 RS features the highly sought-after Weissach Package, reducing weight and enhancing aerodynamics. Immaculately maintained by a single enthusiast collector with complete Porsche Mumbai center records.",
@@ -66,7 +70,11 @@ export const MOCK_VEHICLES: Vehicle[] = [
     color: "Matte Obsidian Black",
     ownership: "1st Owner",
     registration: "MH-02-FN-1111",
-    images: ["/frames/desktop/frame_0025.webp", "/frames/desktop/frame_0038.webp", "/frames/desktop/frame_0050.webp"],
+    images: [
+      "https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=1600&q=80"
+    ],
     features: ["AMG Night Package", "22-inch Forged AMG Wheels", "Burmester Surround Sound System", "Bespoke Nappa Leather Concept", "Dynamic Ride Control Active Suspension", "Red Brake Calipers"],
     status: "Available",
     description: "The ultimate power statement. Obsidian Black metallic exterior combined with red/black bi-color Nappa leather. Complete company service records, absolute showroom condition.",

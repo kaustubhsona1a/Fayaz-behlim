@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getInMemoryImageUrl, getCachedImageUrl } from '../lib/imageCache';
+import { CAR_PLACEHOLDER_IMAGE } from '../constants/placeholders';
 
 interface SmartImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
   cacheLocally?: boolean;
 }
 
-const DEFAULT_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='500' fill='%2318181b'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2371717a' font-family='sans-serif' font-size='16'>Loading Image...</text></svg>";
-
 export const SmartImage: React.FC<SmartImageProps> = ({
   src,
-  fallbackSrc = DEFAULT_PLACEHOLDER,
+  fallbackSrc = CAR_PLACEHOLDER_IMAGE,
   alt = '',
   className = '',
   loading = 'lazy',
@@ -18,13 +17,49 @@ export const SmartImage: React.FC<SmartImageProps> = ({
   onError,
   ...props
 }) => {
-  const inMemory = src ? getInMemoryImageUrl(src) : null;
-  const [currentSrc, setCurrentSrc] = useState<string>(inMemory || src || fallbackSrc);
+  // If src is an accidental video frame, intercept and replace immediately with placeholder
+  const sanitizedSrc = (src && !src.includes('/frames/desktop/frame_') && !src.includes('/frames/mobile/frame_')) ? src : '';
+  const inMemory = sanitizedSrc ? getInMemoryImageUrl(sanitizedSrc) : null;
+  const [currentSrc, setCurrentSrc] = useState<string>(inMemory || sanitizedSrc || fallbackSrc);
   const [isInView, setIsInView] = useState<boolean>(loading === 'eager');
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
-  // IntersectionObserver: Only trigger fetches when image is within 250px of viewport
+  // Sync currentSrc whenever src or fallbackSrc changes
+  useEffect(() => {
+    setHasError(false);
+    if (!sanitizedSrc) {
+      setCurrentSrc(fallbackSrc);
+      return;
+    }
+
+    const mem = getInMemoryImageUrl(sanitizedSrc);
+    if (mem) {
+      setCurrentSrc(mem);
+      return;
+    }
+
+    // Immediately show direct src so user sees uploaded photo with zero delay
+    setCurrentSrc(sanitizedSrc);
+
+    if (cacheLocally && isInView) {
+      let isMounted = true;
+      getCachedImageUrl(sanitizedSrc).then((cachedUrl) => {
+        if (isMounted && cachedUrl) {
+          setCurrentSrc(cachedUrl);
+        }
+      }).catch(() => {
+        if (isMounted) {
+          setCurrentSrc(sanitizedSrc);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [sanitizedSrc, isInView, cacheLocally, fallbackSrc]);
+
+  // IntersectionObserver: Only trigger background cache fetch when image is near viewport
   useEffect(() => {
     if (loading === 'eager' || typeof window === 'undefined' || !('IntersectionObserver' in window)) {
       setIsInView(true);
@@ -46,40 +81,14 @@ export const SmartImage: React.FC<SmartImageProps> = ({
     return () => observer.disconnect();
   }, [loading]);
 
-  // Fetch and cache when in view
-  useEffect(() => {
-    if (!src || !isInView) return;
-
-    if (!cacheLocally) {
-      setCurrentSrc(src);
-      return;
-    }
-
-    const mem = getInMemoryImageUrl(src);
-    if (mem) {
-      setCurrentSrc(mem);
-      return;
-    }
-
-    let isMounted = true;
-    getCachedImageUrl(src).then((cachedUrl) => {
-      if (isMounted && cachedUrl) {
-        setCurrentSrc(cachedUrl);
-      }
-    }).catch(() => {
-      if (isMounted) {
-        setCurrentSrc(src);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [src, isInView, cacheLocally]);
-
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     if (!hasError) {
       setHasError(true);
+      // If a cached blob URL failed to render, try reverting to direct sanitizedSrc first
+      if (currentSrc !== sanitizedSrc && sanitizedSrc) {
+        setCurrentSrc(sanitizedSrc);
+        return;
+      }
       setCurrentSrc(fallbackSrc);
     }
     if (onError) {

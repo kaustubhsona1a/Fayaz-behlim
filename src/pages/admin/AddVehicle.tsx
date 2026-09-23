@@ -101,7 +101,7 @@ export default function AdminAddVehicle() {
           description: vehicle.description || '',
           instagramReel: vehicle.instagramReel || '',
         });
-        setImages(vehicle.images || []);
+        setImages((vehicle.images || []).filter(url => typeof url === 'string' && url && !url.includes('/frames/desktop/frame_') && !url.includes('/frames/mobile/frame_')));
       }
     }
   }, [id, isEditing, vehicles]);

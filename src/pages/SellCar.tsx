@@ -121,50 +121,60 @@ export default function SellCar() {
         </div>
 
         {submitted ? (
-          <div className="frost-card p-14 text-center rounded-2xl">
-            <div className="w-16 h-16 frost-pill text-white rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="frost-card p-6 sm:p-12 md:p-14 text-center rounded-2xl">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 frost-pill text-white rounded-2xl flex items-center justify-center mx-auto mb-5 sm:mb-6">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-cinzel font-bold text-white mb-2 uppercase">Request Lodged</h2>
-            <p className="text-zinc-200 mb-8 tracking-wider uppercase text-[10px] leading-relaxed font-sans font-bold">Our purchase team will contact you within 2 business hours.</p>
-            <button onClick={resetForm} className="px-8 py-3.5 bg-white text-black hover:bg-zinc-100 rounded-full uppercase tracking-widest text-xs font-bold transition-all duration-300 font-sans shadow-lg">
-              Submit Another Vehicle
-            </button>
+            <h2 className="text-xl sm:text-2xl font-cinzel font-bold text-white mb-2 uppercase">Request Lodged</h2>
+            <p className="text-zinc-200 mb-6 tracking-wider uppercase text-[10px] sm:text-[11px] leading-relaxed font-sans font-bold">Our purchase team will contact you within 2 business hours.</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a 
+                href={`https://wa.me/919987773656?text=${encodeURIComponent(`Hi CYR Cars, I just submitted my car valuation request for appraisal.`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full sm:w-auto px-6 py-3 bg-[#25D366] text-black font-bold uppercase tracking-wider text-xs rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all"
+              >
+                Chat on WhatsApp for Priority
+              </a>
+              <button onClick={resetForm} className="w-full sm:w-auto px-6 py-3 bg-white text-black hover:bg-zinc-100 rounded-full uppercase tracking-widest text-xs font-bold transition-all duration-300 font-sans shadow-lg">
+                Submit Another Vehicle
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="frost-card rounded-2xl p-8 md:p-12 font-sans">
-            <form onSubmit={handleSubmit} className="space-y-10">
+          <div className="frost-card rounded-2xl p-5 sm:p-8 md:p-12 font-sans">
+            <form onSubmit={handleSubmit} className="space-y-7 sm:space-y-10">
               
               <div>
-                <h3 className="text-xs font-bold tracking-widest uppercase text-white mb-6 border-b border-white/15 pb-3 font-cinzel">Section A: Vehicle Specs</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
+                <h3 className="text-xs font-bold tracking-widest uppercase text-white mb-4 sm:mb-6 border-b border-white/15 pb-2.5 sm:pb-3 font-cinzel">Section A: Vehicle Specs</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label htmlFor="make" className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Brand / Make</label>
-                    <input id="make" value={formData.make} onChange={e => setFormData({...formData, make: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. BMW" required />
+                    <input id="make" value={formData.make} onChange={e => setFormData({...formData, make: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. BMW" required />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label htmlFor="model" className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Model Name</label>
-                    <input id="model" value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. X5" required />
+                    <input id="model" value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. X5" required />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label htmlFor="year" className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Registration Year</label>
-                    <input id="year" type="number" value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. 2022" required />
+                    <input id="year" type="number" value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. 2022" required />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label htmlFor="mileage" className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Odometer Reading (KM)</label>
-                    <input id="mileage" type="number" value={formData.mileage} onChange={e => setFormData({...formData, mileage: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. 18500" required />
+                    <input id="mileage" type="number" value={formData.mileage} onChange={e => setFormData({...formData, mileage: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. 18500" required />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
                     <label className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Ownership History</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-1">
                       {['First', 'Second', 'Third', 'Fourth+'].map((opt) => (
                         <button
                           key={opt}
                           type="button"
                           onClick={() => setFormData({...formData, ownership: opt})}
-                          className={`py-3 px-4 rounded-xl text-[10px] font-sans font-bold uppercase tracking-wider transition-all border ${
+                          className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl text-[10px] font-sans font-bold uppercase tracking-wider transition-all border ${
                             formData.ownership === opt 
                               ? 'bg-white border-white text-black shadow-md scale-[1.02]'
                               : 'bg-black/40 border-white/20 text-zinc-300 hover:border-white/50 hover:text-white'
@@ -179,22 +189,22 @@ export default function SellCar() {
               </div>
 
               <div>
-                <h3 className="text-xs font-bold tracking-widest uppercase text-white mb-6 border-b border-white/15 pb-3 font-cinzel">Section B: Owner Contacts</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
+                <h3 className="text-xs font-bold tracking-widest uppercase text-white mb-4 sm:mb-6 border-b border-white/15 pb-2.5 sm:pb-3 font-cinzel">Section B: Owner Contacts</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label htmlFor="name" className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Full Name</label>
-                    <input id="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="Enter name" required />
+                    <input id="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="Enter name" required />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label htmlFor="phone" className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Active Contact Number</label>
-                    <input id="phone" type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="+91" required />
+                    <input id="phone" type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="+91" required />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 <label htmlFor="notes" className="block text-[10px] tracking-wider uppercase text-zinc-200 font-sans font-bold">Additional Specifications (Optional)</label>
-                <textarea id="notes" rows={4} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. Single owner, insurance active till Dec 2026, ceramic coating..." />
+                <textarea id="notes" rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="w-full bg-black/40 border border-white/20 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black/60 transition-all font-sans" placeholder="e.g. Single owner, insurance active till Dec 2026, ceramic coating..." />
               </div>
 
               <div>
