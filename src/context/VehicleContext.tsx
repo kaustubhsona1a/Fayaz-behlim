@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Vehicle, MOCK_VEHICLES, MOCK_LEADS } from '../data/mockData';
-import { supabase, handleSupabaseError, OperationType, deleteImagesFromStorage } from '../lib/supabase';
+import { supabase, handleSupabaseError, OperationType, deleteImagesFromStorage, getSupabaseUrl, getSupabaseAnonKey } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { getFromCache, saveToCache } from '../lib/indexedDB';
 
@@ -53,6 +53,7 @@ interface VehicleContextType {
   updateSiteConfig: (updates: Partial<SiteConfig>) => Promise<void>;
   migrateLocalStorage: () => Promise<boolean>;
   seedSampleData: () => Promise<boolean>;
+  syncCurrentInventoryToSupabase?: () => Promise<{ success: boolean; count: number; error?: string }>;
   metrics: DiagnosticMetrics;
   refreshInventory: (bypassCache?: boolean) => Promise<void>;
   fetchLeads?: () => Promise<void>;
@@ -93,8 +94,8 @@ export function sanitizeAboutImage(path: string | undefined): string {
 }
 
 export const isSupabaseConfigured = () => {
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON;
+  const url = getSupabaseUrl();
+  const key = getSupabaseAnonKey();
   return Boolean(
     url &&
     url !== 'YOUR_SUPABASE_URL' &&
@@ -346,7 +347,9 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
         setVehicles(filtered);
         hasMountedCache = true;
       } else {
-        setVehicles([]);
+        // If no cache exists (incognito, AI Studio preview, new devices), initialize with active showroom cars (2 cars)
+        setVehicles(MOCK_VEHICLES);
+        hasMountedCache = true;
       }
       
       if (cachedConfig) {
@@ -468,27 +471,60 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
             await saveToCache('site_config', parsedConfig);
           }
 
-          // Authoritative fetch of vehicles from Supabase database
+          // Authoritative fetch of vehicles directly from Supabase database
           incrementMetric('supabaseReads');
-          const { data, error } = await supabase.from('vehicles').select('*, vehicle_images(*)');
-          if (!error && data) {
-            console.log(`[SUPABASE INVENTORY FETCH] Received ${data.length} vehicle records from remote database.`);
-            const normalized = normalizeVehicles(data);
+          let remoteVehicles: any[] | null = null;
+          let queryError: any = null;
+
+          try {
+            // Primary query: vehicles joined with vehicle_images
+            const resImages = await supabase
+              .from('vehicles')
+              .select('*, vehicle_images(*)')
+              .order('created_at', { ascending: false });
+
+            if (!resImages.error && resImages.data) {
+              remoteVehicles = resImages.data;
+            } else {
+              // Resilient fallback: vehicles table direct query
+              const resDirect = await supabase
+                .from('vehicles')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+              if (!resDirect.error && resDirect.data) {
+                remoteVehicles = resDirect.data;
+              } else {
+                queryError = resImages.error || resDirect.error;
+              }
+            }
+          } catch (fetchErr: any) {
+            queryError = fetchErr;
+          }
+
+          if (remoteVehicles && remoteVehicles.length > 0) {
+            console.log(`[SUPABASE INVENTORY FETCH] Successfully loaded ${remoteVehicles.length} vehicles from Supabase.`);
+            const normalized = normalizeVehicles(remoteVehicles);
             const filtered = normalized.filter(v => !v.deleted && v.status !== 'Deleted');
             
             // Set authoritative list in state
             setVehicles(filtered);
             
-            // Overwrite and sanitize the local cache so old stale records (like the 3rd mock car) are evicted
+            // Overwrite and sanitize the local cache so old stale records are evicted
             await saveToCache('vehicles', filtered);
             try {
               localStorage.setItem('cyr_local_vehicles', JSON.stringify(filtered));
             } catch (e) {}
-          } else if (error) {
-            console.warn('Supabase query returned notice, retaining active vehicle cache:', error.message || error);
+          } else if (remoteVehicles && remoteVehicles.length === 0) {
+            console.log('[SUPABASE INVENTORY FETCH] Supabase vehicles table returned 0 records. Retaining showroom baseline.');
+            setVehicles(prev => prev.length > 0 ? prev : MOCK_VEHICLES);
+          } else if (queryError) {
+            console.warn('[SUPABASE INVENTORY NOTICE] Supabase query notice (retaining active showroom cars):', queryError?.message || queryError);
+            setVehicles(prev => prev.length > 0 ? prev : MOCK_VEHICLES);
           }
         } catch (err) {
           console.warn('Background Supabase query notice, retaining active vehicle cache:', err);
+          setVehicles(prev => prev.length > 0 ? prev : MOCK_VEHICLES);
         }
       } else {
         // Offline / demo fallback when Supabase is not configured
@@ -1056,6 +1092,35 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
+  const syncCurrentInventoryToSupabase = async (): Promise<{ success: boolean; count: number; error?: string }> => {
+    if (!isSupabaseConfigured()) {
+      return { success: false, count: 0, error: 'Supabase URL & Key are not configured.' };
+    }
+    try {
+      const activeList = vehicles.length > 0 ? vehicles : MOCK_VEHICLES;
+      const dbPayload = activeList.map(v => toDbPayload(v));
+      console.log('[SUPABASE SYNC ALL] Pushing active inventory to database:', dbPayload);
+      
+      const { data, error } = await supabase.from('vehicles').upsert(dbPayload).select();
+      if (error) {
+        console.error('[SUPABASE SYNC ERROR]', error);
+        return { success: false, count: 0, error: error.message };
+      }
+      
+      for (const v of activeList) {
+        if (v.images && v.images.length > 0) {
+          await syncVehicleImages(ensureUUID(v.id), v.images);
+        }
+      }
+      
+      await fetchInventory();
+      return { success: true, count: activeList.length };
+    } catch (err: any) {
+      console.error('[SUPABASE SYNC EXCEPTION]', err);
+      return { success: false, count: 0, error: err?.message || String(err) };
+    }
+  };
+
   const refreshInventory = async () => {
     await fetchInventory();
   };
@@ -1075,6 +1140,7 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
       updateSiteConfig,
       migrateLocalStorage,
       seedSampleData,
+      syncCurrentInventoryToSupabase,
       metrics,
       refreshInventory,
       fetchLeads

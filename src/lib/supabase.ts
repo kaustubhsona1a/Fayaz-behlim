@@ -2,10 +2,42 @@ import { createClient } from '@supabase/supabase-js';
 import imageCompression from 'browser-image-compression';
 import heic2any from 'heic2any';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON || 'placeholder';
+export function getSupabaseUrl(): string {
+  try {
+    if (typeof window !== 'undefined') {
+      const custom = localStorage.getItem('cyr_custom_supabase_url');
+      if (custom && custom.trim().startsWith('http')) return custom.trim();
+    }
+  } catch (e) {}
+  return import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export function getSupabaseAnonKey(): string {
+  try {
+    if (typeof window !== 'undefined') {
+      const custom = localStorage.getItem('cyr_custom_supabase_anon_key');
+      if (custom && custom.trim().length > 10) return custom.trim();
+    }
+  } catch (e) {}
+  return import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON || 'placeholder';
+}
+
+export let supabase = createClient(getSupabaseUrl(), getSupabaseAnonKey());
+
+export function reinitSupabaseClient(newUrl?: string, newKey?: string) {
+  try {
+    if (newUrl !== undefined) {
+      if (newUrl) localStorage.setItem('cyr_custom_supabase_url', newUrl.trim());
+      else localStorage.removeItem('cyr_custom_supabase_url');
+    }
+    if (newKey !== undefined) {
+      if (newKey) localStorage.setItem('cyr_custom_supabase_anon_key', newKey.trim());
+      else localStorage.removeItem('cyr_custom_supabase_anon_key');
+    }
+  } catch (e) {}
+  supabase = createClient(getSupabaseUrl(), getSupabaseAnonKey());
+  return supabase;
+}
 
 export enum OperationType {
   CREATE = 'create',
@@ -169,163 +201,8 @@ export async function convertHeicToJpeg(file: File): Promise<File> {
   }
 }
 
-/**
- * High quality, super-fast client-side compression pipeline.
- * Designed for iPhone HEIC, Android High-Res, and Laptop/Mac DSLR photos.
- * Downscales to 1280px max-dimension and compresses to high-clarity WebP/JPEG under 200KB.
- */
-export async function compressImage(
-  inputFile: File, 
-  options?: { maxDimension?: number; targetQuality?: number; isShowcase?: boolean }
-): Promise<File> {
-  // 1. Process HEIC files first
-  const file = await convertHeicToJpeg(inputFile);
-
-  // Skip compression for non-images or showcase branding assets if requested
-  if (options?.isShowcase || (!file.type.startsWith('image/') && !file.name.match(/\.(heic|heif|jpe?g|png|webp|mov)$/i))) {
-    return file;
-  }
-
-  // 1280px is optimal HD for retina mobile & desktop galleries
-  const maxDim = options?.maxDimension || 1280;
-  const initialQuality = options?.targetQuality || 0.75;
-
-  try {
-    let img: HTMLImageElement | null = new Image();
-    let objectUrl = URL.createObjectURL(file);
-    img.src = objectUrl;
-
-    const loaded = await new Promise<boolean>((resolve) => {
-      if (!img) return resolve(false);
-      const timer = setTimeout(() => resolve(false), 4000);
-      img.onload = () => {
-        clearTimeout(timer);
-        resolve(true);
-      };
-      img.onerror = () => {
-        clearTimeout(timer);
-        resolve(false);
-      };
-      if (img.complete && img.naturalWidth) {
-        clearTimeout(timer);
-        resolve(true);
-      }
-    });
-
-    // If direct HTMLImageElement load failed (e.g. raw unconverted HEIC on desktop), try Web Worker fallback
-    if (!loaded || !img.naturalWidth || !img.naturalHeight) {
-      URL.revokeObjectURL(objectUrl);
-      try {
-        const fallbackOptions = {
-          maxSizeMB: 0.25, // ~250 KB target
-          maxWidthOrHeight: maxDim,
-          useWebWorker: true,
-          initialQuality: 0.75
-        };
-        const compressedBlob = await imageCompression(file, fallbackOptions);
-        return new File([compressedBlob], file.name.replace(/\.[^/.]+$/, '') + '.jpg', { 
-          type: 'image/jpeg', 
-          lastModified: Date.now() 
-        });
-      } catch {
-        return file;
-      }
-    }
-
-    const renderToCanvas = (targetMaxDim: number) => {
-      let width = img!.naturalWidth || img!.width;
-      let height = img!.naturalHeight || img!.height;
-
-      if (width > targetMaxDim || height > targetMaxDim) {
-        if (width > height) {
-          height = Math.round((height * targetMaxDim) / width);
-          width = targetMaxDim;
-        } else {
-          width = Math.round((width * targetMaxDim) / height);
-          height = targetMaxDim;
-        }
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return null;
-
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, width, height);
-      ctx.drawImage(img!, 0, 0, width, height);
-
-      return canvas;
-    };
-
-    const getBlob = (canvas: HTMLCanvasElement, mimeType: string, q: number): Promise<Blob | null> => {
-      return new Promise((resolve) => {
-        try {
-          canvas.toBlob((b) => resolve(b), mimeType, q);
-        } catch {
-          resolve(null);
-        }
-      });
-    };
-
-    let canvas = renderToCanvas(maxDim);
-    if (!canvas) {
-      URL.revokeObjectURL(objectUrl);
-      return file;
-    }
-
-    // Step 1: Quality pass at 0.75
-    let jpegBlob = await getBlob(canvas, 'image/jpeg', initialQuality);
-    let webpBlob = await getBlob(canvas, 'image/webp', initialQuality);
-
-    // Step 2: If file is larger than 250KB, adaptively reduce quality to 0.68
-    if (jpegBlob && jpegBlob.size > 250 * 1024) {
-      const tighterJpeg = await getBlob(canvas, 'image/jpeg', 0.68);
-      if (tighterJpeg) jpegBlob = tighterJpeg;
-    }
-
-    if (webpBlob && webpBlob.size > 250 * 1024) {
-      const tighterWebp = await getBlob(canvas, 'image/webp', 0.68);
-      if (tighterWebp) webpBlob = tighterWebp;
-    }
-
-    URL.revokeObjectURL(objectUrl);
-    img = null;
-
-    let finalBlob: Blob | null = jpegBlob;
-    let finalExt = 'jpg';
-    let finalType = 'image/jpeg';
-
-    // Pick WebP if it is smaller, valid, and under 250KB; otherwise fallback to crisp JPEG
-    if (
-      webpBlob && 
-      webpBlob.type === 'image/webp' && 
-      webpBlob.size > 0 && 
-      jpegBlob && 
-      webpBlob.size <= jpegBlob.size && 
-      webpBlob.size < 250 * 1024
-    ) {
-      finalBlob = webpBlob;
-      finalExt = 'webp';
-      finalType = 'image/webp';
-    }
-
-    if (!finalBlob) {
-      return file;
-    }
-
-    const cleanBaseName = file.name.replace(/\.[^/.]+$/, '');
-    const newFileName = `${cleanBaseName}.${finalExt}`;
-    return new File([finalBlob], newFileName, { type: finalType, lastModified: Date.now() });
-
-  } catch (err) {
-    console.warn('[IMAGE COMPRESS ERROR] Canvas compression failed, using original file:', err);
-    return file;
-  }
-}
+import { compressImage, type CompressionOptions } from './imageCompression';
+export { compressImage, type CompressionOptions };
 
 /**
  * Storage upload integration that processes each file before upload

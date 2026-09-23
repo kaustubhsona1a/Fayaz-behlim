@@ -28,11 +28,11 @@ import {
   CheckCircle2,
   FileCode
 } from 'lucide-react';
-import { uploadImageToStorage, cleanupLegacyImageVariants, supabase } from '../../lib/supabase';
+import { uploadImageToStorage, cleanupLegacyImageVariants, supabase, getSupabaseUrl, getSupabaseAnonKey, reinitSupabaseClient } from '../../lib/supabase';
 import { SmartImage } from '../../components/SmartImage';
 
 export default function AdminSettings() {
-  const { siteConfig, updateSiteConfig } = useVehicles();
+  const { siteConfig, updateSiteConfig, syncCurrentInventoryToSupabase, vehicles, refreshInventory } = useVehicles();
   const [success, setSuccess] = useState('');
   const [errorText, setErrorText] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
@@ -41,6 +41,11 @@ export default function AdminSettings() {
   const [supabaseErrorMsg, setSupabaseErrorMsg] = useState('');
   const [showSqlHelper, setShowSqlHelper] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(getSupabaseUrl());
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(getSupabaseAnonKey());
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [isSyncingShowroom, setIsSyncingShowroom] = useState(false);
 
   // 360 Turntable Frame Sequence State (In-Build Preset Preview)
   const [activePreviewTarget, setActivePreviewTarget] = useState<'desktop' | 'mobile'>('desktop');
@@ -58,32 +63,83 @@ export default function AdminSettings() {
     return () => clearInterval(interval);
   }, [isDealerAutoSpinning, totalTurntableFrames]);
 
-  React.useEffect(() => {
-    const checkConnection = async () => {
-      const url = import.meta.env.VITE_SUPABASE_URL;
-      const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (!url || !key || url === 'YOUR_SUPABASE_URL' || url === 'https://placeholder.supabase.co' || url.includes('placeholder')) {
-        setSupabaseStatus('not_configured');
-        return;
-      }
+  const checkConnection = async (testUrl?: string, testKey?: string) => {
+    setSupabaseStatus('checking');
+    const url = testUrl || getSupabaseUrl();
+    const key = testKey || getSupabaseAnonKey();
+    
+    if (!url || !key || url === 'YOUR_SUPABASE_URL' || url === 'https://placeholder.supabase.co' || url.includes('placeholder')) {
+      setSupabaseStatus('not_configured');
+      setSupabaseErrorMsg('Supabase URL and API Key are not configured.');
+      return;
+    }
 
-      try {
-        const { error } = await supabase.from('metadata_versions').select('key').limit(1);
-        if (error) {
+    try {
+      const { data, error } = await supabase.from('vehicles').select('id').limit(1);
+      if (error) {
+        const { error: metaError } = await supabase.from('metadata_versions').select('key').limit(1);
+        if (metaError && error.message) {
           setSupabaseStatus('error');
-          setSupabaseErrorMsg(error.message || JSON.stringify(error));
-        } else {
-          setSupabaseStatus('connected');
+          setSupabaseErrorMsg(error.message);
+          return;
         }
-      } catch (err: any) {
-        setSupabaseStatus('error');
-        setSupabaseErrorMsg(err?.message || String(err));
       }
-    };
+      setSupabaseStatus('connected');
+      setSupabaseErrorMsg('');
+    } catch (err: any) {
+      setSupabaseStatus('error');
+      const msg = err?.message || String(err);
+      if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('networkerror') || msg.toLowerCase().includes('err_name_not_resolved')) {
+        setSupabaseErrorMsg(`Could not resolve host (${url}). If your project was created on Supabase free tier, check if it was paused in supabase.com/dashboard and click "Restore project", or verify your project URL.`);
+      } else {
+        setSupabaseErrorMsg(msg);
+      }
+    }
+  };
 
+  React.useEffect(() => {
     checkConnection();
   }, []);
+
+  const handleSaveSupabaseConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsTestingConnection(true);
+    setErrorText('');
+    setSuccess('');
+    try {
+      reinitSupabaseClient(supabaseUrlInput.trim(), supabaseKeyInput.trim());
+      await checkConnection(supabaseUrlInput.trim(), supabaseKeyInput.trim());
+      if (refreshInventory) {
+        await refreshInventory();
+      }
+      setSuccess('Supabase credentials updated & re-tested successfully.');
+    } catch (e: any) {
+      setErrorText(e?.message || 'Failed to update credentials.');
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
+
+  const handlePushInventoryToSupabase = async () => {
+    setIsSyncingShowroom(true);
+    setErrorText('');
+    setSuccess('');
+    try {
+      if (syncCurrentInventoryToSupabase) {
+        const res = await syncCurrentInventoryToSupabase();
+        if (res.success) {
+          setSuccess(`Successfully pushed ${res.count} showroom vehicle(s) directly to Supabase! Remote database is synchronized.`);
+          setSupabaseStatus('connected');
+        } else {
+          setErrorText(`Could not sync to Supabase: ${res.error || 'Unknown error'}. Make sure your Supabase project is active.`);
+        }
+      }
+    } catch (e: any) {
+      setErrorText(`Sync failed: ${e?.message || e}`);
+    } finally {
+      setIsSyncingShowroom(false);
+    }
+  };
   
   const handleCleanupLegacyVariants = async () => {
     setIsCleaning(true);
@@ -254,24 +310,110 @@ export default function AdminSettings() {
                   supabaseStatus === 'error' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
                   'bg-blue-500/10 border-blue-500/30 text-blue-400'
                 }`}>
-                  {supabaseStatus === 'connected' ? 'Connected & Synced' : supabaseStatus === 'error' ? 'IndexedDB Active (Cloud Notice)' : 'Local IndexedDB Active'}
+                  {supabaseStatus === 'connected' ? 'Connected & Synced' : supabaseStatus === 'error' ? 'Cloud Unreachable (Using Showroom Baseline)' : 'Local Storage Active'}
                 </span>
               </div>
               <p className="text-[10px] text-zinc-400 font-mono mt-0.5">
-                All vehicles, 360° frames, and media configurations are guaranteed saved in high-speed IndexedDB cache.
+                Target Cloud: <span className="text-zinc-200 font-bold">{getSupabaseUrl().replace('https://', '')}</span>
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowSqlHelper(!showSqlHelper)}
-            className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
-          >
-            <span>Supabase Schema Helper</span>
-            {showSqlHelper ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePushInventoryToSupabase}
+              disabled={isSyncingShowroom}
+              className="text-[10px] font-mono font-bold uppercase tracking-wider text-black bg-white hover:bg-zinc-200 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            >
+              <UploadCloud className={`w-3 h-3 ${isSyncingShowroom ? 'animate-bounce' : ''}`} />
+              <span>{isSyncingShowroom ? 'Syncing...' : 'Sync Showroom to Cloud (2 Cars)'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => checkConnection()}
+              className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+            >
+              <RotateCw className={`w-3 h-3 ${supabaseStatus === 'checking' ? 'animate-spin' : ''}`} />
+              <span>Test Connection</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowConfigPanel(!showConfigPanel)}
+              className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+            >
+              <span>Cloud Credentials</span>
+              {showConfigPanel ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowSqlHelper(!showSqlHelper)}
+              className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+            >
+              <span>Schema SQL</span>
+              {showSqlHelper ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+          </div>
         </div>
+
+        {supabaseErrorMsg && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-[11px] font-mono text-amber-300 space-y-1">
+            <div className="flex items-center gap-1.5 font-bold">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Supabase Connection Notice:</span>
+            </div>
+            <p className="text-[10px] text-zinc-300 leading-relaxed pl-5">
+              {supabaseErrorMsg}
+            </p>
+          </div>
+        )}
+
+        {showConfigPanel && (
+          <form onSubmit={handleSaveSupabaseConfig} className="mt-2 pt-3 border-t border-white/5 space-y-3">
+            <p className="text-[10px] text-zinc-400 font-mono">
+              Update your Supabase credentials if you have recreated or resumed your project:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-1">
+                  Supabase Project URL
+                </label>
+                <input
+                  type="text"
+                  value={supabaseUrlInput}
+                  onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                  placeholder="https://your-project.supabase.co"
+                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-white"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-1">
+                  Supabase Anon Key
+                </label>
+                <input
+                  type="password"
+                  value={supabaseKeyInput}
+                  onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                  placeholder="eyJhbGciOi..."
+                  className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-white"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="submit"
+                disabled={isTestingConnection}
+                className="bg-white hover:bg-zinc-200 text-black text-[10px] font-mono font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all flex items-center gap-1.5"
+              >
+                <Check className="w-3 h-3" />
+                <span>{isTestingConnection ? 'Testing...' : 'Save & Reconnect'}</span>
+              </button>
+            </div>
+          </form>
+        )}
 
         {showSqlHelper && (
           <div className="mt-2 pt-3 border-t border-white/5 space-y-3">

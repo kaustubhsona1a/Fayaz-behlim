@@ -72,28 +72,6 @@ export const MOCK_VEHICLES: Vehicle[] = [
     description: "The ultimate power statement. Obsidian Black metallic exterior combined with red/black bi-color Nappa leather. Complete company service records, absolute showroom condition.",
     updatedAt: Date.now(),
     deleted: false
-  },
-  {
-    id: "range_rover_autobio",
-    make: "Land Rover",
-    model: "Range Rover",
-    variant: "3.0 LWB Autobiography (D350)",
-    year: 2021,
-    price: 19500000,
-    mileage: 24000,
-    fuelType: "Diesel",
-    transmission: "Automatic",
-    bodyType: "SUV",
-    engine: "3.0L twin-turbocharged inline-6 Diesel (346 HP)",
-    color: "Belgravia Green Metallic",
-    ownership: "1st Owner",
-    registration: "MH-47-AA-0300",
-    images: ["/frames/desktop/frame_0050.webp", "/frames/desktop/frame_0065.webp", "/frames/desktop/frame_0078.webp"],
-    features: ["Executive Class Rear Seating", "Meridian Signature Sound System (1600W)", "Panoramic Sliding Sunroof", "Laser LED Headlights", "Cabin Air Purification Pro", "24-Way Heated & Cooled Massage Seats"],
-    status: "Available",
-    description: "Unrivaled luxury and off-road capability. Belgravia Green exterior with semi-aniline Perlino leather interior. Serviced strictly at Land Rover authorized workshops in Mumbai.",
-    updatedAt: Date.now(),
-    deleted: false
   }
 ];
 
