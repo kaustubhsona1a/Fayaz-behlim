@@ -217,7 +217,7 @@ export default function AdminAddVehicle() {
           price: Number(formData.price),
           mileage: Number(formData.mileage),
           bodyType: formData.bodyType,
-          fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'CNG' | 'Electric',
+          fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'Hybrid' | 'Electric',
           transmission: formData.transmission as 'Manual' | 'Automatic',
           engine: formData.engine || 'Standard',
           color: formData.color || 'Standard',
@@ -237,7 +237,7 @@ export default function AdminAddVehicle() {
           price: Number(formData.price),
           mileage: Number(formData.mileage),
           bodyType: formData.bodyType,
-          fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'CNG' | 'Electric',
+          fuelType: formData.fuelType as 'Petrol' | 'Diesel' | 'Hybrid' | 'Electric',
           transmission: formData.transmission as 'Manual' | 'Automatic',
           engine: formData.engine || 'Standard',
           color: formData.color || 'Standard',
@@ -353,7 +353,7 @@ export default function AdminAddVehicle() {
               <select name="fuelType" value={formData.fuelType} onChange={handleChange} className="flex h-12 w-full items-center justify-between rounded-xl border border-white/5 bg-zinc-950 px-4 py-2 text-xs text-zinc-300 outline-none focus:border-white transition-all font-mono uppercase tracking-wider">
                 <option className="bg-zinc-950 text-white">Petrol</option>
                 <option className="bg-zinc-950 text-white">Diesel</option>
-                <option className="bg-zinc-950 text-white">CNG</option>
+                <option className="bg-zinc-950 text-white">Hybrid</option>
                 <option className="bg-zinc-950 text-white">Electric</option>
               </select>
             </div>

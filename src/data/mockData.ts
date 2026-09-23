@@ -12,7 +12,7 @@ export type Vehicle = {
   year: number;
   price: number;
   mileage: number;
-  fuelType: 'Petrol' | 'Diesel' | 'CNG' | 'Electric';
+  fuelType: 'Petrol' | 'Diesel' | 'Hybrid' | 'Electric';
   transmission: 'Manual' | 'Automatic';
   bodyType?: BodyType | string;
   engine: string;

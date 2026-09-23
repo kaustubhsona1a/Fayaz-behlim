@@ -12,20 +12,20 @@
 
 @layer base {
   html, body {
-    touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
   }
   body {
     @apply bg-[#050505] text-zinc-300 font-sans antialiased selection:bg-white selection:text-black;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-cinzel text-white tracking-wider;
   }
   html {
     @apply font-sans bg-[#050505];
-    scroll-behavior: smooth;
   }
   input, select, textarea {
     font-size: 16px !important;
@@ -46,13 +46,15 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #FFFFFF;
 }
 
 .frost-pill:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.20);
+  border-color: rgba(255, 255, 255, 0.50);
   box-shadow: 0 8px 25px -2px rgba(0, 0, 0, 0.45), inset 0 1px 2px 0 rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
+  color: #FFFFFF;
 }
 
 .frost-card {

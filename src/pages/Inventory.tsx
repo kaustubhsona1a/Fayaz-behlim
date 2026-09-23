@@ -6,24 +6,44 @@ import { useVehicles } from '../context/VehicleContext';
 import { SmartImage } from '../components/SmartImage';
 import { CAR_PLACEHOLDER_IMAGE } from '../constants/placeholders';
 
+export type BudgetPreset = {
+  id: string;
+  label: string;
+  shortLabel: string;
+  min?: number;
+  max?: number;
+};
+
+const BUDGET_PRESETS: BudgetPreset[] = [
+  { id: 'under-25l', label: 'Under ₹ 25 Lakh', shortLabel: 'Under 25L', max: 2500000 },
+  { id: 'under-50l', label: 'Under ₹ 50 Lakh', shortLabel: 'Under 50L', max: 5000000 },
+  { id: 'under-75l', label: 'Under ₹ 75 Lakh', shortLabel: 'Under 75L', max: 7500000 },
+  { id: 'under-1cr', label: 'Under ₹ 1 Crore', shortLabel: 'Under 1 Cr', max: 10000000 },
+  { id: 'under-1.5cr', label: 'Under ₹ 1.5 Crore', shortLabel: 'Under 1.5 Cr', max: 15000000 },
+  { id: 'under-2cr', label: 'Under ₹ 2 Crore', shortLabel: 'Under 2 Cr', max: 20000000 },
+  { id: 'under-3cr', label: 'Under ₹ 3 Crore', shortLabel: 'Under 3 Cr', max: 30000000 },
+  { id: 'under-5cr', label: 'Under ₹ 5 Crore', shortLabel: 'Under 5 Cr', max: 50000000 },
+  { id: 'above-1cr', label: '₹ 1 Crore & Above', shortLabel: '1 Cr+', min: 10000000 },
+  { id: 'above-2cr', label: '₹ 2 Crore & Above', shortLabel: '2 Cr+', min: 20000000 },
+  { id: 'all', label: 'All Budgets', shortLabel: 'All', min: undefined, max: undefined },
+];
+
+const QUICK_BUDGET_CHIPS = [
+  { id: 'all', label: 'All' },
+  { id: 'under-50l', label: 'Under 50L' },
+  { id: 'under-1cr', label: 'Under 1 Cr' },
+  { id: 'under-2cr', label: 'Under 2 Cr' },
+  { id: 'above-1cr', label: '1 Cr & Above' },
+  { id: 'above-2cr', label: '2 Cr+' },
+];
+
 export default function Inventory() {
   const { vehicles, loading } = useVehicles();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   
-  const BUDGET_OPTIONS = [
-    1000000,  // Below 10L
-    1500000,  // Under 15L
-    2000000,  // Under 20L
-    2500000,  // Under 25L
-    3000000,  // Under 30L
-    3500000,  // Under 35L
-    4000500,  // Under 40L
-    4500000,  // Under 45L
-    5000000,  // Under 50L
-    100000000 // 50 Lakh+ / Any
-  ];
-  const [budgetIndex, setBudgetIndex] = useState(BUDGET_OPTIONS.length - 1);
+  const [budgetIndex, setBudgetIndex] = useState(BUDGET_PRESETS.length - 1);
+  const activeBudget = BUDGET_PRESETS[budgetIndex] || BUDGET_PRESETS[BUDGET_PRESETS.length - 1];
   const [minYear, setMinYear] = useState<number | null>(null);
   const [selectedBodyTypes, setSelectedBodyTypes] = useState<string[]>([]);
   const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
@@ -55,10 +75,15 @@ export default function Inventory() {
       );
     }
     
-    // Budget filter
-    if (budgetIndex < BUDGET_OPTIONS.length - 1) {
-      const currentMaxBudget = BUDGET_OPTIONS[budgetIndex];
-      result = result.filter(car => car.price <= currentMaxBudget);
+    // Budget filter (including options up to 5 Cr and 1 Cr & Above / 2 Cr & Above)
+    const currentBudget = BUDGET_PRESETS[budgetIndex] || BUDGET_PRESETS[BUDGET_PRESETS.length - 1];
+    if (currentBudget.id !== 'all') {
+      if (currentBudget.max !== undefined) {
+        result = result.filter(car => car.price <= currentBudget.max!);
+      }
+      if (currentBudget.min !== undefined) {
+        result = result.filter(car => car.price >= currentBudget.min!);
+      }
     }
 
     // Min Year filter
@@ -139,7 +164,7 @@ export default function Inventory() {
   };
 
   const resetFilters = () => {
-    setBudgetIndex(BUDGET_OPTIONS.length - 1);
+    setBudgetIndex(BUDGET_PRESETS.length - 1);
     setMinYear(null);
     setSelectedBodyTypes([]);
     setSelectedOwners([]);
@@ -151,11 +176,12 @@ export default function Inventory() {
   };
 
   const ALL_TRANSMISSIONS = ['Automatic', 'Manual'];
-  const ALL_FUELS = ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'CNG'];
+  const ALL_FUELS = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (budgetIndex < BUDGET_OPTIONS.length - 1) count++;
+    const currentBudget = BUDGET_PRESETS[budgetIndex] || BUDGET_PRESETS[BUDGET_PRESETS.length - 1];
+    if (currentBudget.id !== 'all') count++;
     if (minYear !== null) count++;
     if (selectedBodyTypes.length > 0) count += selectedBodyTypes.length;
     if (selectedOwners.length > 0) count += selectedOwners.length;
@@ -175,23 +201,23 @@ export default function Inventory() {
       <div className="container mx-auto max-w-7xl px-3.5 sm:px-6">
         
         {/* Header Banner - Dark Frosted Container with Crisp Typography */}
-        <div className="frost-card p-5 sm:p-7 md:p-8 rounded-2xl mb-6 sm:mb-8 border border-white/15 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
+        <div className="frost-card p-3.5 sm:p-7 md:p-8 rounded-2xl mb-3 sm:mb-8 border border-white/15 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-6">
           <div className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-cinzel font-bold tracking-wider sm:tracking-widest uppercase text-white">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-cinzel font-bold tracking-wider sm:tracking-widest uppercase text-white">
               Inventory
             </h1>
-            <p className="text-zinc-300 mt-1.5 tracking-widest uppercase text-[11px] sm:text-xs font-sans">
+            <p className="text-zinc-300 mt-0.5 sm:mt-1.5 tracking-wider sm:tracking-widest uppercase text-[10px] sm:text-xs font-sans">
               Explore <span className="text-white font-bold">{filteredCars.length}</span> Certified Motorcars on <span className="text-white font-semibold">Hill View Road, Bandra</span>
             </p>
           </div>
           
           <div className="w-full md:w-auto font-sans text-xs">
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+              <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-300" />
               <input 
                 type="text" 
                 placeholder="SEARCH BRAND OR MODEL..." 
-                className="w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3.5 bg-black/80 border border-white/25 backdrop-blur-2xl rounded-full text-[11px] sm:text-xs tracking-wider uppercase text-white placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black transition-all shadow-lg font-sans"
+                className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3.5 bg-black/80 border border-white/25 backdrop-blur-2xl rounded-xl sm:rounded-full text-[10.5px] sm:text-xs tracking-wider uppercase text-white placeholder:text-zinc-400 focus:outline-none focus:border-white focus:bg-black transition-all shadow-lg font-sans"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -200,21 +226,21 @@ export default function Inventory() {
         </div>
 
         {/* Mobile Filter Toggle */}
-        <div className="lg:hidden mb-5 font-sans">
+        <div className="lg:hidden mb-3 sm:mb-5 font-sans">
           <button 
             onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-            className="flex items-center justify-between w-full p-3.5 sm:p-4 bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl text-white font-bold tracking-wider text-xs uppercase transition-colors shadow-md hover:bg-black/90 active:scale-[0.99]"
+            className="flex items-center justify-between w-full px-3.5 py-2.5 sm:p-4 bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl text-white font-bold tracking-wider text-[11px] sm:text-xs uppercase transition-colors shadow-md hover:bg-black/90 active:scale-[0.99]"
           >
             <div className="flex items-center">
-              <Filter className="w-3.5 h-3.5 mr-2.5 text-white" /> 
+              <Filter className="w-3.5 h-3.5 mr-2 text-white" /> 
               <span>Filters &amp; Sorting</span>
               {activeFiltersCount > 0 && (
-                <span className="ml-2.5 px-2 py-0.5 rounded-full bg-white text-black text-[10px] font-bold">
+                <span className="ml-2 px-1.5 py-0.5 rounded-full bg-white text-black text-[9px] font-bold">
                   {activeFiltersCount}
                 </span>
               )}
             </div>
-            <span className="text-[10px] text-zinc-300 uppercase tracking-widest font-semibold">
+            <span className="text-[9.5px] text-zinc-300 uppercase tracking-widest font-semibold">
               {isMobileFiltersOpen ? 'Close ▲' : 'Open ▼'}
             </span>
           </button>
@@ -322,26 +348,73 @@ export default function Inventory() {
 
                 {/* Budget */}
                 <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-[10px] uppercase tracking-wider text-zinc-200 font-bold font-sans">Max Budget</h4>
-                    <span className="text-[11px] text-white tracking-wider font-bold font-sans">
-                      {budgetIndex === 0
-                        ? 'Below ₹ 10 Lakh'
-                        : budgetIndex === BUDGET_OPTIONS.length - 1
-                          ? '50 Lakh+'
-                          : `Under ₹ ${(BUDGET_OPTIONS[budgetIndex] / 100000).toFixed(0)} Lakh`}
-                    </span>
+                  <div className="flex justify-between items-center mb-2.5">
+                    <h4 className="text-[10px] uppercase tracking-wider text-zinc-200 font-bold font-sans flex items-center justify-between w-full">
+                      <span>Budget</span>
+                      {activeBudget.id !== 'all' && (
+                        <button 
+                          type="button"
+                          onClick={() => setBudgetIndex(BUDGET_PRESETS.length - 1)} 
+                          className="text-[9px] text-zinc-400 hover:text-white uppercase font-normal tracking-normal cursor-pointer"
+                        >
+                          clear
+                        </button>
+                      )}
+                    </h4>
                   </div>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-white tracking-wider font-bold font-sans">
+                      {activeBudget.label}
+                    </span>
+                    {activeBudget.min && activeBudget.min >= 10000000 && (
+                      <span className="text-[9px] uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono tracking-wider font-semibold">
+                        Supercar Spec
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Budget Quick Chips */}
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {QUICK_BUDGET_CHIPS.map((chip) => {
+                      const isSelected = activeBudget.id === chip.id;
+                      return (
+                        <button
+                          key={chip.id}
+                          type="button"
+                          onClick={() => {
+                            const targetIdx = BUDGET_PRESETS.findIndex(p => p.id === chip.id);
+                            if (targetIdx !== -1) setBudgetIndex(targetIdx);
+                          }}
+                          className={`px-2.5 py-1 text-[10px] font-sans rounded-lg border transition-all ${
+                            isSelected
+                              ? 'bg-white text-black border-white font-bold shadow-md'
+                              : 'bg-black/40 text-zinc-300 border-white/15 hover:border-white/40 hover:text-white'
+                          }`}
+                        >
+                          {chip.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Range Slider */}
                   <div className="px-2">
                     <input 
                       type="range" 
                       min="0" 
-                      max={BUDGET_OPTIONS.length - 1} 
+                      max={BUDGET_PRESETS.length - 1} 
                       step="1"
                       value={budgetIndex} 
                       onChange={(e) => setBudgetIndex(parseInt(e.target.value))}
                       className="w-full accent-white h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
                     />
+                    <div className="flex justify-between text-[9px] font-sans text-zinc-400 mt-1">
+                      <span>₹25L</span>
+                      <span>₹1 Cr</span>
+                      <span>1 Cr+</span>
+                      <span>All</span>
+                    </div>
                   </div>
                 </div>
 
@@ -539,33 +612,33 @@ export default function Inventory() {
                                 e.stopPropagation();
                                 window.open(car.instagramReel, '_blank', 'noopener,noreferrer');
                               }}
-                              className="absolute top-3 right-3 sm:top-4 sm:right-4 frost-pill text-white px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-widest font-sans shadow-lg hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 flex items-center gap-1 z-10"
+                              className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/60 hover:bg-[#E4405F] text-white hover:text-white border border-white/20 hover:border-[#E4405F] px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-widest font-sans shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-1 z-10 backdrop-blur-md"
                             >
                               <Instagram className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> REEL
                             </button>
                           )}
                         </div>
-                        <div className="p-4 sm:p-6 md:p-8 flex-grow flex flex-col justify-between text-zinc-200">
+                        <div className="p-3.5 sm:p-6 md:p-8 flex-grow flex flex-col justify-between text-zinc-200">
                           <div>
-                            <div className="mb-3 sm:mb-4 text-center">
-                              <h3 className="text-base sm:text-lg md:text-xl font-cinzel font-bold text-white group-hover:text-zinc-200 transition-colors mb-1 sm:mb-2">
+                            <div className="mb-2 sm:mb-4 text-center">
+                              <h3 className="text-base sm:text-lg md:text-xl font-cinzel font-bold text-white group-hover:text-zinc-200 transition-colors mb-0.5 sm:mb-2">
                                 {car.make} <span className="font-normal text-zinc-300">{car.model}</span>
                               </h3>
                               <p className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase text-zinc-300 font-sans font-semibold">{car.variant}</p>
                             </div>
-                            <div className="text-xl sm:text-2xl font-bold text-center text-white mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-white/10 font-cinzel tracking-wide">
+                            <div className="text-lg sm:text-2xl font-bold text-center text-white mb-2.5 sm:mb-6 pb-2.5 sm:pb-6 border-b border-white/10 font-cinzel tracking-wide">
                               {formatPrice(car.price)}
                             </div>
                           </div>
                           
                           <div>
-                            <div className="flex flex-wrap justify-center gap-x-3 sm:gap-x-5 gap-y-1.5 sm:gap-y-2 text-[11px] sm:text-xs md:text-sm font-semibold text-zinc-200 mb-4 sm:mb-6 font-sans">
-                              <div className="flex items-center"><Gauge className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-zinc-300" /> {car.mileage.toLocaleString()} KM</div>
-                              <div className="flex items-center"><Fuel className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-zinc-300" /> {car.fuelType}</div>
-                              <div className="flex items-center"><Cog className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-zinc-300" /> {car.transmission}</div>
+                            <div className="flex flex-wrap justify-center gap-x-3 sm:gap-x-5 gap-y-1 sm:gap-y-2 text-[10.5px] sm:text-xs md:text-sm font-semibold text-zinc-200 mb-3 sm:mb-6 font-sans">
+                              <div className="flex items-center"><Gauge className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-zinc-300" /> {car.mileage.toLocaleString()} KM</div>
+                              <div className="flex items-center"><Fuel className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-zinc-300" /> {car.fuelType}</div>
+                              <div className="flex items-center"><Cog className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-zinc-300" /> {car.transmission}</div>
                             </div>
                             
-                            <div className="w-full uppercase tracking-widest text-black text-[11px] sm:text-xs font-bold text-center py-2.5 sm:py-3.5 bg-white hover:bg-zinc-100 group-hover:shadow-[0_4px_25px_rgba(255,255,255,0.2)] transition-all duration-300 rounded-full font-sans">
+                            <div className="w-full uppercase tracking-widest text-black text-[10.5px] sm:text-xs font-bold text-center py-2 sm:py-3.5 bg-white hover:bg-zinc-100 group-hover:shadow-[0_4px_25px_rgba(255,255,255,0.2)] transition-all duration-300 rounded-full font-sans">
                               Explore Specs & Details ↗
                             </div>
                           </div>

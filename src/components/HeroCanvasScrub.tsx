@@ -87,6 +87,8 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     // Solid dark showroom background fill to guarantee zero underlying image bleeding
     ctx.fillStyle = '#050507';
     ctx.fillRect(0, 0, cw, ch);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'medium';
 
     const drawAspectCover = (img: HTMLImageElement): boolean => {
       if (!img || !img.complete || img.naturalWidth === 0) return false;
@@ -189,10 +191,17 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         frames.forEach((src, idx) => {
           const img = new Image();
           img.src = src;
-          img.onload = () => {
+          const onFrameReady = () => {
             const activeIdx = Math.floor(currentFrameRef.current % frames.length);
             if (activeIdx === idx || idx === 0) {
               drawInterpolatedFrame(currentFrameRef.current);
+            }
+          };
+          img.onload = () => {
+            if ('decode' in img) {
+              img.decode().then(onFrameReady).catch(onFrameReady);
+            } else {
+              onFrameReady();
             }
           };
           if (idx === 0 && img.complete && img.naturalWidth > 0) {
@@ -212,10 +221,17 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           const frameNum = String(i).padStart(4, '0');
           img.src = `/frames/${device}/frame_${frameNum}.webp`;
           const idx = i - 1;
-          img.onload = () => {
+          const onFrameReady = () => {
             const activeIdx = Math.floor(currentFrameRef.current % DEFAULT_TOTAL_FRAMES);
             if (activeIdx === idx || idx === 0) {
               drawInterpolatedFrame(currentFrameRef.current);
+            }
+          };
+          img.onload = () => {
+            if ('decode' in img) {
+              img.decode().then(onFrameReady).catch(onFrameReady);
+            } else {
+              onFrameReady();
             }
           };
           if (img.complete && img.naturalWidth > 0 && i === 1) {
@@ -342,9 +358,18 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
       if (rect.width === 0 || rect.height === 0) return;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2); // Max 2x DPR for ultra performance
+      const targetW = Math.floor(rect.width * dpr);
+      const targetH = Math.floor(rect.height * dpr);
 
-      canvas.width = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
+      // On iOS Safari, the dynamic address bar collapses/expands by 30-80px during scroll.
+      // Reassigning canvas.width / canvas.height re-allocates and clears the HTML5 canvas buffer!
+      // Only resize canvas if width changed or height changed substantially (> 120px)
+      const wChanged = Math.abs(canvas.width - targetW) > 4;
+      const hChanged = Math.abs(canvas.height - targetH) > 120;
+      if (canvas.width === 0 || wChanged || hChanged) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
 
       // Check if device category changed between mobile and desktop
       const newDevice = window.innerWidth < 768 ? 'mobile' : 'desktop';
@@ -387,7 +412,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     };
   }, []);
 
-  // 6. Direct Synchronous Scroll Sync with ZERO play or dead-zone (Optimized RAF loop)
+  // 6. Direct Synchronous Scroll Sync with ZERO play or dead-zone (Optimized RAF loop for iOS Safari)
   useEffect(() => {
     let ticking = false;
 
@@ -396,11 +421,16 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         window.requestAnimationFrame(() => {
           const container = containerRef.current;
           if (container) {
+            // Document-relative scroll position is 100% stable across all browsers (including Brave & Safari)
+            const scrollY = window.pageYOffset || window.scrollY || document.documentElement.scrollTop || 0;
             const rect = container.getBoundingClientRect();
-            const totalScrollableDist = rect.height - window.innerHeight;
+            const containerTop = rect.top + scrollY;
+            const containerHeight = container.offsetHeight;
+            const viewportHeight = window.innerHeight;
+            const totalScrollableDist = containerHeight - viewportHeight;
 
             if (totalScrollableDist > 0) {
-              const rawProgress = -rect.top / totalScrollableDist;
+              const rawProgress = (scrollY - containerTop) / totalScrollableDist;
               const progress = Math.max(0, Math.min(1, rawProgress));
 
               targetProgressRef.current = progress;
@@ -511,13 +541,14 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
 
   return (
     <div 
-      id="hero-section"
       ref={containerRef} 
       className="relative w-full bg-[#050507] text-white select-none"
-      style={{ height: '360vh' }}
+      style={{ height: '320vh' }}
     >
       {/* Sticky Canvas Viewport */}
-      <div className="sticky top-0 h-[100dvh] h-screen w-full overflow-hidden flex items-center justify-center">
+      <div 
+        className="sticky top-0 h-[100dvh] w-full overflow-hidden flex items-center justify-center"
+      >
         
         {/* Immediate First Frame Poster - Always visible instantly before scrolling or loading */}
         <img 
@@ -535,12 +566,13 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="relative z-[2] w-full h-full block cursor-grab active:cursor-grabbing touch-pan-y"
+          className={`relative z-[2] w-full h-full block ${showDealerControls ? 'cursor-grab active:cursor-grabbing touch-pan-y' : 'pointer-events-none md:pointer-events-auto md:cursor-grab md:active:cursor-grabbing'}`}
+          style={{ touchAction: 'pan-y' }}
         />
 
-        {/* Ambient Darkening & Vignette Overlay */}
-        <div className="absolute inset-0 z-[3] bg-black/30 pointer-events-none" />
-        <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/50 via-transparent to-black/70 pointer-events-none" />
+        {/* Ambient Darkening & Vignette Overlay - Subtly reduced for vibrant vehicle clarity */}
+        <div className="absolute inset-0 z-[3] bg-black/10 pointer-events-none" />
+        <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/25 via-transparent to-black/40 pointer-events-none" />
 
         {/* Floating Interaction Hint (Dealer Mode Only) */}
         {showDealerControls && (
@@ -572,9 +604,8 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
             <div className="flex items-center gap-2 bg-black/70 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/15 shadow-xl pointer-events-auto">
               {onOpenFrameStudio && (
                 <button
-                  id="btn-hero-upload-frames"
                   onClick={onOpenFrameStudio}
-                  className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-white/10 hover:bg-white hover:text-black text-white border border-white/30 transition-all shadow-sm uppercase tracking-wider font-sans"
+                  className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-white/10 hover:bg-white/25 hover:border-white/60 text-white hover:text-white border border-white/30 transition-all shadow-sm uppercase tracking-wider font-sans"
                   title="Upload custom 360 frames"
                 >
                   <Upload className="w-3.5 h-3.5" />
@@ -583,7 +614,6 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
               )}
 
               <button
-                id="btn-hero-reset-view"
                 onClick={handleResetToPreset}
                 className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full text-zinc-300 hover:text-white hover:bg-white/10 transition-colors font-sans uppercase tracking-wider"
                 title="Reset to factory showroom frames"
@@ -595,41 +625,39 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           </div>
         )}
 
-        {/* Phase 1: Hero Action Section (0% - 22% Scroll) - Non-Intrusive Bottom Left */}
+        {/* Phase 1: Action Section (0% - 22% Scroll) - Non-Intrusive Bottom Left */}
         <div 
           ref={phase1Ref}
-          id="hero-phase-1"
-          className="absolute inset-0 z-30 flex flex-col justify-end pb-16 sm:pb-24 md:pb-28 px-5 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
+          style={{ opacity: 1, visibility: 'visible' }}
+          className="absolute inset-0 z-30 flex flex-col justify-end pb-20 sm:pb-24 md:pb-28 pb-[max(5.5rem,env(safe-area-inset-bottom,20px)+4.5rem)] px-4 sm:px-10 md:px-14 lg:px-16 pointer-events-none"
         >
-          {/* Bottom Action Section with large luxury buttons */}
-          <div className="select-none max-w-xl">
-            <div className="flex flex-row flex-wrap items-center gap-3 sm:gap-4 mb-3 sm:mb-3.5">
+          {/* Bottom Action Section with refined luxury buttons */}
+          <div className="select-none max-w-xl pointer-events-none">
+            <div className="flex flex-row flex-wrap items-center gap-2.5 sm:gap-4 mb-2.5 sm:mb-3.5">
               <Link
                 to="/inventory"
-                id="btn-hero-phase1-browse"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/inventory');
                 }}
-                className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-extrabold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-[0_4px_24px_rgba(255,255,255,0.35)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 sm:px-8 py-2.5 sm:py-4 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-extrabold text-[11px] sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-[0_4px_24px_rgba(255,255,255,0.35)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
               >
                 <span>Browse Inventory</span>
-                <ArrowRight className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
               </Link>
               <Link
                 to="/sell"
-                id="btn-hero-sell-car"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/sell');
                 }}
-                className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-black/85 hover:bg-white hover:text-black text-white font-sans font-bold text-xs sm:text-sm uppercase tracking-wider border border-white/30 transition-all backdrop-blur-md shadow-lg hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-4.5 sm:px-8 py-2.5 sm:py-4 rounded-full bg-black/85 hover:bg-white/20 hover:border-white/60 text-white hover:text-white font-sans font-bold text-[11px] sm:text-sm uppercase tracking-wider border border-white/30 transition-all backdrop-blur-md shadow-lg hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
               >
                 <span>Sell Your Car</span>
               </Link>
             </div>
-            <div className="flex items-center gap-2 text-[10px] sm:text-xs font-sans font-semibold text-zinc-400 uppercase tracking-widest pl-1">
-              <MoveHorizontal className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="flex items-center gap-1.5 text-[9.5px] sm:text-xs font-sans font-semibold text-zinc-400 uppercase tracking-widest pl-1">
+              <MoveHorizontal className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400" />
               <span>Scroll down to rotate 360°</span>
             </div>
           </div>
@@ -638,18 +666,16 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         {/* Phase 4: Final Reveal (Last Frame) - Clean Minimalist View Inventory */}
         <div 
           ref={phase4Ref}
-          id="hero-phase-4"
           className="absolute inset-0 z-30 flex flex-col justify-center items-center text-center p-4 sm:p-6 pointer-events-none opacity-0 invisible"
         >
           <div className="select-none pointer-events-auto">
             <Link
               to="/inventory"
-              id="btn-hero-view-inventory"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate('/inventory');
               }}
-              className="inline-flex items-center justify-center gap-2.5 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-extrabold text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_4px_30px_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-6 sm:px-9 py-3 sm:py-4 rounded-full bg-white hover:bg-zinc-100 text-black font-sans font-extrabold text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_4px_30px_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer"
             >
               <span>View Inventory</span>
               <ArrowRight className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />

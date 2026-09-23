@@ -150,7 +150,7 @@ export default function AdminLeads() {
                     <div className="flex items-center space-x-2 shrink-0">
                       <a 
                         href={`tel:${lead.phone}`} 
-                        className="px-3.5 py-2 bg-white/10 hover:bg-white border border-white/20 text-white hover:text-zinc-950 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all"
+                        className="px-3.5 py-2 bg-white/10 hover:bg-white/25 border border-white/20 hover:border-white/50 text-white hover:text-white rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all"
                       >
                         Call
                       </a>

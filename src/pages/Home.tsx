@@ -145,7 +145,7 @@ export default function Home() {
                       {/* View Details Button */}
                       <Link 
                         to={`/inventory/${car.id}`}
-                        className="mt-4 sm:mt-5 w-full py-2.5 sm:py-3 border border-white/15 hover:border-white/40 hover:bg-white hover:text-black rounded-xl text-center text-[10.5px] sm:text-xs uppercase tracking-widest font-bold text-zinc-300 transition-all duration-300 block"
+                        className="mt-4 sm:mt-5 w-full py-2.5 sm:py-3 border border-white/15 hover:border-white/50 bg-white/5 hover:bg-white/20 rounded-xl text-center text-[10.5px] sm:text-xs uppercase tracking-widest font-bold text-zinc-200 hover:text-white transition-all duration-300 block shadow-sm"
                       >
                         VIEW DETAILS
                       </Link>
@@ -192,7 +192,7 @@ export default function Home() {
 
            <div className="mt-8 sm:mt-10 flex justify-center px-4">
              <a 
-               href="https://share.google/VGXKDMtikeDYt2Lcn" 
+               href="https://share.google/KqZdV8L9UzqY2RkUH" 
                target="_blank" 
                rel="noreferrer" 
                className="group flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-white text-black font-sans font-bold rounded-full text-[10.5px] sm:text-xs tracking-wider uppercase transition-all duration-300 shadow-md hover:bg-zinc-100 active:scale-95 max-w-[240px] sm:max-w-none w-full sm:w-auto"
@@ -276,7 +276,7 @@ export default function Home() {
                 Mumbai, Maharashtra 400050
               </p>
               <a 
-                href="https://maps.google.com/?q=Hill+View+Road+Bandra+Mumbai" 
+                href="https://share.google/KqZdV8L9UzqY2RkUH" 
                 target="_blank" 
                 rel="noreferrer" 
                 className="mt-4 sm:mt-6 text-white hover:text-zinc-300 text-[11px] sm:text-xs tracking-widest uppercase font-sans border-b border-white/40 hover:border-white pb-0.5 transition-all inline-flex items-center gap-1.5 font-bold"

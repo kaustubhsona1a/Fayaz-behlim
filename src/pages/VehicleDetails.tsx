@@ -333,7 +333,7 @@ export default function VehicleDetails() {
             </div>
             <button
               onClick={() => window.open(car.instagramReel, '_blank', 'noopener,noreferrer')}
-              className={`w-full text-center frost-pill text-white hover:text-black font-bold rounded-full uppercase tracking-widest font-sans transition-all flex items-center justify-center gap-2 shadow-lg hover:scale-[1.01] active:scale-95 ${isMobile ? 'py-2.5 text-[9px]' : 'py-3.5 text-[10px]'}`}
+              className={`w-full text-center bg-white/10 hover:bg-[#E4405F] text-white hover:text-white border border-white/20 hover:border-[#E4405F] font-bold rounded-full uppercase tracking-widest font-sans transition-all flex items-center justify-center gap-2 shadow-lg hover:scale-[1.01] active:scale-95 ${isMobile ? 'py-2.5 text-[9px]' : 'py-3.5 text-[10px]'}`}
             >
               Watch on Instagram ↗
             </button>
@@ -341,7 +341,7 @@ export default function VehicleDetails() {
         )}
         
         <p className={`tracking-wider text-zinc-200 flex items-center font-sans font-semibold ${isMobile ? 'text-[10px] mb-4' : 'text-xs mb-8'}`}>
-          <a href="https://maps.google.com/?q=Hill+View+Road+Bandra+Mumbai" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-300 inline-flex items-center">
+          <a href="https://share.google/KqZdV8L9UzqY2RkUH" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-300 inline-flex items-center">
             <MapPin className="w-4 h-4 mr-2 text-white" /> CYR Cars Showroom, Bandra, Mumbai
           </a>
         </p>
@@ -350,13 +350,19 @@ export default function VehicleDetails() {
           <button onClick={handleCall} className={`w-full bg-white hover:bg-zinc-100 text-black rounded-full transition-all duration-300 shadow-md font-sans font-bold cursor-pointer active:scale-98 ${isMobile ? 'py-2.5' : 'py-3.5'}`}>
             Call Us (+91 99877 73656)
           </button>
-          <button onClick={handleWhatsApp} className={`w-full frost-pill text-white hover:text-black rounded-full transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-98 ${isMobile ? 'py-2.5' : 'py-3.5'}`}>
-            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397 0 12.008 0c3.205.001 6.216 1.25 8.484 3.52 2.268 2.27 3.516 5.283 3.515 8.491-.005 6.655-5.344 12.003-11.95 12.003-.111 0-.221 0-.332-.005l-5.69 2.12c-.22.08-.454.04-.63-.12l-.35-.35zM6.57 17.51l.36.21c1.55.93 3.32 1.42 5.15 1.42a9.92 9.92 0 0 0 9.95-9.94c0-2.65-1.03-5.15-2.9-7.02C17.26 3.2 14.77 2.17 12.1 2.17 6.64 2.17 2.2 6.61 2.2 12.07c0 1.93.53 3.82 1.54 5.43l.23.37-1.01 3.69 3.61-.95zM17.43 14.93c-.29-.15-1.74-.86-2.01-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07a8.1 8.1 0 0 1-2.39-1.48 8.94 8.94 0 0 1-1.65-2.05c-.17-.3-.02-.46.13-.61.13-.13.29-.34.44-.51.15-.17.2-.29.3-.49.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.59-.49-.51-.67-.52l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.47 1.07 2.89 1.22 3.1 1.05 1.41 1.74 1.74 3.1 2.45a9.5 9.5 0 0 0 3.7.8c1.3-.01 2.44-.45 2.74-1 .3-.53.3-1 .22-1.12-.08-.12-.3-.19-.59-.34z"/></svg>
-            Inquire via WhatsApp
+          <button 
+            onClick={handleWhatsApp} 
+            className={`w-full bg-[#25D366]/20 hover:bg-[#25D366] text-white hover:text-white border border-[#25D366]/40 hover:border-[#25D366] rounded-full transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-98 shadow-md group ${isMobile ? 'py-2.5' : 'py-3.5'}`}
+          >
+            <svg className="w-3.5 h-3.5 fill-[#25D366] group-hover:fill-white transition-colors duration-300 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397 0 12.008 0c3.205.001 6.216 1.25 8.484 3.52 2.268 2.27 3.516 5.283 3.515 8.491-.005 6.655-5.344 12.003-11.95 12.003-.111 0-.221 0-.332-.005l-5.69 2.12c-.22.08-.454.04-.63-.12l-.35-.35zM6.57 17.51l.36.21c1.55.93 3.32 1.42 5.15 1.42a9.92 9.92 0 0 0 9.95-9.94c0-2.65-1.03-5.15-2.9-7.02C17.26 3.2 14.77 2.17 12.1 2.17 6.64 2.17 2.2 6.61 2.2 12.07c0 1.93.53 3.82 1.54 5.43l.23.37-1.01 3.69 3.61-.95zM17.43 14.93c-.29-.15-1.74-.86-2.01-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07a8.1 8.1 0 0 1-2.39-1.48 8.94 8.94 0 0 1-1.65-2.05c-.17-.3-.02-.46.13-.61.13-.13.29-.34.44-.51.15-.17.2-.29.3-.49.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.59-.49-.51-.67-.52l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.47 1.07 2.89 1.22 3.1 1.05 1.41 1.74 1.74 3.1 2.45a9.5 9.5 0 0 0 3.7.8c1.3-.01 2.44-.45 2.74-1 .3-.53.3-1 .22-1.12-.08-.12-.3-.19-.59-.34z"/></svg>
+            <span className="text-white group-hover:text-white transition-colors duration-300">Inquire via WhatsApp</span>
           </button>
-          <button onClick={handleShare} className={`w-full frost-pill text-zinc-200 hover:text-black rounded-full transition-all duration-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-98 ${isMobile ? 'py-2.5' : 'py-3.5'}`}>
-            <Share2 className="w-3.5 h-3.5 text-white" />
-            Share Listing
+          <button 
+            onClick={handleShare} 
+            className={`w-full bg-white/10 hover:bg-white/20 text-white hover:text-white border border-white/20 hover:border-white/50 rounded-full transition-all duration-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-98 group ${isMobile ? 'py-2.5' : 'py-3.5'}`}
+          >
+            <Share2 className="w-3.5 h-3.5 text-zinc-300 group-hover:text-white transition-colors shrink-0" />
+            <span className="text-white group-hover:text-white transition-colors duration-300">Share Listing</span>
           </button>
         </div>
       </div>
@@ -678,7 +684,7 @@ export default function VehicleDetails() {
                   />
                   <button 
                     onClick={handleCopyLink}
-                    className={`px-4 flex items-center justify-center gap-1 border-l border-zinc-800 text-xs font-mono font-bold transition-all ${copied ? 'bg-emerald-600/20 text-emerald-700 text-[10px]' : 'bg-white/5 text-zinc-300 hover:bg-white hover:text-zinc-950 uppercase'}`}
+                    className={`px-4 flex items-center justify-center gap-1 border-l border-zinc-800 text-xs font-mono font-bold transition-all ${copied ? 'bg-emerald-500/20 text-emerald-300 text-[10px]' : 'bg-white/10 text-white hover:bg-white/25 hover:text-white uppercase'}`}
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? 'Copied' : 'Copy'}</span>

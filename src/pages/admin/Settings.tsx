@@ -474,7 +474,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
                   setCopiedSql(true);
                   setTimeout(() => setCopiedSql(false), 3000);
                 }}
-                className="absolute top-2.5 right-2.5 bg-white/10 hover:bg-white text-zinc-300 hover:text-black text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border border-white/20 transition-all flex items-center gap-1"
+                className="absolute top-2.5 right-2.5 bg-white/10 hover:bg-white/25 text-white hover:text-white text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border border-white/20 hover:border-white/50 transition-all flex items-center gap-1"
               >
                 {copiedSql ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                 <span>{copiedSql ? 'Copied!' : 'Copy SQL'}</span>
@@ -573,7 +573,7 @@ CREATE POLICY "Allow all upsert access" ON public.site_settings FOR ALL USING (t
                   <button
                     type="button"
                     onClick={() => setIsDealerAutoSpinning(!isDealerAutoSpinning)}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/80 hover:bg-white hover:text-black text-white text-[10px] font-mono uppercase tracking-wider border border-white/20 transition-all"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/80 hover:bg-white/25 text-white hover:text-white text-[10px] font-mono uppercase tracking-wider border border-white/20 hover:border-white/50 transition-all"
                   >
                     {isDealerAutoSpinning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                     <span>{isDealerAutoSpinning ? 'Pause Spin' : 'Test 360 Spin'}</span>

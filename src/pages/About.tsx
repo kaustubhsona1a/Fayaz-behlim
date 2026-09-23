@@ -1,4 +1,4 @@
-import { Star, X, ChevronLeft, ChevronRight, MapPin, Clock, Bookmark, ShieldCheck, Sparkles, ExternalLink } from 'lucide-react';
+import { Star, X, ChevronLeft, ChevronRight, MapPin, Clock, Bookmark, ShieldCheck, Sparkles, ExternalLink, FileCheck, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useVehicles } from '../context/VehicleContext';
 import { MOCK_REVIEWS } from '../data/mockData';
@@ -28,93 +28,72 @@ export default function About() {
   return (
     <div className="bg-transparent text-zinc-300 font-sans min-h-screen">
       {/* Top Header & Milestone Section */}
-      <section className="pt-4 sm:pt-8 pb-6 sm:pb-10 bg-transparent relative z-10">
+      <section className="pt-4 sm:pt-8 pb-6 sm:pb-8 bg-transparent relative z-10">
         <div className="container mx-auto max-w-7xl px-3.5 sm:px-6">
           
           {/* Header Title Block */}
-          <div className="text-center max-w-3xl mx-auto mb-5 sm:mb-7 animate-fade-in">
-            <span className="text-zinc-400 font-sans tracking-[0.25em] uppercase text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2 block">
-              BOUTIQUE HISTORY
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8 animate-fade-in">
+            <span className="text-zinc-400 font-sans tracking-[0.25em] uppercase text-[10px] sm:text-xs font-semibold mb-1.5 block">
+              About Us
             </span>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-sans tracking-tight text-white uppercase mb-2 sm:mb-3">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-sans tracking-tight text-white uppercase mb-2">
               CYR CARS
             </h1>
             
-            {/* Established Badge - Pure Monochrome Frost Pill */}
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/20 bg-white/[0.06] backdrop-blur-md text-zinc-200 text-[9px] sm:text-xs uppercase tracking-wider font-sans font-semibold shadow-sm mb-3 sm:mb-4">
-              <Bookmark className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-white fill-white shrink-0" />
-              <span>ESTD. 2020 • DISTINGUISHED LUXURY & PERFORMANCE MOTORCARS</span>
+            {/* Established Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/15 bg-white/[0.05] backdrop-blur-md text-zinc-300 text-[10px] sm:text-xs uppercase tracking-wider font-sans font-medium mb-3">
+              <Bookmark className="w-3 h-3 text-white fill-white shrink-0" />
+              <span>ESTD. 2020 • BANDRA, MUMBAI</span>
             </div>
 
-            <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal max-w-2xl mx-auto px-2">
-              Mumbai's premier boutique destination for curated luxury, performance supercars, and flagship motorcars on Hill View Road, Bandra.
+            <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal max-w-xl mx-auto px-2">
+              Mumbai's boutique destination for curated luxury, performance, and exotic motorcars on Hill View Road, Bandra.
             </p>
           </div>
 
           {/* Milestones Container Card */}
-          <div className="frost-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 md:p-8 shadow-xl border border-white/15 animate-fade-in">
+          <div className="frost-card rounded-2xl p-4 sm:p-6 shadow-xl border border-white/15 animate-fade-in">
             {/* Milestone Header */}
-            <div className="flex items-center gap-2 pb-3 sm:pb-4 border-b border-white/10 mb-4 sm:mb-6 text-[10px] sm:text-xs md:text-sm font-sans tracking-wider uppercase font-bold flex-wrap">
-              <div className="flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" />
-                <span className="text-zinc-300 font-semibold">MILESTONES OF INTEGRITY & PASSION</span>
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4 text-xs font-sans tracking-wider uppercase">
+              <div className="flex items-center gap-2 text-white font-bold">
+                <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <span>Our Journey</span>
               </div>
-              <span className="text-zinc-500 hidden sm:inline">•</span>
-              <span className="text-white font-bold">THE JOURNEY (2020 - 2026)</span>
+              <span className="text-zinc-400 text-[11px] font-mono">2020 – 2026</span>
             </div>
 
-            {/* Milestones 4-Column Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-              {/* 2020 */}
-              <div className="bg-black/40 border border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 md:p-5 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2020</div>
-                  <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    THE FOUNDATION
-                  </h3>
-                  <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Founded in Bandra, Mumbai with an uncompromising vision: curating only pristine, low-mileage luxury and performance vehicles with verified provenance.
-                  </p>
-                </div>
+            {/* Milestones 4-Column Grid - Ultra Compact & Punchy */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-black/40 border border-white/10 hover:border-white/25 rounded-xl p-3.5 transition-all">
+                <span className="text-xs font-mono font-bold text-white px-2 py-0.5 rounded bg-white/10 inline-block mb-2">2020</span>
+                <h3 className="text-white font-bold text-xs uppercase tracking-wide mb-1">Founded in Bandra</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Established with a focus on pristine, low-mileage luxury vehicles.
+                </p>
               </div>
 
-              {/* 2022 */}
-              <div className="bg-black/40 border border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 md:p-5 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2022</div>
-                  <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    EXECUTIVE EXPANSION
-                  </h3>
-                  <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Pioneered comprehensive 150-point telemetry inspection for imported grand tourers, sports coupés, and flagship luxury SUVs.
-                  </p>
-                </div>
+              <div className="bg-black/40 border border-white/10 hover:border-white/25 rounded-xl p-3.5 transition-all">
+                <span className="text-xs font-mono font-bold text-white px-2 py-0.5 rounded bg-white/10 inline-block mb-2">2022</span>
+                <h3 className="text-white font-bold text-xs uppercase tracking-wide mb-1">150-Point Standards</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Pioneered rigorous mechanical and telemetry certification audits.
+                </p>
               </div>
 
-              {/* 2024 */}
-              <div className="bg-black/40 border border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 md:p-5 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2024</div>
-                  <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    COLLECTOR TRUST
-                  </h3>
-                  <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Established private boutique advisory for prominent Mumbai auto enthusiasts, industrialists, and collectors seeking rare performance icons.
-                  </p>
-                </div>
+              <div className="bg-black/40 border border-white/10 hover:border-white/25 rounded-xl p-3.5 transition-all">
+                <span className="text-xs font-mono font-bold text-white px-2 py-0.5 rounded bg-white/10 inline-block mb-2">2024</span>
+                <h3 className="text-white font-bold text-xs uppercase tracking-wide mb-1">Collector Network</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Trusted by Mumbai's prominent auto enthusiasts and collectors.
+                </p>
               </div>
 
-              {/* 2026 */}
-              <div className="bg-black/40 border border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 md:p-5 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold font-cinzel text-white mb-1">2026</div>
-                  <h3 className="text-white font-bold text-[10px] sm:text-xs md:text-sm tracking-wider uppercase font-sans mb-1.5 sm:mb-2">
-                    FLAGSHIP EXCELLENCE
-                  </h3>
-                  <p className="text-zinc-300 text-xs leading-relaxed font-sans font-normal">
-                    Hundreds of bespoke handovers celebrated on Hill View Road. Setting the benchmark for curated pre-owned luxury motoring in Mumbai.
-                  </p>
-                </div>
+              <div className="bg-black/40 border border-white/10 hover:border-white/25 rounded-xl p-3.5 transition-all">
+                <span className="text-xs font-mono font-bold text-white px-2 py-0.5 rounded bg-white/10 inline-block mb-2">2026</span>
+                <h3 className="text-white font-bold text-xs uppercase tracking-wide mb-1">Flagship Boutique</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Hundreds of verified handovers celebrated on Hill View Road.
+                </p>
               </div>
             </div>
           </div>
@@ -123,9 +102,9 @@ export default function About() {
       </section>
 
       {/* Featured Delivery Showcase Banner */}
-      <section className="py-4 sm:py-8 bg-transparent relative z-10">
+      <section className="py-3 sm:py-6 bg-transparent relative z-10">
         <div className="container mx-auto max-w-7xl px-3.5 sm:px-6">
-          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-white/15 aspect-[16/11] sm:aspect-[16/9] md:aspect-[21/9] w-full bg-black/60 group">
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-white/15 aspect-[16/10] sm:aspect-[16/8] md:aspect-[21/8] w-full bg-black/60 group">
             <SmartImage 
               src={heroShowcaseImage} 
               alt="Where Performance Meets Prestige - CYR Cars Showroom" 
@@ -133,12 +112,12 @@ export default function About() {
               className="w-full h-full object-cover object-center brightness-90 group-hover:scale-[1.02] transition-all duration-700 ease-out"
             />
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-8 md:p-12 pointer-events-none">
-              <span className="text-zinc-300 font-sans font-bold text-[10px] sm:text-xs md:text-sm tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-1 sm:mb-1.5 block">
-                BANDRA SHOWROOM
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 sm:p-6 md:p-8 pointer-events-none">
+              <span className="text-zinc-300 font-sans font-bold text-[10px] sm:text-xs tracking-[0.2em] uppercase mb-1 block">
+                Bandra Showroom
               </span>
-              <h2 className="text-white font-sans text-xl sm:text-3xl md:text-5xl font-black uppercase tracking-tight">
-                WHERE PERFORMANCE MEETS PRESTIGE
+              <h2 className="text-white font-sans text-lg sm:text-2xl md:text-3xl font-black uppercase tracking-tight">
+                Where Performance Meets Prestige
               </h2>
             </div>
           </div>
@@ -146,98 +125,106 @@ export default function About() {
       </section>
 
       {/* Story & Showroom Vitals Section */}
-      <section className="py-10 sm:py-16 bg-transparent relative z-10">
+      <section className="py-6 sm:py-10 bg-transparent relative z-10">
         <div className="container mx-auto max-w-7xl px-3.5 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
             
-            {/* Left Column: Narrative Story */}
-            <div className="lg:col-span-7 space-y-4 sm:space-y-6 animate-fade-in">
-              <h2 className="text-xl sm:text-2xl md:text-4xl font-sans font-black text-white tracking-tight uppercase leading-tight">
-                UNCOMPROMISING CURATION FOR PERFORMANCE & LUXURY CONNOISSEURS
-              </h2>
-              
-              <p className="text-zinc-200 text-xs sm:text-sm md:text-base leading-relaxed font-normal">
-                At CYR Cars, we curate only the rarest, most immaculate automotive masterworks. Every high-performance sports car, flagship luxury SUV, and bespoke grand tourer on our showroom floor at Hill View Road, Bandra undergoes an exhaustive 150-point technical audit covering engine compression, gearbox telemetry, carbon-ceramic brake tolerances, ECU integrity, and 100% verified single-collector provenance. We reject over 90% of evaluated motorcars to guarantee that only the apex tier enters our private collection.
-              </p>
-
-              <div className="border-l-2 border-white pl-4 sm:pl-5 py-1.5 sm:py-2 mt-3 sm:mt-4">
-                <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed font-normal">
-                  We specialize in delivering a bespoke, white-glove automotive acquisition experience. From private trackway inspections to seamless title provenance, customized high-value financing, and insured enclosed logistics across India, our team caters exclusively to distinguished patrons.
+            {/* Left Column: Simplified Narrative & 4 Quality Pillars */}
+            <div className="lg:col-span-7 space-y-4 animate-fade-in">
+              <div>
+                <span className="text-zinc-400 font-sans tracking-[0.2em] uppercase text-[10px] sm:text-xs font-semibold mb-1 block">
+                  The Standard
+                </span>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-sans font-bold text-white tracking-tight uppercase">
+                  Curated With Precision
+                </h2>
+                <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed mt-2">
+                  Every motorcar on our showroom floor at Hill View Road, Bandra is hand-selected and certified to the highest standards.
                 </p>
               </div>
 
-              {/* Core Quality Badges */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2 sm:pt-4">
-                <div className="frost-card p-3.5 sm:p-4 rounded-xl flex items-start gap-3">
-                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0 mt-0.5" />
+              {/* 4 Crisp Feature Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="frost-card p-3.5 rounded-xl flex items-start gap-3">
+                  <ShieldCheck className="w-4 h-4 text-white shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">150-Point Dyno & Telemetry</h4>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed mt-0.5">Drivetrain, paint depth meter & flood-free provenance certificate.</p>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">150-Point Audit</h4>
+                    <p className="text-zinc-400 text-[11px] leading-relaxed mt-0.5">Drivetrain, electronics, and flood-free provenance.</p>
                   </div>
                 </div>
-                <div className="frost-card p-3.5 sm:p-4 rounded-xl flex items-start gap-3">
-                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0 mt-0.5" />
+
+                <div className="frost-card p-3.5 rounded-xl flex items-start gap-3">
+                  <FileCheck className="w-4 h-4 text-white shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">Verified Provenance</h4>
+                    <p className="text-zinc-400 text-[11px] leading-relaxed mt-0.5">100% genuine mileage and clean single-owner titles.</p>
+                  </div>
+                </div>
+
+                <div className="frost-card p-3.5 rounded-xl flex items-start gap-3">
+                  <Sparkles className="w-4 h-4 text-white shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-white font-bold text-xs uppercase tracking-wider">Bespoke Title Transfer</h4>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed mt-0.5">Discreet, expedited VIP registration and ownership transfers.</p>
+                    <p className="text-zinc-400 text-[11px] leading-relaxed mt-0.5">Discreet, expedited VIP registration and ownership transfers.</p>
+                  </div>
+                </div>
+
+                <div className="frost-card p-3.5 rounded-xl flex items-start gap-3">
+                  <Truck className="w-4 h-4 text-white shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider">Enclosed Logistics</h4>
+                    <p className="text-zinc-400 text-[11px] leading-relaxed mt-0.5">Insured, white-glove transport directly to your doorstep.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Right Column: Showroom Vitals Card */}
-            <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-32 font-sans animate-fade-in">
-              <div className="frost-card rounded-2xl p-5 sm:p-7 md:p-8 space-y-5 sm:space-y-6 shadow-2xl border border-white/15">
-                <span className="text-zinc-300 font-sans tracking-[0.25em] uppercase text-xs font-bold block">
-                  SHOWROOM VITALS
-                </span>
-
-                {/* Google Rating */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-white font-bold text-sm sm:text-base font-sans">
-                    <Star className="w-4 h-4 fill-white text-white" />
-                    <span>Google Rating: 4.3 ★</span>
+            <div className="lg:col-span-5 font-sans animate-fade-in">
+              <div className="frost-card rounded-2xl p-4 sm:p-6 space-y-4 shadow-xl border border-white/15">
+                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <span className="text-zinc-300 font-sans tracking-[0.2em] uppercase text-xs font-bold">
+                    Showroom Vitals
+                  </span>
+                  <div className="flex items-center gap-1.5 text-white font-bold text-xs">
+                    <Star className="w-3.5 h-3.5 fill-white text-white" />
+                    <span>4.3 ★ Google</span>
                   </div>
-                  <p className="text-zinc-300 text-[10px] sm:text-[11px] uppercase tracking-wider font-mono font-semibold">
-                    VERIFIED ACROSS 109 LOCAL MUMBAI CLIENT REVIEWS.
-                  </p>
                 </div>
 
-                <div className="border-t border-white/10" />
-
                 {/* Showroom Timings */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-white font-bold text-xs sm:text-sm uppercase font-sans">
-                    <Clock className="w-4 h-4 text-zinc-400" />
-                    <span>SHOWROOM TIMINGS</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-white font-bold text-xs uppercase">
+                    <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Visiting Hours</span>
                   </div>
-                  <p className="text-zinc-300 text-xs font-mono font-semibold tracking-wider">
-                    MON–SUN: 10AM – 8:30PM
+                  <p className="text-zinc-300 text-xs font-mono font-medium">
+                    Monday – Sunday: 10:00 AM – 8:30 PM
                   </p>
                 </div>
 
                 <div className="border-t border-white/10" />
 
                 {/* Showroom Location */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-white font-bold text-xs sm:text-sm uppercase font-sans">
-                    <MapPin className="w-4 h-4 text-white" />
-                    <span>SHOWROOM ADDRESS</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-white font-bold text-xs uppercase">
+                    <MapPin className="w-3.5 h-3.5 text-white" />
+                    <span>Location</span>
                   </div>
-                  <p className="text-zinc-300 text-xs leading-relaxed font-sans">
-                    Hill View Road, Bandra, Mumbai, Maharashtra 400050
+                  <p className="text-zinc-300 text-xs leading-relaxed">
+                    Hill View Road, Bandra, Mumbai, MH 400050
                   </p>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1">
                   <a 
-                    href="https://maps.google.com/?q=Hill+View+Road+Bandra+Mumbai" 
+                    href="https://share.google/KqZdV8L9UzqY2RkUH" 
                     target="_blank" 
                     rel="noreferrer" 
-                    className="w-full frost-pill text-white hover:text-black py-2.5 sm:py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="w-full bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/50 text-white py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm"
                   >
-                    <span>View Location on Map</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Get Directions & Reviews</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-white" />
                   </a>
                 </div>
 
@@ -250,30 +237,30 @@ export default function About() {
 
       {/* Client Deliveries Section (Patron Archive) */}
       {deliveries.length > 0 && (
-        <section className="py-12 sm:py-20 bg-transparent border-t border-white/10 relative z-10">
+        <section className="py-8 sm:py-14 bg-transparent border-t border-white/10 relative z-10">
           <div className="container mx-auto max-w-7xl px-3.5 sm:px-6">
-            <div className="text-center mb-10 sm:mb-16 animate-fade-in">
-              <span className="text-zinc-300 tracking-[0.25em] uppercase text-[11px] sm:text-xs font-bold mb-2 sm:mb-3 block font-sans">
-                MOMENTS OF DISTINCTION
+            <div className="text-center mb-6 sm:mb-10 animate-fade-in">
+              <span className="text-zinc-400 tracking-[0.2em] uppercase text-[10px] sm:text-xs font-bold mb-1.5 block font-sans">
+                Deliveries
               </span>
-              <h2 className="text-2xl sm:text-3xl md:text-5xl font-sans font-black text-white tracking-tight uppercase mb-3 sm:mb-4">
-                MEMORIES <span className="text-zinc-400 font-normal">ON</span> THE ROAD
+              <h2 className="text-xl sm:text-3xl md:text-4xl font-sans font-bold text-white tracking-tight uppercase mb-2">
+                Memories on the Road
               </h2>
-              <p className="text-zinc-200 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed font-normal px-2">
-                Real, candid snapshots of happy keys and vehicle handovers outside our Mumbai showroom.
+              <p className="text-zinc-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
+                Recent vehicle handovers and celebrations at our Bandra showroom.
               </p>
             </div>
 
             {/* Photo Wall Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5 lg:gap-6 pt-1">
               {deliveries.map((img, i) => {
                 const captions = [
-                  "🔑 Milestone Handover",
-                  "✨ Premium Acquisition",
-                  "🚗 Driving Dream Home",
-                  "🌟 Exceptional Delivery",
-                  "🖤 Bespoke Client Celebration",
-                  "🔥 Pure Motoring Passion"
+                  "Milestone Handover",
+                  "Premium Acquisition",
+                  "Driving Dream Home",
+                  "Exceptional Delivery",
+                  "Bespoke Handover",
+                  "Pure Motoring Passion"
                 ];
 
                 const currentCaption = captions[i % captions.length];
@@ -283,7 +270,7 @@ export default function About() {
                     key={i} 
                     id={`patron-card-${i}`}
                     onClick={() => setActivePhotoIndex(i)}
-                    className="group relative frost-card p-3 sm:p-4 rounded-2xl transition-all duration-500 ease-out cursor-pointer flex flex-col justify-between hover:-translate-y-1.5"
+                    className="group relative frost-card p-3 sm:p-3.5 rounded-2xl transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between hover:-translate-y-1"
                   >
                     {/* Photo Canvas Frame with Zoom Effect */}
                     <div className="relative overflow-hidden rounded-xl bg-black/50 aspect-[4/3] w-full">
@@ -293,29 +280,22 @@ export default function About() {
                         fallbackSrc={DELIVERY_PLACEHOLDER_IMAGE}
                         loading="lazy"
                         decoding="async"
-                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
+                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 ease-out"
                       />
                       
-                      <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 frost-pill text-white text-[9px] font-bold tracking-wider uppercase px-2.5 sm:px-3 py-1 rounded-full shadow-sm select-none font-sans">
+                      <div className="absolute top-2.5 right-2.5 frost-pill text-white text-[9px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-sm select-none font-sans">
                         ✓ DELIVERED
                       </div>
                     </div>
 
                     {/* Metadata & Caption */}
-                    <div className="pt-3 sm:pt-4 px-1 flex flex-col justify-between flex-grow">
-                      <div>
-                        <span className="text-[10px] font-sans text-zinc-400 font-semibold tracking-widest uppercase block mb-1">
-                          PATRON ARCHIVE #{i + 1}
-                        </span>
-                        <p className="font-sans text-white text-xs sm:text-sm md:text-base font-semibold tracking-wide select-none group-hover:text-zinc-200 transition-colors">
-                          {currentCaption}
-                        </p>
-                      </div>
-
-                      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-white/10 flex justify-between items-center text-[10px] font-sans text-zinc-300 select-none">
-                        <span className="font-semibold text-zinc-300">40+ YEARS LEGACY</span>
-                        <span className="text-zinc-200 font-bold">BANDRA, MUMBAI</span>
-                      </div>
+                    <div className="pt-2.5 px-1 flex items-center justify-between">
+                      <p className="font-sans text-white text-xs sm:text-sm font-semibold tracking-wide select-none group-hover:text-zinc-200 transition-colors">
+                        {currentCaption}
+                      </p>
+                      <span className="text-[10px] font-sans text-zinc-400 uppercase tracking-wider">
+                        Bandra, Mumbai
+                      </span>
                     </div>
                   </div>
                 );
@@ -391,14 +371,13 @@ export default function About() {
       )}
 
       {/* Reviews Section */}
-      <section className="py-12 sm:py-20 bg-transparent border-t border-white/10 font-sans relative z-10">
+      <section className="py-8 sm:py-14 bg-transparent border-t border-white/10 font-sans relative z-10">
         <div className="container mx-auto max-w-7xl px-3.5 sm:px-6">
-          <div className="text-center mb-10 sm:mb-16">
-            <span className="text-zinc-300 tracking-[0.2em] uppercase text-[11px] sm:text-xs font-semibold mb-2 sm:mb-3 block font-sans">Verified Endorsements</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-sans font-bold text-white tracking-wide mb-3 sm:mb-4 uppercase">Google Business Ratings</h2>
-            <div className="w-20 h-[1px] bg-white/20 mx-auto mt-3 mb-3"></div>
-            <p className="text-zinc-300 text-xs max-w-2xl mx-auto tracking-widest font-sans uppercase font-semibold">
-              Direct verification from our esteemed client community across Mumbai.
+          <div className="text-center mb-6 sm:mb-10">
+            <span className="text-zinc-400 tracking-[0.2em] uppercase text-[10px] sm:text-xs font-semibold mb-1.5 block font-sans">Verified Feedback</span>
+            <h2 className="text-xl sm:text-3xl md:text-4xl font-sans font-bold text-white tracking-wide mb-2 uppercase">Google Reviews</h2>
+            <p className="text-zinc-400 text-xs max-w-xl mx-auto tracking-wide">
+              Direct ratings from verified clients and collectors across Mumbai.
             </p>
           </div>
 
@@ -430,14 +409,14 @@ export default function About() {
             })}
           </div>
 
-          <div className="mt-8 sm:mt-10 flex justify-center px-4">
+          <div className="mt-6 sm:mt-8 flex justify-center px-4">
             <a 
-              href="https://share.google/VGXKDMtikeDYt2Lcn" 
+              href="https://share.google/KqZdV8L9UzqY2RkUH" 
               target="_blank" 
               rel="noreferrer" 
-              className="group flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 frost-pill text-white hover:text-black font-bold rounded-full text-[10.5px] sm:text-xs tracking-wider uppercase font-sans transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md max-w-[240px] sm:max-w-none w-full sm:w-auto"
+              className="group flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-white hover:bg-zinc-100 text-black font-sans font-bold rounded-full text-[10.5px] sm:text-xs tracking-wider uppercase transition-all duration-300 shadow-md active:scale-95 max-w-[240px] sm:max-w-none w-full sm:w-auto"
             >
-              <Star className="w-3.5 h-3.5 fill-white text-white group-hover:text-black shrink-0 transition-colors" />
+              <Star className="w-3.5 h-3.5 fill-current text-black shrink-0" />
               <span>View Google Reviews</span>
               <span className="text-xs font-light transition-transform duration-300 group-hover:translate-x-1">→</span>
             </a>
@@ -446,15 +425,15 @@ export default function About() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-transparent text-center border-t border-white/10 relative z-10 animate-fade-in overflow-hidden font-sans">
-        <div className="container mx-auto max-w-3xl px-4 relative z-10">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black text-white mb-2.5 sm:mb-3 tracking-wide uppercase">Experience Bespoke Curation</h2>
-          <p className="text-zinc-200 mb-6 sm:mb-7 font-normal tracking-wide text-xs sm:text-sm md:text-base">We welcome you to inspect our verified, certified pre-owned luxury and performance motorcars in Mumbai.</p>
-          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 justify-center text-[11px] sm:text-xs tracking-wider uppercase font-sans font-bold max-w-[240px] sm:max-w-none mx-auto">
+      <section className="py-8 sm:py-12 bg-transparent text-center border-t border-white/10 relative z-10 animate-fade-in overflow-hidden font-sans">
+        <div className="container mx-auto max-w-2xl px-4 relative z-10">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-sans font-bold text-white mb-2 tracking-wide uppercase">Experience Bespoke Curation</h2>
+          <p className="text-zinc-300 mb-5 font-normal tracking-wide text-xs sm:text-sm">We welcome you to inspect our verified, certified pre-owned luxury and performance motorcars in Mumbai.</p>
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3.5 justify-center text-[11px] sm:text-xs tracking-wider uppercase font-sans font-bold max-w-[240px] sm:max-w-none mx-auto">
             <Link to="/inventory" className="bg-white text-black hover:bg-zinc-200 px-5 sm:px-7 py-2.5 sm:py-3 transition-all duration-300 rounded-full shadow-md text-center">
               Browse Collection
             </Link>
-            <Link to="/sell" className="frost-pill text-white hover:text-black px-5 sm:px-7 py-2.5 sm:py-3 transition-all duration-300 rounded-full shadow-sm text-center">
+            <Link to="/sell" className="bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/50 text-white hover:text-white px-5 sm:px-7 py-2.5 sm:py-3 transition-all duration-300 rounded-full shadow-sm text-center">
               Consign Your Car
             </Link>
           </div>

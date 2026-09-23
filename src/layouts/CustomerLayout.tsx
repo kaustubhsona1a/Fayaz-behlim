@@ -125,14 +125,14 @@ export default function CustomerLayout() {
             : 'md:frost-nav md:border-b md:border-white/10'
         } text-zinc-100`}>
 
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center">
+          <div className="container mx-auto max-w-7xl px-3.5 sm:px-6 py-2.5 sm:py-4 flex justify-between items-center">
             
             {/* Left Side: Branding Logo or Text */}
             <Link to="/" className="flex items-center shrink-0 select-none group">
               <img 
                 src="/logo.png" 
                 alt="CYR Cars" 
-                className="h-10 sm:h-12 md:h-14 w-auto max-w-[220px] object-contain transition-all duration-300 group-hover:scale-105" 
+                className="h-8 sm:h-12 md:h-14 w-auto max-w-[190px] sm:max-w-[220px] object-contain transition-all duration-300 group-hover:scale-105" 
               />
             </Link>
 
@@ -176,11 +176,11 @@ export default function CustomerLayout() {
                   <MessageCircle className="w-3.5 h-3.5 stroke-[1.8]" />
                 </a>
                 <a 
-                  href="https://maps.google.com/?q=Hill+View+Road+Bandra+Mumbai" 
+                  href="https://share.google/KqZdV8L9UzqY2RkUH" 
                   target="_blank" 
                   rel="noreferrer" 
                   className="w-8 h-8 rounded-full frost-pill flex items-center justify-center text-[#EA4335] hover:text-red-400 hover:border-[#EA4335]/50 transition-all"
-                  title="Showroom Location: Bandra Hill View Road"
+                  title="Showroom Location & Reviews: Cash Your Ride"
                 >
                   <MapPin className="w-3.5 h-3.5 stroke-[1.8]" />
                 </a>
@@ -276,11 +276,11 @@ export default function CustomerLayout() {
                   <Instagram className="w-3.5 h-3.5 stroke-[1.8]" />
                 </a>
                 <a 
-                  href="https://maps.google.com/?q=Hill+View+Road+Bandra+Mumbai" 
+                  href="https://share.google/KqZdV8L9UzqY2RkUH" 
                   target="_blank" 
                   rel="noreferrer" 
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full frost-pill flex items-center justify-center text-[#EA4335] hover:text-red-400 hover:border-[#EA4335]/50 transition-colors"
-                  title="Showroom Location: Bandra Hill View Road"
+                  title="Showroom Location & Reviews"
                 >
                   <MapPin className="w-3.5 h-3.5 stroke-[1.8]" />
                 </a>
@@ -397,7 +397,7 @@ export default function CustomerLayout() {
               <a href="https://wa.me/919987773656" target="_blank" rel="noreferrer" className="p-2.5 rounded-full frost-pill hover:bg-[#25D366] hover:text-white transition-all text-[#25D366]" title="WhatsApp">
                 <MessageCircle className="w-4 h-4" />
               </a>
-              <a href="tel:+919987773656" className="p-2.5 rounded-full frost-pill hover:bg-white hover:text-black transition-all text-white" title="Call Showroom">
+              <a href="tel:+919987773656" className="p-2.5 rounded-full frost-pill hover:bg-white/25 hover:border-white/50 hover:text-white transition-all text-white" title="Call Showroom">
                 <Phone className="w-4 h-4" />
               </a>
             </div>
@@ -418,7 +418,7 @@ export default function CustomerLayout() {
             <ul className="space-y-4 text-sm tracking-wide text-zinc-200 font-normal font-sans">
               <li className="flex items-start">
                 <MapPin className="w-5 h-5 text-white mr-3 shrink-0 mt-1" />
-                <a href="https://maps.google.com/?q=Hill+View+Road+Bandra+Mumbai" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-300 leading-relaxed font-normal text-zinc-200 font-sans">
+                <a href="https://share.google/KqZdV8L9UzqY2RkUH" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-300 leading-relaxed font-normal text-zinc-200 font-sans">
                   Hill View Road, Bandra, Mumbai, Maharashtra 400050
                 </a>
               </li>
