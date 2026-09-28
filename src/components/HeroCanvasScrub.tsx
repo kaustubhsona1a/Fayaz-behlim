@@ -88,7 +88,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
     ctx.fillStyle = '#050507';
     ctx.fillRect(0, 0, cw, ch);
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'medium';
+    ctx.imageSmoothingQuality = 'high';
 
     const drawAspectCover = (img: HTMLImageElement): boolean => {
       if (!img || !img.complete || img.naturalWidth === 0) return false;
@@ -570,9 +570,9 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           style={{ touchAction: 'pan-y' }}
         />
 
-        {/* Ambient Darkening & Vignette Overlay - Subtly reduced for vibrant vehicle clarity */}
-        <div className="absolute inset-0 z-[3] bg-black/10 pointer-events-none" />
-        <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/25 via-transparent to-black/40 pointer-events-none" />
+        {/* Ambient Darkening & Vignette Overlay - Balanced luxury showroom contrast */}
+        <div className="absolute inset-0 z-[3] bg-black/25 pointer-events-none" />
+        <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/50 via-black/15 to-black/60 pointer-events-none" />
 
         {/* Floating Interaction Hint (Dealer Mode Only) */}
         {showDealerControls && (
