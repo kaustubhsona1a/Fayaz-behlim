@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useVehicles } from '../context/VehicleContext';
 import { useAuth } from '../context/AuthContext';
 import { SmartImage } from '../components/SmartImage';
-import { getFirstFrameUrl } from '../lib/frameStore';
+import { getFirstFrameUrl, getPresetFrameUrl } from '../lib/frameStore';
 
 export default function CustomerLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,8 +17,8 @@ export default function CustomerLayout() {
   const isHomePage = location.pathname === '/';
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [desktopFirstFrame, setDesktopFirstFrame] = useState<string>('/frames/desktop/frame_0001.webp');
-  const [mobileFirstFrame, setMobileFirstFrame] = useState<string>('/frames/mobile/frame_0001.webp');
+  const [desktopFirstFrame, setDesktopFirstFrame] = useState<string>(getPresetFrameUrl('desktop', 1));
+  const [mobileFirstFrame, setMobileFirstFrame] = useState<string>(getPresetFrameUrl('mobile', 1));
 
   useEffect(() => {
     const fetchFirstFrames = () => {

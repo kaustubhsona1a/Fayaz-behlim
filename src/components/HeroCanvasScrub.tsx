@@ -9,7 +9,7 @@ import {
   Upload,
   MoveHorizontal
 } from 'lucide-react';
-import { loadCustomFrames, getFirstFrameUrl, clearCustomFrames } from '../lib/frameStore';
+import { loadCustomFrames, getFirstFrameUrl, clearCustomFrames, getPresetFrameUrl } from '../lib/frameStore';
 import { useVehicles } from '../context/VehicleContext';
 
 interface HeroCanvasScrubProps {
@@ -47,7 +47,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
 
   // Loading & Mode State
   const initialDevice = getDeviceCategory();
-  const [firstFrameSrc, setFirstFrameSrc] = useState<string>(`/frames/${initialDevice}/frame_0001.webp`);
+  const [firstFrameSrc, setFirstFrameSrc] = useState<string>(getPresetFrameUrl(initialDevice, 1));
   const [totalFrames, setTotalFrames] = useState(DEFAULT_TOTAL_FRAMES);
   const [isCustomSequence, setIsCustomSequence] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -165,7 +165,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
   // Load appropriate frame sequence (Desktop vs Mobile)
   const loadDeviceSequence = useCallback((device: 'desktop' | 'mobile') => {
     currentDeviceRef.current = device;
-    const initialUrl = `/frames/${device}/frame_0001.webp`;
+    const initialUrl = getPresetFrameUrl(device, 1);
     setFirstFrameSrc(initialUrl);
 
     // Check if custom sequences are saved in IndexedDB
@@ -218,8 +218,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
         const presetImages: HTMLImageElement[] = [];
         for (let i = 1; i <= DEFAULT_TOTAL_FRAMES; i++) {
           const img = new Image();
-          const frameNum = String(i).padStart(4, '0');
-          img.src = `/frames/${device}/frame_${frameNum}.webp`;
+          img.src = getPresetFrameUrl(device, i);
           const idx = i - 1;
           const onFrameReady = () => {
             const activeIdx = Math.floor(currentFrameRef.current % DEFAULT_TOTAL_FRAMES);
@@ -556,7 +555,7 @@ export const HeroCanvasScrub: React.FC<HeroCanvasScrubProps> = ({
           alt="CYR Cars 360 Turntable Frame 1"
           loading="eager"
           decoding="sync"
-          className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+          className="absolute inset-0 w-full h-full object-contain md:object-cover object-center pointer-events-none"
         />
 
         {/* HTML5 Canvas for Apple-Style Frame Scrubbing Locked to Scroll & Interactive Drag */}

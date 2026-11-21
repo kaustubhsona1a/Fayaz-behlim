@@ -166,6 +166,14 @@ export async function clearCustomFrames(target: DeviceTarget | 'all' = 'all'): P
   }
 }
 
+export const MOBILE_FRAMES_VERSION = '2';
+
+export function getPresetFrameUrl(target: DeviceTarget, frameNumber: number): string {
+  const frameStr = String(frameNumber).padStart(4, '0');
+  const query = target === 'mobile' ? `?v=${MOBILE_FRAMES_VERSION}` : '';
+  return `/frames/${target}/frame_${frameStr}.webp${query}`;
+}
+
 // Get the first frame URL from either custom sequence or default preset sequence
 export async function getFirstFrameUrl(target: DeviceTarget = 'desktop'): Promise<string> {
   try {
@@ -176,7 +184,7 @@ export async function getFirstFrameUrl(target: DeviceTarget = 'desktop'): Promis
   } catch {
     // fallback
   }
-  return `/frames/${target}/frame_0001.webp`;
+  return getPresetFrameUrl(target, 1);
 }
 
 // Get the last frame URL from either custom sequence or default preset sequence
@@ -189,7 +197,8 @@ export async function getLastFrameUrl(target: DeviceTarget = 'desktop'): Promise
   } catch {
     // fallback
   }
-  return `/frames/${target}/frame_0096.webp`;
+  return getPresetFrameUrl(target, 96);
 }
+
 
 
