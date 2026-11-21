@@ -47,7 +47,7 @@ export default function About() {
             </div>
 
             <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal max-w-xl mx-auto px-2">
-              Mumbai's boutique destination for curated luxury, performance, and exotic motorcars on Hill View Road, Bandra.
+              Mumbai's boutique destination for curated luxury, performance, and exotic motorcars on Bandra Hill Road.
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export default function About() {
                 <span className="text-xs font-mono font-bold text-white px-2 py-0.5 rounded bg-white/10 inline-block mb-2">2026</span>
                 <h3 className="text-white font-bold text-xs uppercase tracking-wide mb-1">Flagship Boutique</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
-                  Hundreds of verified handovers celebrated on Hill View Road.
+                  Hundreds of verified handovers celebrated on Bandra Hill Road.
                 </p>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function About() {
                   Curated With Precision
                 </h2>
                 <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed mt-2">
-                  Every motorcar on our showroom floor at Hill View Road, Bandra is hand-selected and certified to the highest standards.
+                  Every motorcar on our showroom floor at Bandra Hill Road is hand-selected and certified to the highest standards.
                 </p>
               </div>
 
@@ -212,7 +212,7 @@ export default function About() {
                     <span>Location</span>
                   </div>
                   <p className="text-zinc-300 text-xs leading-relaxed">
-                    Hill View Road, Bandra, Mumbai, MH 400050
+                    Bandra Hill Road, Mumbai, MH 400050
                   </p>
                 </div>
 
@@ -381,7 +381,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5 lg:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-7">
             {MOCK_REVIEWS.map((review) => {
               return (
                 <div key={review.id} className="frost-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between">

@@ -1,6 +1,6 @@
 {
   "name": "CYR Cars",
-  "description": "Mumbai's premier boutique destination for curated luxury, exotic and high-performance motorcars on Hill View Road, Bandra. 150-point certified inspection, verified single-owner provenance, and bespoke acquisitions.",
+  "description": "Mumbai's premier boutique destination for curated luxury, exotic and high-performance motorcars on Bandra Hill Road. 150-point certified inspection, verified single-owner provenance, and bespoke acquisitions.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

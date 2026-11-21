@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS public.leads (
 CREATE TABLE IF NOT EXISTS public.site_settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     company_name TEXT DEFAULT 'CYR Cars',
-    address TEXT DEFAULT 'Bandra Hill View Rd, Mumbai',
+    address TEXT DEFAULT 'Bandra Hill Road, Mumbai',
     phone TEXT DEFAULT '+91 98200 00000',
     email TEXT DEFAULT 'contact@cyrcars.com',
     instagram_url TEXT,

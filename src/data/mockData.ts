@@ -86,31 +86,24 @@ export const MOCK_VEHICLES: Vehicle[] = [
 export const MOCK_REVIEWS = [
   {
     id: 1,
-    name: "Aryaman Singhania",
+    name: "Ranveer Gaikwad",
     rating: 5,
-    text: "Acquired a certified 2023 Porsche 911 GT3 RS with the Weissach Package for my weekend track sessions and coastal drives. The car was in flawless factory condition with full service provenance from Porsche Mumbai. CYR Cars managed the entire white-glove transfer and documentation within 48 hours.",
-    date: "Bandra West • 2 weeks ago"
+    text: "Picked up my Porsche Boxster through CYR Cars. Fayaz is a rare gentleman in this trade—straightforward, calm, and completely transparent from the first call to handover. No pushy sales talk, just clean paperwork and a spotless car.",
+    date: "Porsche Boxster"
   },
   {
     id: 2,
-    name: "Kabir & Natasha Mehta",
+    name: "Harsh Makhija",
     rating: 5,
-    text: "We were searching for an immaculate Mercedes-AMG G63 in Matte Obsidian Black with zero paint defects and authentic single-owner provenance. CYR Cars provided full telemetry logs, paint gauge depth readings, and chassis diagnostic reports. Truly Mumbai's most elite supercar and luxury motorcar boutique!",
-    date: "Worli Sea Face • 1 month ago"
+    text: "Bought my G63 here and the delivery experience was effortless. Courteous, respectful of my time, and completely transparent through every detail—no unnecessary follow-ups, and the handover was ready right when promised.",
+    date: "Mercedes-AMG G63"
   },
   {
     id: 3,
-    name: "Vikramaditya Roy",
+    name: "Mr. Mehrnosh",
     rating: 5,
-    text: "Acquired an exceptional 2022 Land Rover Range Rover Autobiography LWB. Complete transparency on air suspension health, active telemetry checks, and a seamless private appointment at their Bandra showroom. Unmatched professionalism with no hidden fees.",
-    date: "Juhu • 2 months ago"
-  },
-  {
-    id: 4,
-    name: "Dr. Siddharth Merchant",
-    rating: 5,
-    text: "Purchased a 2024 BMW M4 Competition M xDrive. The CYR Cars team demonstrated deep technical mastery on the twin-turbo drivetrain and dynamic modes. Clean paperwork, pristine ceramic detailing, and absolute peace of mind for an enthusiast driver.",
-    date: "Altamount Road • 3 weeks ago"
+    text: "A genuine pleasure from inspection to delivery for our GLS 400d. The conduct throughout was dignified, patient, and refreshingly honest—rare in the pre-owned luxury space. Discreetly arranged and delivered immaculately on schedule.",
+    date: "Mercedes-Benz GLS 400d"
   }
 ];
 

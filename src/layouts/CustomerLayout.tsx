@@ -388,7 +388,7 @@ export default function CustomerLayout() {
               />
             </div>
             <p className="text-sm tracking-wide leading-relaxed text-zinc-300 font-light font-sans">
-              Exotic & Luxury Motorcars. Located at Hill View Road, Bandra, CYR Cars delivers uncompromising certification, transparent transactions, and bespoke automotive excellence.
+              Exotic & Luxury Motorcars. Located on Bandra Hill Road, CYR Cars delivers uncompromising certification, transparent transactions, and bespoke automotive excellence.
             </p>
             <div className="flex items-center space-x-3 pt-2">
               <a href="https://www.instagram.com/cashyourride/" target="_blank" rel="noreferrer" className="p-2.5 rounded-full frost-pill hover:bg-[#E4405F] hover:text-white transition-all text-[#E4405F]" title="Instagram @cashyourride">
@@ -419,7 +419,7 @@ export default function CustomerLayout() {
               <li className="flex items-start">
                 <MapPin className="w-5 h-5 text-white mr-3 shrink-0 mt-1" />
                 <a href="https://share.google/KqZdV8L9UzqY2RkUH" target="_blank" rel="noreferrer" className="hover:text-white transition-colors duration-300 leading-relaxed font-normal text-zinc-200 font-sans">
-                  Hill View Road, Bandra, Mumbai, Maharashtra 400050
+                  Bandra Hill Road, Mumbai, Maharashtra 400050
                 </a>
               </li>
               <li className="flex items-center">
@@ -449,7 +449,7 @@ export default function CustomerLayout() {
               touchAction: 'manipulation'
             }}
           >
-            &copy; 2020 - {new Date().getFullYear()} CYR Cars. Excellence on Hill View Road, Bandra, Mumbai.
+            &copy; 2020 - {new Date().getFullYear()} CYR Cars. Excellence on Bandra Hill Road, Mumbai.
           </button>
           <div className="flex space-x-6 text-zinc-400 font-sans items-center">
             <a href="#" className="hover:text-white py-2 px-1">Privacy</a>

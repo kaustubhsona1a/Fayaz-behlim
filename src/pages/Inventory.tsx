@@ -207,7 +207,7 @@ export default function Inventory() {
               Inventory
             </h1>
             <p className="text-zinc-300 mt-0.5 sm:mt-1.5 tracking-wider sm:tracking-widest uppercase text-[10px] sm:text-xs font-sans">
-              Explore <span className="text-white font-bold">{filteredCars.length}</span> Certified Motorcars on <span className="text-white font-semibold">Hill View Road, Bandra</span>
+              Explore <span className="text-white font-bold">{filteredCars.length}</span> Certified Motorcars on <span className="text-white font-semibold">Bandra Hill Road</span>
             </p>
           </div>
           

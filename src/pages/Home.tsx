@@ -13,7 +13,7 @@ export default function Home() {
   const featuredCars = vehicles.filter(v => v.status === 'Available').slice(0, 3);
   
   const siteUrl = "https://www.instagram.com/cashyourride/";
-  const defaultDesc = "CYR Cars | Mumbai's Premier Boutique for Curated Luxury, Performance & Exotic Motorcars on Hill View Road, Bandra. 150-point certified inspection, transparent provenance, and bespoke acquisitions.";
+  const defaultDesc = "CYR Cars | Mumbai's Premier Boutique for Curated Luxury, Performance & Exotic Motorcars on Bandra Hill Road. 150-point certified inspection, transparent provenance, and bespoke acquisitions.";
 
   const scrollToCollection = () => {
     const el = document.getElementById('featured-collection-section');
@@ -168,7 +168,7 @@ export default function Home() {
              <p className="text-zinc-300 text-[11px] sm:text-xs mt-2 sm:mt-2.5 tracking-wider font-sans uppercase">Authentic experiences from collectors and performance enthusiasts across Mumbai</p>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5 lg:gap-6">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-7">
              {MOCK_REVIEWS.map((review) => (
                <div key={review.id} className="frost-card p-4 sm:p-5 rounded-2xl flex flex-col justify-between h-full">
                  <div>
@@ -184,7 +184,6 @@ export default function Home() {
                      <p className="font-cinzel font-bold text-white uppercase tracking-wider text-xs mb-0.5">{review.name}</p>
                      <p className="text-[10px] text-zinc-300 tracking-wider font-medium">{review.date}</p>
                    </div>
-                   <span className="text-[9px] frost-pill text-zinc-100 font-semibold px-2 py-0.5 rounded-full font-sans">✓ Verified</span>
                  </div>
                </div>
              ))}
@@ -272,7 +271,7 @@ export default function Home() {
               </div>
               <h3 className="font-cinzel tracking-widest text-[11px] sm:text-xs uppercase text-white mb-2 sm:mb-3 font-bold">Showroom Address</h3>
               <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed tracking-wide font-normal font-sans">
-                Hill View Road, Bandra,<br/>
+                Bandra Hill Road,<br/>
                 Mumbai, Maharashtra 400050
               </p>
               <a 
